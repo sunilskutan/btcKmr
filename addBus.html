@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add New Bus</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f7;
+      padding: 30px;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    form {
+      background: #ffffff;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    input[readonly] {
+      background-color: #eee;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1e8449;
+    }
+    .success {
+      text-align: center;
+      color: green;
+      margin-top: 15px;
+    }
+    .error {
+      text-align: center;
+      color: red;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<h2><i class="fas fa-bus-alt"></i> Add New Bus <a href="dashboard.html" title="Go Back To DashBoard"> 🏠 </a></h2>
+
+<form id="busForm">
+  <label for="busid">Bus ID</label>
+  <input type="number" id="busid" readonly>
+
+  <label for="busNumber">Bus Number (e.g., KL15-B1223)</label>
+  <input type="text" id="busNumber" required>
+
+  <label for="busType">Bus Type (e.g., AC Low Floor)</label>
+  <input type="text" id="busType" required>
+
+  <label for="busTotalSeat">Total Seats</label>
+  <input type="number" id="busTotalSeat" required>
+
+  <button type="submit">Add Bus</button>
+
+  <div id="msg"></div>
+</form>
+
+<script>
+  // Firebase Configuration
+       const firebaseConfig = {
+  apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+  authDomain: "btckmr.firebaseapp.com",
+  projectId: "btckmr",
+  storageBucket: "btckmr.firebasestorage.app",
+  messagingSenderId: "1038756102997",
+  appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+  measurementId: "G-E73FZRNCFM"
+};
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const busForm = document.getElementById("busForm");
+  const msgDiv = document.getElementById("msg");
+  const busidInput = document.getElementById("busid");
+
+  // Get next available busid
+  async function getNextBusId() {
+    try {
+      const snapshot = await db.collection("buses").orderBy("busid", "desc").limit(1).get();
+      if (!snapshot.empty) {
+        const maxBusId = snapshot.docs[0].data().busid;
+        busidInput.value = maxBusId + 1;
+      } else {
+        busidInput.value = 1;
+      }
+    } catch (err) {
+      console.error("Failed to fetch busid:", err);
+      msgDiv.innerHTML = '<div class="error">Error fetching next bus ID.</div>';
+    }
+  }
+
+  getNextBusId();
+
+  busForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const busid = parseInt(busidInput.value);
+    const busNumber = document.getElementById("busNumber").value.trim();
+    const busType = document.getElementById("busType").value.trim();
+    const busTotalSeat = parseInt(document.getElementById("busTotalSeat").value);
+
+    if (!busNumber || !busType || isNaN(busTotalSeat)) {
+      msgDiv.innerHTML = '<div class="error">Please fill all fields correctly.</div>';
+      return;
+    }
+
+    try {
+      const newBus = {
+        busid: busid,
+        busNumber: busNumber,
+        busType: busType,
+        busTotalSeat: busTotalSeat
+      };
+
+      await db.collection("buses").add(newBus);
+      msgDiv.innerHTML = '<div class="success">Bus added successfully!</div>';
+      busForm.reset();
+      getNextBusId(); // Prepare for next entry
+    } catch (error) {
+      console.error("Add bus error:", error);
+      msgDiv.innerHTML = '<div class="error">Failed to add bus. Try again.</div>';
+    }
+  });
+</script>
+
+</body>
+</html>

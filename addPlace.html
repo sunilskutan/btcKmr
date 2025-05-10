@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add New Place</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      padding: 30px;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    form {
+      background: #fff;
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    label {
+      margin-top: 15px;
+      display: block;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    input[readonly] {
+      background-color: #eee;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1c5980;
+    }
+    .message {
+      margin-top: 15px;
+      text-align: center;
+    }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+
+<h2><i class="fas fa-map-marker-alt"></i> Add New Place <a href="dashboard.html" title="Go Back To DashBoard"> 🏠 </a></h2>
+
+<form id="placeForm">
+  <label for="placeid">Place ID</label>
+  <input type="number" id="placeid" readonly>
+
+  <label for="placeName">Place Name</label>
+  <input type="text" id="placeName" required>
+
+  <label for="placeDescription">Description</label>
+  <input type="text" id="placeDescription" required>
+
+  <label for="placeImageUrl">Image URL</label>
+  <input type="text" id="placeImageUrl" required>
+
+  <button type="submit">Add Place</button>
+  <div id="message" class="message"></div>
+</form>
+
+<script>
+  // Firebase Configuration
+       const firebaseConfig = {
+  apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+  authDomain: "btckmr.firebaseapp.com",
+  projectId: "btckmr",
+  storageBucket: "btckmr.firebasestorage.app",
+  messagingSenderId: "1038756102997",
+  appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+  measurementId: "G-E73FZRNCFM"
+};
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const placeForm = document.getElementById("placeForm");
+  const messageDiv = document.getElementById("message");
+  const placeidInput = document.getElementById("placeid");
+
+  // ✅ Auto-generate placeid
+  async function generatePlaceId() {
+    try {
+      const snapshot = await db.collection("places").orderBy("placeid", "desc").limit(1).get();
+      if (!snapshot.empty) {
+        const lastId = snapshot.docs[0].data().placeid;
+        placeidInput.value = lastId + 1;
+      } else {
+        placeidInput.value = 1;
+      }
+    } catch (err) {
+      console.error("Error fetching placeid:", err);
+      messageDiv.innerHTML = `<p class="error">Failed to generate place ID.</p>`;
+    }
+  }
+
+  generatePlaceId();
+
+  placeForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const placeid = parseInt(placeidInput.value);
+    const placeName = document.getElementById("placeName").value.trim();
+    const placeDescription = document.getElementById("placeDescription").value.trim();
+    const placeImageUrl = document.getElementById("placeImageUrl").value.trim();
+
+    if (!placeName || !placeDescription || !placeImageUrl) {
+      messageDiv.innerHTML = `<p class="error">Please fill in all fields.</p>`;
+      return;
+    }
+
+    const newPlace = {
+      placeid,
+      placeName,
+      placeDescription,
+      placeImageUrl
+    };
+
+    try {
+      await db.collection("places").add(newPlace);
+      messageDiv.innerHTML = `<p class="success">Place added successfully!</p>`;
+      placeForm.reset();
+      generatePlaceId(); // Get next placeid
+    } catch (err) {
+      console.error("Error adding place:", err);
+      messageDiv.innerHTML = `<p class="error">Failed to add place.</p>`;
+    }
+  });
+</script>
+
+</body>
+</html>
