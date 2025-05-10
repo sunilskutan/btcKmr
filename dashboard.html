@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background-light: #f4f7f9;
+            --text-color: #333;
+            --card-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 270px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+    display: flex;
+    justify-content: center; /* centers horizontally */
+    align-items: center;     /* centers vertically */
+    flex-direction: column;  /* if you want image + text stacked */
+    text-align: center;      /* to center text inside */
+}
+
+        .sidebar-header img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin: 0 auto; /* centers image if not using flex */
+}
+
+        .sidebar-header .profile-info {
+            flex-grow: 1;
+        }
+
+        .sidebar-header .profile-info h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-header .profile-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .nav-menu {
+            flex-grow: 1;
+        }
+
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu a i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            width: 25px;
+            text-align: center;
+        }
+
+        .nav-menu a:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            background-color: var(--background-light);
+            overflow-y: auto;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.12);
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .action-card {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .action-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .action-card:hover i {
+            color: white;
+        }
+    </style>
+</head>
+<script>
+function redirectToTours() {
+    const userName = sessionStorage.getItem('userName');
+    if (userName === 'Guest') {
+        window.location = 'guestupcomingTours.html';
+    } else {
+        window.location = 'upcomingTours.html';
+    }
+}
+</script>
+<body>
+    <div class="container">
+        <div class="sidebar"  id="sidebar1">
+            <div class="sidebar-header">
+
+               
+                <div class="profile-info">
+
+<p><img src="https://scontent.ftrv3-1.fna.fbcdn.net/v/t39.30808-1/313292268_488016430025731_6458956527776626455_n.png?_nc_cat=110&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=IukFqU7a-8QQ7kNvwFUxvV_&_nc_oc=AdkAohOrF8Vu67OzGlkjoEYHCrXpHtF4owhVQG2oPtdI2goTTDOxn-_dIhd6hrZSJhw&_nc_zt=24&_nc_ht=scontent.ftrv3-1.fna&_nc_gid=geF95S98QIdWd-JRlLjpaQ&oh=00_AfJS8pR5VYgvFvMj052wf8QqURiG_PKuYRJ111sI8UvwLw&oe=68223AC1"
+    title="To toggle side bar click bell ">
+               </p>
+                     </div>
+            </div>
+
+            <nav class="nav-menu" >
+		<a href="javascript:void(0);" onclick="alert('Feature coming soon')">  <i class="fas fa-tachometer-alt"></i><font size="2px"><span id="usertype2"></span></font></a>
+                <a href="#tour"><i class="fas fa-book"></i> Tour Management</a>
+                <a href="#place"><i class="fas fa-user-graduate"></i> Place Management</a>
+                <a href="#bus"><i class="fas fa-calendar-alt"></i> Bus Management</a>
+                <a href="#user"><i class="fas fa-flask"></i> User Management</a>
+                <a href="javascript:void(0);" onclick="alert('You are not Authorised')"><i class="fa-solid fa-gear"></i> Setting</a>
+                <a href="javascript:void(0);" onclick="window.location='adminViewTours.html';"><i class="fas fa-ticket-alt" ></i> Tour Booking </a>
+            </nav>
+
+            <a href="index.html" class="nav-menu-bottom" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 15px;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+
+        <div class="main-content">
+            <div class="welcome-banner">
+                <div>
+                    <h1>Welcome <span id="userId"></span></h1>
+                    <p>Budget Tourism Cell, K S R T C Kilimanoor</p>
+                </div>
+                <div>
+                 <span id="bell" onclick="toggleSidebar()" >  <i class="fas fa-bell" style="font-size: 2rem;"></i> </span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Quick Actions</h2>
+                <div class="quick-actions">
+                    <div class="action-card"  onclick="redirectToTours()">
+                       <i class="fas fa-bus-alt"></i>
+                        <h3>Upcoming Tours</h3>
+                    </div>
+                    <div class="action-card" onclick="window.location='addUser.html';">
+                        <i class="fas fa-user"></i>
+                        <h3>Register</h3>
+                    </div>
+                    <div class="action-card" onclick="window.location='viewPlaces.html';">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>Tour Places</h3>
+                    </div>
+                    <div class="action-card" onclick="window.location='index.html';">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <h3>Logout</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="tour">
+                <h2><i class="fas fa-suitcase-rolling"></i> Tour Management</h2>
+                <div class="quick-actions">
+                    <div class="action-card"   onclick="window.location='addTour.html';">
+                        <i class="fas fa-calendar-plus"></i>
+                        <h3>Create A Tour</h3>
+                    </div>
+                    <div class="action-card" onclick="window.location='editTour.html';">
+                        <i class="fas fa-calendar-check"></i>
+                        <h3>Modify A Tour</h3>
+                    </div>
+                    <div class="action-card" onclick="window.location='deleteTour.html';">
+                        <i class="fas fa-calendar-day"></i>
+                        <h3>Delete A Tour</h3>
+                    </div>
+                    <div class="action-card" onclick="window.location='upcomingTours.html';">
+                        <i class="fas fa-calendar-week"></i>
+                        <h3>View Tours</h3>
+                    </div>
+                </div>
+            </div>
+
+ 	<div class="card" id="place">
+                <h2><i class="fas fa-globe"></i> Place Management</h2>
+                <div class="quick-actions">
+                    <div class="action-card"   onclick="window.location='addPlace.html';">
+                        <i class="fas fa-globe-asia"></i>
+                        <h3>Add A Place</h3>
+                    </div>
+                    <div class="action-card"  onclick="window.location='editPlace.html';">
+                        <i class="fas fa-globe-europe"></i>
+                        <h3>Modify A Place</h3>
+                    </div>
+                    <div class="action-card"  onclick="window.location='deletePlace.html';">
+                        <i class="fas fa-globe-africa"></i>
+                        <h3>Delete A Place</h3>
+                    </div>
+                    <div class="action-card"  onclick="window.location='viewPlaces.html';">
+                        <i class="fas fa-globe"></i>
+                        <h3>View Places</h3>
+                    </div>
+                </div>
+            </div>
+
+ 	<div class="card" id="bus">
+                <h2><i class="fas fa-bus"></i> Bus Management</h2>
+                <div class="quick-actions">
+                    <div class="action-card"   onclick="window.location='addBus.html';">
+                        <i class="fas fa-bus-alt"></i>
+                        <h3>Add A Bus</h3>
+                    </div>
+                    <div class="action-card"  onclick="window.location='editBus.html';">
+                        <i class="fas fa-shuttle-van"></i>
+                        <h3>Change A Bus</h3>
+                    </div>
+                    <div class="action-card"  onclick="window.location='deleteBus.html';">
+                        <i class="fas fa-tram"></i>
+                        <h3>Delete A Bus</h3>
+                    </div>
+                    <div class="action-card"  onclick="window.location='viewBuses.html';">
+                        <i class="fas fa-road"></i>
+                        <h3>View Buses</h3>
+                    </div>
+                </div>
+            </div>
+
+	<div class="card" id="user">
+                <h2><i class="fas fa-user"></i> User Management</h2>
+                <div class="quick-actions">
+                    <div class="action-card" onclick="window.location='addUser.html';">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>Create A User</h3>
+                    </div>
+                    <div class="action-card" onclick="window.location='editUser.html';">
+                        <i class="fas fa-user-edit"></i>
+                        <h3>Modify A User</h3>
+                    </div>
+                    <div class="action-card" onclick="window.location='deleteUser.html';">
+                        <i class="fas fa-user-minus"></i>
+                        <h3>Delete A User</h3>
+                    </div>
+                    <div class="action-card" onclick="window.location='viewUsers.html';">
+                        <i class="fas fa-users"></i>
+                        <h3>View Users</h3>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+        </div>
+    </div>
+
+    <script>
+	const urlParams = new URLSearchParams(window.location.search);
+  	const userId = urlParams.get('userId');
+        let userid = document.getElementById("userId");
+	let userName = sessionStorage.getItem('userName');
+        let sidebar = document.getElementById("sidebar1");
+        let tour = document.getElementById("tour");
+        let place = document.getElementById("place");
+        let bus = document.getElementById("bus");
+        let user = document.getElementById("user");
+
+	let isLogin = sessionStorage.getItem('isLogin');
+	if (isLogin === 'true' && userId !== '0') {
+    userid.innerHTML = " " + userName;
+} else {
+    userid.innerHTML = " Guest";
+    sidebar.style.display = "none";
+    tour.style.display = "none";
+    place.style.display = "none";
+    bus.style.display = "none";
+    user.style.display = "none";
+}
+
+
+
+       function updateDateTime() {
+    const now = new Date();
+
+    let day = now.getDate().toString().padStart(2, '0');
+    let month = (now.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-based
+    let year = now.getFullYear();
+
+    let hours = now.getHours();
+    let minutes = now.getMinutes().toString().padStart(2, '0');
+    let seconds = now.getSeconds().toString().padStart(2, '0');
+
+    let ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12; // Convert 0 to 12 and 13+ to 1-12
+    hours = hours.toString().padStart(2, '0');
+
+    let formatted = `${day}-${month}-${year} : ${hours}:${minutes}:${seconds} ${ampm}`;
+    document.getElementById("usertype2").innerText = formatted;
+}
+
+// Initial call
+updateDateTime();
+
+// Update every second
+setInterval(updateDateTime, 1000); 
+
+      
+
+	function toggleSidebar() {
+ if(userId != '0') {
+    const sidebar = document.getElementById("sidebar1");
+    if (sidebar.style.display === "none") {
+        sidebar.style.display = "block"; // show
+    } else {
+        sidebar.style.display = "none";  // hide
+    }
+}
+}
+    </script>
+</body>
+</html>
