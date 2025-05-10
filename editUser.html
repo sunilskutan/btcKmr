@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f7f9fc;
+            color: #333;
+            line-height: 1.6;
+        }
+a {
+  color: white;
+  display: inline-block;
+  text-align: center;
+}
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #1e40af;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+text-align: center;
+        }
+        
+        header h1 {
+            text-align: center;
+            font-weight: 600;
+            font-size: 28px;
+        }
+        
+        .search-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .search-container h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .search-form input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .search-form button {
+            background-color: #1e40af;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .search-form button:hover {
+            background-color: #1e3a8a;
+        }
+        
+        .user-form-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .user-form-container h2 {
+            font-size: 20px;
+            margin-bottom: 25px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #1e40af;
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1e3a8a;
+        }
+        
+        .btn-secondary {
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .alert-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+        
+        .alert-info {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+        
+        .hide {
+            display: none;
+        }
+        
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>User Data Updation</h1>
+        </div>
+<a href="dashboard.html" class="home-link" title="Go Back To Dashboard">
+        <i class="fas fa-home"></i> Back to Dashboard
+      </a>
+    </header>
+
+    <div class="container">
+        <div class="search-container">
+            <h2>Search User by ID</h2>
+            <div class="search-form">
+                <input type="number" id="search-userid" placeholder="Enter User ID">
+                <button id="search-button">Search <span id="search-loader" class="loader hide"></span></button>
+            </div>
+            <div id="search-alert" class="alert hide"></div>
+        </div>
+
+        <div id="user-form-container" class="user-form-container">
+            <h2>Update User Information</h2>
+            <form id="user-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="userid">User ID</label>
+                        <input type="number" id="userid" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="userName">User Name</label>
+                        <input type="text" id="userName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">Email</label>
+                        <input type="email" id="userEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPhoneNo">Phone Number</label>
+                        <input type="tel" id="userPhoneNo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userAadhaarNumber">Aadhaar Number</label>
+                        <input type="text" id="userAadhaarNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPassword">Password</label>
+                        <input type="password" id="userPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userRole">User Role</label>
+                        <select id="userRole" required>
+                            <option value="Tourist">Tourist</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="userStatus">User Status</label>
+                        <select id="userStatus" required>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="createdAt">Created At</label>
+                        <input type="text" id="createdAt" readonly>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancel-button" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" id="update-button" class="btn btn-primary">Update User <span id="update-loader" class="loader hide"></span></button>
+                </div>
+            </form>
+            <div id="update-alert" class="alert hide"></div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+       const firebaseConfig = {
+  apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+  authDomain: "btckmr.firebaseapp.com",
+  projectId: "btckmr",
+  storageBucket: "btckmr.firebasestorage.app",
+  messagingSenderId: "1038756102997",
+  appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+  measurementId: "G-E73FZRNCFM"
+};
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // DOM elements
+        const searchInput = document.getElementById('search-userid');
+        const searchButton = document.getElementById('search-button');
+        const searchLoader = document.getElementById('search-loader');
+        const searchAlert = document.getElementById('search-alert');
+        const userFormContainer = document.getElementById('user-form-container');
+        const userForm = document.getElementById('user-form');
+        const cancelButton = document.getElementById('cancel-button');
+        const updateButton = document.getElementById('update-button');
+        const updateLoader = document.getElementById('update-loader');
+        const updateAlert = document.getElementById('update-alert');
+
+        // Form fields
+        const useridField = document.getElementById('userid');
+        const userNameField = document.getElementById('userName');
+        const userEmailField = document.getElementById('userEmail');
+        const userPhoneNoField = document.getElementById('userPhoneNo');
+        const userAadhaarNumberField = document.getElementById('userAadhaarNumber');
+        const userPasswordField = document.getElementById('userPassword');
+        const userRoleField = document.getElementById('userRole');
+        const userStatusField = document.getElementById('userStatus');
+        const createdAtField = document.getElementById('createdAt');
+
+        // Show alert message
+        function showAlert(element, message, type) {
+            element.textContent = message;
+            element.className = `alert alert-${type}`;
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                element.className = 'alert hide';
+            }, 5000);
+        }
+
+        // Format timestamp
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'N/A';
+            
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toLocaleString();
+        }
+
+        // Search user by ID
+        searchButton.addEventListener('click', async () => {
+            const userid = parseInt(searchInput.value.trim());
+            
+            if (!userid) {
+                showAlert(searchAlert, 'Please enter a valid User ID', 'error');
+                return;
+            }
+            
+            try {
+                // Show loader
+                searchLoader.classList.remove('hide');
+                searchButton.disabled = true;
+                
+                // Query Firestore
+                const usersRef = db.collection('users');
+                const query = usersRef.where('userid', '==', userid);
+                const snapshot = await query.get();
+                
+                if (snapshot.empty) {
+                    showAlert(searchAlert, `No user found with ID: ${userid}`, 'error');
+                    userFormContainer.style.display = 'none';
+                    return;
+                }
+                
+                // Get the first matching document
+                const doc = snapshot.docs[0];
+                const userData = doc.data();
+                
+                // Populate form fields
+                useridField.value = userData.userid;
+                userNameField.value = userData.userName || '';
+                userEmailField.value = userData.userEmail || '';
+                userPhoneNoField.value = userData.userPhoneNo || '';
+                userAadhaarNumberField.value = userData.userAadhaarNumber || '';
+                userPasswordField.value = userData.userPassword || '';
+                userRoleField.value = userData.userRole || 'Tourist';
+                userStatusField.value = userData.userStatus || 'Active';
+                createdAtField.value = formatTimestamp(userData.createdAt);
+                
+                // Store document ID for update
+                userForm.dataset.docId = doc.id;
+                
+                // Show the form
+                userFormContainer.style.display = 'block';
+                
+                // Hide any previous alerts
+                updateAlert.className = 'alert hide';
+                
+            } catch (error) {
+                console.error('Error searching for user:', error);
+                showAlert(searchAlert, 'Error searching for user: ' + error.message, 'error');
+            } finally {
+                // Hide loader
+                searchLoader.classList.add('hide');
+                searchButton.disabled = false;
+            }
+        });
+
+        // Cancel button handler
+        cancelButton.addEventListener('click', () => {
+            userFormContainer.style.display = 'none';
+            userForm.reset();
+        });
+
+        // Update user form submit handler
+        userForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const docId = userForm.dataset.docId;
+            if (!docId) {
+                showAlert(updateAlert, 'No user selected for update', 'error');
+                return;
+            }
+            
+            try {
+                // Show loader
+                updateLoader.classList.remove('hide');
+                updateButton.disabled = true;
+                
+                // Prepare update data
+                const updateData = {
+                    userid: parseInt(useridField.value),
+                    userName: userNameField.value,
+                    userEmail: userEmailField.value,
+                    userPhoneNo: userPhoneNoField.value,
+                    userAadhaarNumber: userAadhaarNumberField.value,
+                    userPassword: userPasswordField.value,
+                    userRole: userRoleField.value,
+                    userStatus: userStatusField.value,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp() // Update timestamp
+                };
+                
+                // Update document in Firestore
+                await db.collection('users').doc(docId).update(updateData);
+                
+                // Update the createdAt field in the form after successful update
+                setTimeout(async () => {
+                    const updatedDoc = await db.collection('users').doc(docId).get();
+                    if (updatedDoc.exists) {
+                        createdAtField.value = formatTimestamp(updatedDoc.data().createdAt);
+                    }
+                }, 1000);
+                
+                showAlert(updateAlert, 'User updated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error updating user:', error);
+                showAlert(updateAlert, 'Error updating user: ' + error.message, 'error');
+            } finally {
+                // Hide loader
+                updateLoader.classList.add('hide');
+                updateButton.disabled = false;
+            }
+        });
+
+        // Enter key in search input triggers search
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                searchButton.click();
+            }
+        });
+    </script>
+</body>
+</html>

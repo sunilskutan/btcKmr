@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit tour</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary: #cc0066;
+      --primary-dark: #800040;
+      --primary-light: #ff99cc;
+      --success: #2ecc71;
+      --danger: #e74c3c;
+      --text: #2c3e50;
+      --text-light: #7f8c8d;
+      --background: #f0f4f8;
+      --card: #ffffff;
+      --border: #e0e6ed;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 0px 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 10px;
+      padding-top: 0px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .header .icon {
+      color: var(--primary);
+      font-size: 34px;
+    }
+
+    .home-link {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 18px;
+      text-decoration: none;
+      color: var(--primary);
+      transition: var(--transition);
+    }
+
+    .home-link:hover {
+      transform: scale(1.1);
+      color: var(--primary-dark);
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+      font-size: 15px;
+    }
+#tourPlaceid{
+   width: 25%;
+}
+#tourid{
+   width: 55%;
+}
+#tourPlace{
+   width: 74%;
+}
+     textarea,input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background-color: white;
+      transition: var(--transition);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+
+    .search-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .search-group input {
+      flex: 1;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      flex: 1;
+    }
+
+    button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .search-button {
+      width: 250px;
+      height: 40px;  
+    }
+
+    .message {
+      margin-top: 24px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .message.visible {
+      opacity: 1;
+    }
+
+    .success {
+      background-color: rgba(46, 204, 113, 0.15);
+      color: #27ae60;
+      border: 1px solid rgba(46, 204, 113, 0.3);
+    }
+
+    .error {
+      background-color: rgba(231, 76, 60, 0.15);
+      color: #c0392b;
+      border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1><i class="fas fa-route"></i> Edit tour</h1>
+      <a href="dashboard.html" class="home-link" title="Go Back To Dashboard">
+        <i class="fas fa-home"></i> Back to Dashboard
+      </a>
+    </div>
+
+    <div class="card">
+      <form id="tourForm">
+        <div class="search-group">
+          <div class="form-group" style="flex: 1;">
+            <label for="tourid">tour ID </label>
+            <input type="number" id="tourid" placeholder="Enter tour ID" required>
+          </div>
+          <button type="button" class="search-button" onclick="fetchtour()">
+            <i class="fas fa-search"></i> Search
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label for="tourPlaceid">tour Placeid</label>
+          <input type="number" id="tourPlaceid" placeholder="tour placeid" required>  <input type="text" id="tourPlace" placeholder="tour place" >
+        </div>
+
+        <div class="form-group">
+          <label for="tourDate">Tour Date</label>
+          <input type="date" id="tourDate" placeholder="tour date" required>
+        </div>
+
+        <div class="form-group">
+          <label for="tourFare">Tour Fare</label>
+          <input type="text" id="tourFare" placeholder="tour fare" required>
+        </div>
+
+	<div class="form-group">
+          <label for="tourBusid">Tour Busid</label>
+          <input type="text" id="tourBusid" placeholder="tour busid" required>
+        </div>
+
+	<div class="form-group">
+          <label for="tourDetails">Tour Details</label>
+          <textarea id="tourDetails" rows="4" cols="50" placeholder="tour details" required></textarea>
+        </div>
+
+        <div class="button-group">
+          <button type="button" onclick="edittour()">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </div>
+        
+        <div id="message" class="message"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+      authDomain: "btckmr.firebaseapp.com",
+      projectId: "btckmr",
+      storageBucket: "btckmr.firebasestorage.app",
+      messagingSenderId: "1038756102997",
+      appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+      measurementId: "G-E73FZRNCFM"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const tourForm = document.getElementById("tourForm");
+    const messageDiv = document.getElementById("message");
+
+    let currentDocId = null; // Firestore document ID
+
+    function showMessage(message, isError = false) {
+      messageDiv.textContent = message;
+      messageDiv.className = isError ? "message error visible" : "message success visible";
+      
+      // Auto-hide message after 5 seconds
+      setTimeout(() => {
+        messageDiv.className = "message";
+      }, 5000);
+    }
+
+    async function fetchtour() {
+      const tourid = parseInt(document.getElementById("tourid").value.trim());
+      if (!tourid) {
+        showMessage("Enter a valid tour ID to search.", true);
+        return;
+      }
+
+      try {
+        const snapshot = await db.collection("tours").where("tourid", "==", tourid).get();
+        if (snapshot.empty) {
+          showMessage(`No tour found with ID ${tourid}.`, true);
+          currentDocId = null;
+          return;
+        }
+
+        const doc = snapshot.docs[0];
+        const data = doc.data();
+        currentDocId = doc.id;
+
+
+const timestamp = data.tourDate;
+const dateObj = timestamp.toDate();
+const formattedDate = dateObj.toISOString().split('T')[0];
+document.getElementById("tourDate").value = formattedDate;
+
+
+        document.getElementById("tourPlaceid").value = data.tourPlaceid;
+	//document.getElementById("tourDate").value = data.tourDate;
+        document.getElementById("tourFare").value = data.tourFare;
+        document.getElementById("tourBusid").value = data.tourBusid;
+        document.getElementById("tourDetails").value = data.tourDetails;
+
+        showMessage("tour details loaded successfully!");
+      } catch (err) {
+        console.error("Error fetching tour:", err);
+        showMessage("Failed to fetch tour data.", true);
+      }
+    }
+
+    async function edittour() {
+      if (!currentDocId) {
+        showMessage("Search and load a tour before editing.", true);
+        return;
+      }
+
+      const tourPlaceid = document.getElementById("tourPlaceid").value.trim();
+     // const tourDate = document.getElementById("tourDate").value.trim();
+      const tourFare = document.getElementById("tourFare").value.trim();
+      const tourBusid = document.getElementById("tourBusid").value.trim();
+      const tourDetails = document.getElementById("tourDetails").value.trim();
+
+const formattedDate2 = document.getElementById("tourDate").value; 
+const dateObj = new Date(formattedDate2); 
+const tourDate = firebase.firestore.Timestamp.fromDate(dateObj);
+
+      if (!tourPlaceid || !tourDate || !tourFare || !tourBusid || !tourDetails) {
+        showMessage("Please fill in all fields.", true);
+        return;
+      }
+
+      try {
+        await db.collection("tours").doc(currentDocId).update({
+          tourPlaceid: tourPlaceid,
+          tourDate: tourDate,
+          tourFare: tourFare,
+          tourBusid: tourBusid,
+          tourDetails: tourDetails
+
+        });
+        showMessage("tour updated successfully!");
+      } catch (err) {
+        console.error("Error updating tour:", err);
+        showMessage("Failed to update tour.", true);
+      }
+    }
+  </script>
+</body>
+</html>
