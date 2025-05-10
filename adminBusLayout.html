@@ -1,0 +1,84 @@
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Tour Redirect</title>
+  <script type="module">
+    // Firebase imports (modular SDK)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+
+    // Firebase Configuration
+       const firebaseConfig = {
+  apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+  authDomain: "btckmr.firebaseapp.com",
+  projectId: "btckmr",
+  storageBucket: "btckmr.firebasestorage.app",
+  messagingSenderId: "1038756102997",
+  appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+  measurementId: "G-E73FZRNCFM"
+};
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Get URL parameter
+    const queryParams = new URLSearchParams(window.location.search);
+    const tourId = parseInt(queryParams.get("tourId"));
+
+    async function getTourBusidAndRedirect(tourId) {
+      try {
+        const toursRef = collection(db, "tours");
+        const q = query(toursRef, where("tourid", "==", tourId));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          alert("No tour found with tourId: " + tourId);
+          return;
+        }
+
+        const doc = querySnapshot.docs[0];
+        const tourBusid = parseInt(doc.data().tourBusid);
+
+        // Redirect based on tourBusid
+        switch (tourBusid) {
+          case 1:
+            window.location.href = "acLowfloorLayout.html";
+            break;
+          case 2:
+          window.location.href = `adminSuperfastLayout.html?tourId=${tourId}`;
+
+            break;
+          case 3:
+            window.location.href = "bus3.html";
+            break;
+          default:
+            alert("Unknown tourBusid: " + tourBusid);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error occurred while fetching data.");
+      }
+    }
+
+    // Only run if tourId is valid
+    if (!isNaN(tourId)) {
+      getTourBusidAndRedirect(tourId);
+    } else {
+      alert("Invalid or missing tourId in URL.");
+    }
+  </script>
+</head>
+<body>
+  <h2>
+<div style="text-align: center;">
+<img height="30px" width="30px"  src="https://cdn.pixabay.com/animation/2023/08/11/21/18/21-18-05-265_512.gif">
+Processing tour information...</div>
+</h2>
+</body>
+</html>
