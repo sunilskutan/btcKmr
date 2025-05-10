@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Registration | Account Creation</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4285f4;
+      --primary-hover: #3367d6;
+      --error-color: #ea4335;
+      --success-color: #34a853;
+      --text-color: #333333;
+      --light-gray: #f5f5f5;
+      --border-color: #dddddd;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: var(--light-gray);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      color: var(--primary-color);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .subheading {
+      color: #666;
+      font-size: 16px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #555;
+    }
+    
+    .input-container {
+      position: relative;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+    }
+    
+    .input-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+    }
+    
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+    
+    .message {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 4px;
+      font-weight: 500;
+      text-align: center;
+      display: none;
+    }
+    
+    .error {
+      background-color: rgba(234, 67, 53, 0.1);
+      color: var(--error-color);
+      border: 1px solid rgba(234, 67, 53, 0.3);
+    }
+    
+    .success {
+      background-color: rgba(52, 168, 83, 0.1);
+      color: var(--success-color);
+      border: 1px solid rgba(52, 168, 83, 0.3);
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(66, 133, 244, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .container {
+        margin: 20px;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1> <a href="dashboard.html" title="Go Back To DashBoard"> 🏠 </a> Register</h1>
+      <p class="subheading">Fill in your details to register</p>
+    </header>
+    
+    <form id="registrationForm">
+      <div class="form-group">
+        <label for="userName">Full Name</label>
+        <div class="input-container">
+          <input type="text" id="userName" placeholder="Enter your full name" autocomplete="name">
+          <i class="input-icon fas fa-user"></i>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="userEmail">Email Address</label>
+        <div class="input-container">
+          <input type="email" id="userEmail" placeholder="Enter your email address" autocomplete="email">
+          <i class="input-icon fas fa-envelope"></i>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="userPhoneNo">Phone Number</label>
+        <div class="input-container">
+          <input type="tel" id="userPhoneNo" placeholder="Enter your phone number" autocomplete="tel">
+          <i class="input-icon fas fa-phone"></i>
+        </div>
+      </div>
+
+     <div class="form-group">
+        <label for="userAadhaarNumber">Aadhaar Number</label>
+        <div class="input-container">
+          <input type="tel" id="userAadhaarNumber" placeholder="Enter your aadhaar number" autocomplete="tel">
+          <i class="input-icon fas fa-id-card"></i>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="userPassword">Password</label>
+        <div class="input-container">
+          <input type="password" id="userPassword" placeholder="Create a strong password" autocomplete="new-password">
+          <i class="input-icon fas fa-lock"></i>
+        </div>
+      </div>
+      
+      <button type="button" id="registerBtn">Register Account</button>
+      
+      <div class="loading" id="loadingIndicator">
+        <div class="spinner"></div>
+        <span>Processing...</span>
+      </div>
+      
+      <div class="message" id="messageBox"></div>
+    </form>
+  </div>
+
+  <script type="module">
+    import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3.11.0/+esm';
+    
+    // Initialize EmailJS
+    emailjs.init("x2Lzn03EjpvM5Xf_E");
+    
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+      authDomain: "btckmr.firebaseapp.com",
+      projectId: "btckmr",
+      storageBucket: "btckmr.firebasestorage.app",
+      messagingSenderId: "1038756102997",
+      appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+      measurementId: "G-E73FZRNCFM"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    // DOM Elements
+    const registerBtn = document.getElementById("registerBtn");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+    const messageBox = document.getElementById("messageBox");
+    
+    // Validation Functions
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    
+    function validatePhone(phone) {
+      const re = /^\+?[0-9]{10,15}$/;
+      return re.test(phone.replace(/\s+/g, ''));
+    }
+    
+    function validatePassword(password) {
+      return password.length >= 6;
+    }
+    
+    // Show Message Function
+    function showMessage(text, isError = false) {
+      messageBox.textContent = text;
+      messageBox.style.display = "block";
+      
+      if (isError) {
+        messageBox.className = "message error";
+      } else {
+        messageBox.className = "message success";
+      }
+      
+      // Auto hide after 5 seconds for success messages
+      if (!isError) {
+        setTimeout(() => {
+          messageBox.style.display = "none";
+        }, 5000);
+      }
+    }
+    
+    // Show/Hide Loading Indicator
+    function setLoading(isLoading) {
+      if (isLoading) {
+        loadingIndicator.style.display = "block";
+        registerBtn.disabled = true;
+      } else {
+        loadingIndicator.style.display = "none";
+        registerBtn.disabled = false;
+      }
+    }
+    
+    // Add User Function
+    async function addUser() {
+      // Get form values
+      const userName = document.getElementById("userName").value.trim();
+      const userPassword = document.getElementById("userPassword").value.trim();
+      const userPhoneNo = document.getElementById("userPhoneNo").value.trim();
+      const userEmail = document.getElementById("userEmail").value.trim();
+      const userAadhaarNumber = document.getElementById("userAadhaarNumber").value.trim();     
+ 
+      // Default values
+      const userRole = "Tourist";
+      const userStatus = "Active";
+      
+      // Validate inputs
+      if (!userName) {
+        showMessage("Please enter your full name", true);
+        return;
+      }
+      
+      if (!userEmail || !validateEmail(userEmail)) {
+        showMessage("Please enter a valid email address", true);
+        return;
+      }
+      
+      if (!userPhoneNo || !validatePhone(userPhoneNo)) {
+        showMessage("Please enter a valid phone number", true);
+        return;
+      }
+      
+      if (!userPassword || !validatePassword(userPassword)) {
+        showMessage("Password must be at least 6 characters long", true);
+        return;
+      }
+      
+      // Show loading indicator
+      setLoading(true);
+      
+      try {
+        // Generate verification code
+        const verificationCode = Math.floor(1000 + Math.random() * 9000);
+        
+        // Send verification email
+        await emailjs.send("service_9ko6xpb", "template_7q7v91q", {
+          to_email: userEmail,
+          to_name: userName,
+          message: "Your verification code is: " + verificationCode
+        });
+        
+        // Hide loading indicator
+        setLoading(false);
+        
+        // Ask for verification code
+        const userInput = prompt("A verification code was sent to your email. Please enter it:");
+        
+        if (userInput == verificationCode) {
+          // Show loading indicator again
+          setLoading(true);
+          
+          // Get the latest user ID
+          const querySnapshot = await db.collection("users")
+            .orderBy("userid", "desc")
+            .limit(1)
+            .get();
+          
+          let newUserId = 1;
+          if (!querySnapshot.empty) {
+            const lastUser = querySnapshot.docs[0].data();
+            newUserId = lastUser.userid + 1;
+          }
+          
+          // Add the new user to Firestore
+          await db.collection("users").add({
+            userid: newUserId,
+            userName: userName,
+            userPassword: userPassword,
+            userPhoneNo: userPhoneNo,
+	    userAadhaarNumber: userAadhaarNumber,
+            userEmail: userEmail,
+            userRole: userRole,
+            userStatus: userStatus,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          
+          // Show success message
+          showMessage("✅ Registration successful! Welcome to our platform.");
+          
+          // Reset the form
+          document.getElementById("registrationForm").reset();
+        } else {
+          showMessage("❌ Verification code did not match. Please try again.", true);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        showMessage(`❌ An error occurred: ${error.message || "Please try again later."}`, true);
+      } finally {
+        // Hide loading indicator
+        setLoading(false);
+      }
+    }
+    
+    // Event Listeners
+    registerBtn.addEventListener("click", addUser);
+    
+    // Allow form submission with Enter key
+    document.querySelectorAll("input").forEach(input => {
+      input.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          addUser();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
