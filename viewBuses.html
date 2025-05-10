@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Manager - Bus Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-firestore-compat.min.js"></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #6366f1;
+            --light: #f9fafb;
+            --dark: #1f2937;
+            --gray: #9ca3af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f3f4f6;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        header {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .logo svg {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .search-bar {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            padding-left: 2.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+        
+        .search-bar svg {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+        
+        .bus-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .bus-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .bus-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .bus-image {
+            height: 180px;
+            width: 100%;
+            background-color: #e5e7eb;
+            position: relative;
+        }
+        
+        .bus-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .bus-type {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .bus-info {
+            padding: 1.25rem;
+        }
+        
+        .bus-number {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        .bus-details {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+        
+        .bus-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .bus-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .bus-actions button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            background-color: #f3f4f6;
+            color: var(--dark);
+            font-weight: 500;
+            cursor: pointer;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        
+        .bus-actions button:hover {
+            background-color: #e5e7eb;
+        }
+        
+        .bus-actions button.primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .bus-actions button.primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+        }
+        
+        .loader svg {
+            animation: spin 1s linear infinite;
+            color: var(--primary);
+            width: 48px;
+            height: 48px;
+        }
+        
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .no-buses {
+            text-align: center;
+            padding: 4rem 0;
+            color: var(--gray);
+        }
+        
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        
+        .filter-button {
+            padding: 0.5rem 1rem;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--dark);
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+            white-space: nowrap;
+        }
+        
+        .filter-button:hover {
+            background-color: #f9fafb;
+        }
+        
+        .filter-button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            flex: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-title {
+            font-size: 0.875rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        
+        .stat-change.positive {
+            color: var(--success);
+        }
+        
+        .stat-change.negative {
+            color: var(--danger);
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .search-bar {
+                max-width: none;
+            }
+            
+            .stats {
+                flex-wrap: wrap;
+            }
+            
+            .stat-card {
+                min-width: calc(50% - 0.5rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m-4 6H4m0 0l4 4m-4-4l4-4" />  
+                </svg>
+              <a href="dashboard.html" title="Go Back To DashBoard"> 🏠 </a>   Tour Buses
+            </div>
+            <div class="search-bar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search buses...">  
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-title">Total Buses</div>
+                <div class="stat-value" id="totalBuses">--</div>
+                <div class="stat-change positive">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                    <span>3.6% from last month</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Seats</div>
+                <div class="stat-value" id="totalSeats">--</div>
+                <div class="stat-change positive">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                    <span>5.2% from last month</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Avg. Seats per Bus</div>
+                <div class="stat-value" id="avgSeats">--</div>
+                <div class="stat-change positive">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                    <span>1.8% from last month</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Bus Types</div>
+                <div class="stat-value" id="busTypes">--</div>
+                <div class="stat-change">
+                    <span>Updated just now</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="filters">
+            <button class="filter-button active" data-filter="all">All Buses</button>
+            <button class="filter-button" data-filter="luxury">Luxury</button>
+            <button class="filter-button" data-filter="standard">Standard</button>
+            <button class="filter-button" data-filter="express">Express</button>
+            <button class="filter-button" data-filter="seats-40-plus">40+ Seats</button>
+            <button class="filter-button" data-filter="seats-under-40">Under 40 Seats</button>
+        </div>
+        
+        <div id="busContainer" class="bus-grid">
+            <div class="loader">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+         // Firebase Configuration
+       const firebaseConfig = {
+  apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+  authDomain: "btckmr.firebaseapp.com",
+  projectId: "btckmr",
+  storageBucket: "btckmr.firebasestorage.app",
+  messagingSenderId: "1038756102997",
+  appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+  measurementId: "G-E73FZRNCFM"
+};
+        
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Store all buses for filtering
+        let allBuses = [];
+        let currentFilter = 'all';
+        
+        // DOM elements
+        const busContainer = document.getElementById('busContainer');
+        const searchInput = document.getElementById('searchInput');
+        const totalBusesElement = document.getElementById('totalBuses');
+        const totalSeatsElement = document.getElementById('totalSeats');
+        const avgSeatsElement = document.getElementById('avgSeats');
+        const busTypesElement = document.getElementById('busTypes');
+        const filterButtons = document.querySelectorAll('.filter-button');
+        
+        // Fetch buses from Firestore
+        function fetchBuses() {
+            db.collection('buses').get()
+                .then((querySnapshot) => {
+                    busContainer.innerHTML = '';
+                    allBuses = [];
+                    
+                    if (querySnapshot.empty) {
+                        busContainer.innerHTML = `
+                            <div class="no-buses">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                </svg>
+                                <h3>No buses found</h3>
+                                <p>Try adding some buses to your fleet.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    querySnapshot.forEach((doc) => {
+                        const bus = doc.data();
+                        bus.id = doc.id;
+                        allBuses.push(bus);
+                    });
+                    
+                    updateStats();
+                    renderBuses(allBuses);
+                })
+                .catch((error) => {
+                    console.error("Error fetching buses: ", error);
+                    busContainer.innerHTML = `
+                        <div class="no-buses">
+                            <h3>Error loading buses</h3>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+        
+        // Update statistics
+        function updateStats() {
+            if (allBuses.length === 0) return;
+            
+            const totalBuses = allBuses.length;
+            const totalSeats = allBuses.reduce((sum, bus) => sum + (bus.busTotalSeat || 0), 0);
+            const avgSeats = totalSeats / totalBuses;
+            
+            // Get unique bus types
+            const busTypes = new Set(allBuses.map(bus => bus.busType));
+            
+            totalBusesElement.textContent = totalBuses;
+            totalSeatsElement.textContent = totalSeats;
+            avgSeatsElement.textContent = avgSeats.toFixed(1);
+            busTypesElement.textContent = busTypes.size;
+        }
+        
+        // Render buses
+        function renderBuses(buses) {
+            busContainer.innerHTML = '';
+            
+            if (buses.length === 0) {
+                busContainer.innerHTML = `
+                    <div class="no-buses">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <h3>No matching buses</h3>
+                        <p>Try adjusting your search or filters.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            buses.forEach(bus => {
+                const busCard = document.createElement('div');
+                busCard.className = 'bus-card';
+                
+                // Use placeholder if no image is available
+                const imageUrl = bus.busImageUrl || '/api/placeholder/400/200';
+                
+                busCard.innerHTML = `
+                    <div class="bus-image">
+                        <img src="${imageUrl}" alt="${bus.busNumber || 'Bus'}" onerror="this.src='/api/placeholder/400/200'">
+                        <div class="bus-type">${bus.busType || 'Unknown'}</div>
+                    </div>
+                    <div class="bus-info">
+                        <div class="bus-number">${bus.busNumber || 'No Number'}</div>
+                        <div class="bus-details">
+                            <div class="bus-detail">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                ${bus.busTotalSeat || 0} Seats
+                            </div>
+                            <div class="bus-detail">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                                ID: ${bus.busid || 'N/A'}
+                            </div>
+                        </div>
+                        <div class="bus-actions">
+                            <button>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                                Edit
+                            </button>
+                            <button class="primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                View
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                busContainer.appendChild(busCard);
+            });
+        }
+        
+        // Filter buses
+        function filterBuses(filterType) {
+            let filteredBuses = [];
+            
+            switch(filterType) {
+                case 'all':
+                    filteredBuses = allBuses;
+                    break;
+                case 'luxury':
+                case 'standard':
+                case 'express':
+                    filteredBuses = allBuses.filter(bus => 
+                        bus.busType && bus.busType.toLowerCase() === filterType.toLowerCase()
+                    );
+                    break;
+                case 'seats-40-plus':
+                    filteredBuses = allBuses.filter(bus => bus.busTotalSeat >= 40);
+                    break;
+                case 'seats-under-40':
+                    filteredBuses = allBuses.filter(bus => bus.busTotalSeat < 40);
+                    break;
+                default:
+                    filteredBuses = allBuses;
+            }
+            
+            renderBuses(filteredBuses);
+        }
+        
+        // Search buses
+        function searchBuses(query) {
+            if (!query.trim()) {
+                filterBuses(currentFilter);
+                return;
+            }
+            
+            const searchQuery = query.toLowerCase().trim();
+            let searchResults = allBuses.filter(bus => {
+                return (
+                    (bus.busNumber && bus.busNumber.toLowerCase().includes(searchQuery)) ||
+                    (bus.busType && bus.busType.toLowerCase().includes(searchQuery)) ||
+                    (bus.busid && bus.busid.toString().includes(searchQuery))
+                );
+            });
+            
+            renderBuses(searchResults);
+        }
+        
+        // Initialize the app
+        function init() {
+            // Setup mock data for preview if needed
+            if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'YOUR_API_KEY') {
+                console.warn('Firebase not configured, using mock data');
+                allBuses = [
+                    {
+                        busImageUrl: '/api/placeholder/400/200',
+                        busNumber: 'BUS-001',
+                        busTotalSeat: 45,
+                        busType: 'Luxury',
+                        busid: 1
+                    },
+                    {
+                        busImageUrl: '/api/placeholder/400/200',
+                        busNumber: 'BUS-002',
+                        busTotalSeat: 38,
+                        busType: 'Standard',
+                        busid: 2
+                    },
+                    {
+                        busImageUrl: '/api/placeholder/400/200',
+                        busNumber: 'BUS-003',
+                        busTotalSeat: 52,
+                        busType: 'Express',
+                        busid: 3
+                    },
+                    {
+                        busImageUrl: '/api/placeholder/400/200',
+                        busNumber: 'BUS-004',
+                        busTotalSeat: 36,
+                        busType: 'Standard',
+                        busid: 4
+                    }
+                ];
+                updateStats();
+                renderBuses(allBuses);
+            } else {
+                fetchBuses();
+            }
+            
+            // Setup event listeners
+            searchInput.addEventListener('input', (e) => {
+                searchBuses(e.target.value);
+            });
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    currentFilter = button.dataset.filter;
+                    filterBuses(currentFilter);
+                });
+            });
+        }
+        
+        // Run the app
+        init();
+    </script>
+</body>
+</html>
