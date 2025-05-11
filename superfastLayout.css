@@ -1,0 +1,252 @@
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background-color: #3498db;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center; 
+    }
+    
+    .tour-details {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tour-details h3 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    
+    .tour-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
+    .info-card {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      border-left: 4px solid #3498db;
+    }
+    
+    .info-card h4 {
+      margin-top: 0;
+      color: #3498db;
+    }
+    
+    .status-indicator {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+      gap: 20px;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .status-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+    
+    .bus-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+    }
+    
+    table {
+      border-collapse: collapse;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: white;
+    }
+    
+    td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    
+    .spanx {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .spanx:hover {
+      transform: scale(1.05);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .spanx.selected {
+      background-color: green;
+      color: white;
+    }
+    
+    .spanx.booked {
+      background-color: #ff6b6b;
+      color: white;
+      cursor: not-allowed;
+    }
+    
+    .driver {
+      background-color: #b8c6db;
+      font-weight: bold;
+    }
+    
+    .form-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .booking-form {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+    
+    .booking-form h4 {
+      margin-top: 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #3498db;
+      color: #2c3e50;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #555;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #777;
+    }
+    
+    .close-btn:hover {
+      color: #ff6b6b;
+    }
+    
+    .status-message {
+      text-align: center;
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .loading {
+      background-color: #e2f3f5;
+      color: #0c7b93;
+    }
+    
+    .hide {
+      display: none;
+    }
+    
+    #bookSeats {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 25px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    #bookSeats:hover {
+      background-color: #2980b9;
+    }
+    
+    #bookSeats:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+    
+    #selectedSeats {
+      color: #2c3e50;
+    }
+    
+    @media (max-width: 768px) {
+      .tour-info {
+        grid-template-columns: 1fr;
+      }
+      
+      table {
+        transform: scale(0.9);
+      }
+      
+      .booking-form {
+        width: 100%;
+      }
+    }
