@@ -191,7 +191,7 @@ function redirectToTours() {
     }
 }
 </script>
-<body  oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+<body>
     <div class="container">
         <div class="sidebar" id="sidebar1">
             <div class="sidebar-header">
@@ -343,6 +343,7 @@ function redirectToTours() {
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('userId');
+
         let userid = document.getElementById("userId");
         let userName = sessionStorage.getItem('userName');
         let sidebar = document.getElementById("sidebar1");
@@ -352,14 +353,28 @@ function redirectToTours() {
         let user = document.getElementById("user");
 
         let isLogin = sessionStorage.getItem('isLogin');
+	let userRole = sessionStorage.getItem('userRole');
+
+	if (userRole === "Admin"){
+	    tour.style.display = "block";
+            place.style.display = "block";
+            bus.style.display = "block";
+            user.style.display = "block";
+            sidebar.style.display = "block";
+	}
+	else {
+	    tour.style.display = "none";
+            place.style.display = "none";
+            bus.style.display = "none";
+            user.style.display = "none";
+            sidebar.style.display = "none";
+	}
+
         if (isLogin === 'true' && userId !== '0') {
             userid.innerHTML = " " + userName;
         } else {
             userid.innerHTML = " Guest";
-            tour.style.display = "none";
-            place.style.display = "none";
-            bus.style.display = "none";
-            user.style.display = "none";
+            
         }
 
         function updateDateTime() {
@@ -388,7 +403,7 @@ function redirectToTours() {
         setInterval(updateDateTime, 1000);
 
         function toggleSidebar() {
-            if(userId !== '0') {
+            if((userId !== '0')&&(userRole === "Admin")) {
                 const sidebar = document.getElementById("sidebar1");
                 if (sidebar.style.display === "none" || sidebar.style.display === "") {
                     sidebar.style.display = "flex"; // show
