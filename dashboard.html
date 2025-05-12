@@ -181,7 +181,49 @@
         }
     </style>
 </head>
-<script>
+<script type="module">
+    // Firebase config
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+      authDomain: "btckmr.firebaseapp.com",
+      projectId: "btckmr",
+      storageBucket: "btckmr.firebasestorage.app",
+      messagingSenderId: "1038756102997",
+      appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+      measurementId: "G-E73FZRNCFM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const docRef = doc(db, "views", "counter"); // 'counter' is your document ID
+
+    async function updatePageViews() {
+      try {
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          await updateDoc(docRef, {
+            pageViews: increment(1)
+          });
+          const updatedSnap = await getDoc(docRef);
+          document.getElementById("counter").innerText = 
+            "Page Views: " + updatedSnap.data().pageViews;
+        } else {
+          await setDoc(docRef, { pageViews: 1 });
+          document.getElementById("counter").innerText = 
+            "Page Views: 1";
+        }
+      } catch (error) {
+        console.error("Error updating page views:", error);
+        document.getElementById("counter").innerText = "Error loading views";
+      }
+    }
+
+    updatePageViews();
+	
 function redirectToTours() {
     const userName = sessionStorage.getItem('userName');
     if (userName === 'Guest') {
@@ -209,7 +251,8 @@ function redirectToTours() {
                 <a href="javascript:void(0);" onclick="alert('You are not Authorised')"><i class="fa-solid fa-gear"></i> Setting</a>
 	        <a href="javascript:void(0);" onclick="window.location='upcomingTours.html';"><i class="fas fa-ticket-alt" ></i>Admin Tour Booking </a>	    
                 <a href="javascript:void(0);" onclick="window.location='adminViewTours.html';"><i class="fas fa-ticket" ></i>View Tour Booking </a>
-            </nav>
+                <p id="counter">Loading page views...</p>
+	    </nav>
 
             <a href="index.html" class="nav-menu-bottom" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 15px;">
                 <i class="fas fa-sign-out-alt"></i> Logout
