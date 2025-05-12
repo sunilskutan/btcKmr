@@ -25,7 +25,6 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-		background: url('welcome.png');
             position: relative;
 	    transition: background-image 1s ease-in-out;
         }
