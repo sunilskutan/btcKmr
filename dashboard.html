@@ -224,14 +224,7 @@
 
     updatePageViews();
 	
-function redirectToTours() {
-    const userName = sessionStorage.getItem('userName');
-    if (userName === 'Guest') {
-        window.location = 'guestupcomingTours.html';
-    } else {
-        window.location = 'upcomingTours.html';
-    }
-}
+
 </script>
 <body>
     <div class="container">
@@ -456,6 +449,15 @@ function redirectToTours() {
                 }
             }
         }
+
+	    function redirectToTours() {
+    const userName = sessionStorage.getItem('userName');
+    if (userName === 'Guest') {
+        window.location = 'guestupcomingTours.html';
+    } else {
+        window.location = 'upcomingTours.html';
+    }
+}
     </script>
 </body>
 </html>
