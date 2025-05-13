@@ -117,10 +117,6 @@
             <p>${tour.tourPlaceid}</p>
           </div>
         </div>
-        <div class="tour-description">
-          <h4>Tour Details</h4>
-          <p>${tour.tourDetails}</p>
-        </div>
       `;
       
       // Insert tour details at the top of the container
