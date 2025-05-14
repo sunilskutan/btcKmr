@@ -55,10 +55,10 @@
 
             break;
           case 3:
-            window.location.href = "bus3.html";
+            window.location.href = `superfastLayout.html?tourId=${tourId}`;
             break;
           default:
-            alert("Unknown tourBusid: " + tourBusid);
+            window.location.href = `superfastLayout.html?tourId=${tourId}`;
         }
       } catch (error) {
         console.error("Error:", error);
