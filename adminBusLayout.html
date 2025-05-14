@@ -48,17 +48,17 @@
         // Redirect based on tourBusid
         switch (tourBusid) {
           case 1:
-            window.location.href = "acLowFloorLayout.html";
+            window.location.href = `adminacLowFloorLayout.html?tourId=${tourId}`;
             break;
           case 2:
           window.location.href = `adminSuperfastLayout.html?tourId=${tourId}`;
 
             break;
           case 3:
-            window.location.href = "bus3.html";
+               window.location.href = `adminSuperfastLayout.html?tourId=${tourId}`;
             break;
           default:
-            alert("Unknown tourBusid: " + tourBusid);
+              window.location.href = `adminSuperfastLayout.html?tourId=${tourId}`;
         }
       } catch (error) {
         console.error("Error:", error);
