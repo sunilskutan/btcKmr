@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tour Bus Seat Booking</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    
+    .container {
+      width: 50%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background-color: #3498db;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 50px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center; 
+      height:80px;
+    }
+    
+    .tour-details {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tour-details h3 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    
+    .tour-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 15px;
+    }
+    
+    .info-card {
+      background-color: #f8f9fa;
+      padding: 5px;
+      border-radius: 5px;
+      border-left: 4px solid #3498db;
+      height:70px;
+    }
+    
+    .info-card h6 {
+      margin-top: 0;
+      color: #3498db;
+    }
+    
+    .status-indicator {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+      gap: 20px;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .status-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+    
+    .bus-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+    }
+    
+    table {
+      border-collapse: collapse;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: white;
+    }
+    
+    td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    
+    .spanx {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .spanx:hover {
+      transform: scale(1.05);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .spanx.selected {
+      background-color: green;
+      color: white;
+    }
+    
+    .spanx.booked {
+      background-color: #ff6b6b;
+      color: white;
+      cursor: not-allowed;
+    }
+    
+    .driver {
+      background-color: #b8c6db;
+      font-weight: bold;
+    }
+    
+    .form-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .booking-form {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+    
+    .booking-form h4 {
+      margin-top: 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #3498db;
+      color: #2c3e50;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #555;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #777;
+    }
+    
+    .close-btn:hover {
+      color: #ff6b6b;
+    }
+    
+    .status-message {
+      text-align: center;
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .loading {
+      background-color: #e2f3f5;
+      color: #0c7b93;
+    }
+    
+    .hide {
+      display: none;
+    }
+    
+    #bookSeats {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 25px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    #bookSeats:hover {
+      background-color: #2980b9;
+    }
+    
+    #bookSeats:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+    
+    #selectedSeats {
+      color: #2c3e50;
+    }
+    
+    @media (max-width: 768px) {
+      .tour-info {
+        grid-template-columns: 1fr;
+      }
+      
+      table {
+        transform: scale(0.9);
+      }
+      
+      .booking-form {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+      authDomain: "btckmr.firebaseapp.com",
+      projectId: "btckmr",
+      storageBucket: "btckmr.firebasestorage.app",
+      messagingSenderId: "1038756102997",
+      appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+      measurementId: "G-E73FZRNCFM"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    // Global variables
+    let tourData = null;
+    let selectedSeats = {};
+    let bookedSeats = [];
+    
+    // Parse URL parameters
+    function getUrlParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', async function() {
+      const tourId = getUrlParameter('tourId');
+      
+      if (!tourId) {
+        showStatusMessage('Tour ID is missing from URL. Please provide a valid tour ID.', 'error');
+        document.getElementById('sf').style.display = 'none';
+        document.getElementById('bookSeats').style.display = 'none';
+        return;
+      }
+      
+      document.getElementById('loader').classList.remove('hide');
+      
+      try {
+        // Fetch tour details
+        await fetchTourDetails(parseInt(tourId));
+        
+        // Fetch existing bookings
+        await fetchBookings(parseInt(tourId));
+        
+        document.getElementById('loader').classList.add('hide');
+      } catch (error) {
+        console.error("Error initializing page:", error);
+        showStatusMessage('Error loading tour data. Please try again later.', 'error');
+        document.getElementById('loader').classList.add('hide');
+      }
+    });
+    
+    // Fetch tour details from Firestore
+    async function fetchTourDetails(tourId) {
+      try {
+        const toursSnapshot = await db.collection('tours')
+          .where('tourid', '==', tourId)
+          .limit(1)
+          .get();
+        
+        if (toursSnapshot.empty) {
+          showStatusMessage('Tour not found. Please check the tour ID.', 'error');
+          document.getElementById('sf').style.display = 'none';
+          document.getElementById('bookSeats').style.display = 'none';
+          return;
+        }
+        
+        tourData = toursSnapshot.docs[0].data();
+        displayTourDetails(tourData);
+      } catch (error) {
+        console.error("Error fetching tour details:", error);
+        showStatusMessage('Error loading tour details. Please try again later.', 'error');
+        throw error;
+      }
+    }
+    
+    // Display tour details on the page
+    function displayTourDetails(tour) {
+      const tourDetailsDiv = document.createElement('div');
+      tourDetailsDiv.className = 'tour-details';
+      
+      // Convert timestamp to date
+      let tourDate = tour.tourDate;
+      if (tourDate && tourDate.toDate) {
+        tourDate = tourDate.toDate().toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
+      
+      tourDetailsDiv.innerHTML = `
+        <h4>Tour Information</h4>
+        <div class="tour-info">
+          <div class="info-card">
+            <h6>Tour ID. ${tour.tourid}</h6>
+          
+            <h6>Bus ID. ${tour.tourBusid}</h6>
+          </div>
+          <div class="info-card">
+            <h6>Date. ${tourDate}</h6>
+          </div>
+          <div class="info-card">
+            <h6>Fare. ₹${tour.tourFare}</h6>
+
+            <h6>Place ID. ${tour.tourPlaceid}</h6>
+          </div>
+        </div>
+
+      `;
+      
+      // Insert tour details at the top of the container
+      const container = document.querySelector('.container');
+      container.insertBefore(tourDetailsDiv, container.firstChild);
+    }
+    
+    // Fetch existing bookings for this tour
+    async function fetchBookings(tourId) {
+      try {
+        const bookingsSnapshot = await db.collection('bookings')
+          .where('bookingTourid', '==', tourId)
+          .get();
+        
+        if (!bookingsSnapshot.empty) {
+          bookingsSnapshot.forEach(doc => {
+            const booking = doc.data();
+            const seatNo = booking.bookingCustomerSeatNo;
+            bookedSeats.push(seatNo);
+            
+            // Mark the seat as booked in UI
+            const seatElement = document.getElementById('span' + seatNo);
+            if (seatElement) {
+              seatElement.classList.add('booked');
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+        showStatusMessage('Error loading booked seats. Some seats might appear available even though they are booked.', 'error');
+      }
+    }
+    
+    // Handle seat selection
+    function book(element) {
+      const seatNumber = parseInt(element.innerText);
+      
+      // Check if the seat is already booked
+      if (bookedSeats.includes(seatNumber)) {
+        showStatusMessage(`Seat ${seatNumber} is already booked.`, 'error');
+        return;
+      }
+      
+      // Toggle selection
+      if (selectedSeats[seatNumber]) {
+        // Deselect the seat
+        delete selectedSeats[seatNumber];
+        element.classList.remove('selected');
+        
+        // Remove the booking form
+        const formElement = document.getElementById(`form-seat-${seatNumber}`);
+        if (formElement) {
+          formElement.remove();
+        }
+      } else {
+        // Select the seat
+        selectedSeats[seatNumber] = {
+          seatNumber: seatNumber
+        };
+        element.classList.add('selected');
+        
+        // Create booking form for this seat
+        createBookingForm(seatNumber);
+      }
+      
+      updateSelectedSeatsDisplay();
+    }
+    
+    // Create a booking form for a selected seat
+    function createBookingForm(seatNumber) {
+      const formsContainer = document.getElementById('bookingFormsContainer');
+      
+      const formElement = document.createElement('div');
+      formElement.id = `form-seat-${seatNumber}`;
+      formElement.className = 'booking-form';
+      
+      formElement.innerHTML = `
+        <button class="close-btn" onclick="removeBookingForm(${seatNumber})">&times;</button>
+        <h4>Booking Details for Seat ${seatNumber}</h4>
+        <div class="form-group">
+          <label for="name-${seatNumber}">Full Name</label>
+          <input type="text" id="name-${seatNumber}" required placeholder="Enter full name">
+        </div>
+        <div class="form-group">
+          <label for="email-${seatNumber}">Email</label>
+          <input type="email" id="email-${seatNumber}" required placeholder="Enter email address">
+        </div>
+        <div class="form-group">
+          <label for="phone-${seatNumber}">Phone Number</label>
+          <input type="tel" id="phone-${seatNumber}" required placeholder="Enter 10-digit phone number">
+        </div>
+        <div class="form-group">
+          <label for="aadhaar-${seatNumber}">Aadhaar Number</label>
+          <input type="text" id="aadhaar-${seatNumber}" required placeholder="Enter 12-digit Aadhaar number">
+        </div>
+      `;
+      
+      formsContainer.appendChild(formElement);
+    }
+    
+    // Remove booking form when deselected
+    function removeBookingForm(seatNumber) {
+      const formElement = document.getElementById(`form-seat-${seatNumber}`);
+      if (formElement) {
+        formElement.remove();
+      }
+      
+      // Deselect the seat
+      const seatElement = document.getElementById(`span${seatNumber}`);
+      if (seatElement) {
+        seatElement.classList.remove('selected');
+      }
+      
+      delete selectedSeats[seatNumber];
+      updateSelectedSeatsDisplay();
+    }
+    
+    // Update the selected seats display
+    function updateSelectedSeatsDisplay() {
+      const selectedSeatsElement = document.getElementById('selectedSeats');
+      const seatCount = Object.keys(selectedSeats).length;
+      
+      if (seatCount > 0) {
+        const seatNumbers = Object.keys(selectedSeats).join(', ');
+        selectedSeatsElement.innerText = `Selected Seats: ${seatNumbers} (${seatCount} seats)`;
+        
+        if (tourData) {
+          const totalFare = seatCount * tourData.tourFare;
+          selectedSeatsElement.innerText += ` | Total: ₹${totalFare}`;
+        }
+      } else {
+        selectedSeatsElement.innerText = 'No seats selected';
+      }
+      
+      // Enable/disable book button based on selections
+      document.getElementById('bookSeats').disabled = seatCount === 0;
+    }
+    
+    // Submit all bookings
+    async function submitAllBookings(event) {
+      event.preventDefault();
+      
+      const seatNumbers = Object.keys(selectedSeats);
+      if (seatNumbers.length === 0) {
+        showStatusMessage('Please select at least one seat to book.', 'error');
+        return;
+      }
+      
+      // Validate all forms
+      for (const seatNumber of seatNumbers) {
+        const nameInput = document.getElementById(`name-${seatNumber}`);
+        const emailInput = document.getElementById(`email-${seatNumber}`);
+        const phoneInput = document.getElementById(`phone-${seatNumber}`);
+        const aadhaarInput = document.getElementById(`aadhaar-${seatNumber}`);
+        
+        if (!nameInput.value) {
+          showStatusMessage(`Please enter name for seat ${seatNumber}.`, 'error');
+          nameInput.focus();
+          return;
+        }
+        
+        if (!emailInput.value || !isValidEmail(emailInput.value)) {
+          showStatusMessage(`Please enter a valid email for seat ${seatNumber}.`, 'error');
+          emailInput.focus();
+          return;
+        }
+        
+        if (!phoneInput.value || !isValidPhone(phoneInput.value)) {
+          showStatusMessage(`Please enter a valid 10-digit phone number for seat ${seatNumber}.`, 'error');
+          phoneInput.focus();
+          return;
+        }
+        
+        if (!aadhaarInput.value || !isValidAadhaar(aadhaarInput.value)) {
+          showStatusMessage(`Please enter a valid 12-digit Aadhaar number for seat ${seatNumber}.`, 'error');
+          aadhaarInput.focus();
+          return;
+        }
+        
+        // Store form data in selectedSeats object
+        selectedSeats[seatNumber] = {
+          seatNumber: parseInt(seatNumber),
+          name: nameInput.value,
+          email: emailInput.value,
+          phone: phoneInput.value,
+          aadhaar: aadhaarInput.value
+        };
+      }
+      
+      // Disable the submit button and show loading
+      const submitButton = document.getElementById('bookSeats');
+      submitButton.disabled = true;
+      document.getElementById('loader').classList.remove('hide');
+      showStatusMessage('Processing your bookings...', 'loading');
+      
+      try {
+        // Submit each booking to Firebase
+        const promises = [];
+        
+        for (const seatNumber of seatNumbers) {
+          const seatData = selectedSeats[seatNumber];
+          
+          const bookingData = {
+            bookingCustomerAadhaarNo: parseInt(seatData.aadhaar),
+            bookingCustomerEmail: seatData.email,
+            bookingCustomerName: seatData.name,
+            bookingCustomerPhoneNo: seatData.phone,
+            bookingCustomerSeatNo: parseInt(seatNumber),
+            bookingCustomerStatus: 'confirmed',
+            bookingDate: firebase.firestore.Timestamp.now(),
+            bookingTourid: tourData.tourid,
+            bookingid: Date.now() + parseInt(seatNumber) // Generate a unique booking ID
+          };
+          
+          promises.push(db.collection('bookings').add(bookingData));
+        }
+        
+        await Promise.all(promises);
+        
+        // Show success message
+        showStatusMessage('Booking successful! Your seats have been reserved.', 'success');
+        
+        // Mark the booked seats
+        for (const seatNumber of seatNumbers) {
+          bookedSeats.push(parseInt(seatNumber));
+          const seatElement = document.getElementById(`span${seatNumber}`);
+          if (seatElement) {
+            seatElement.classList.remove('selected');
+            seatElement.classList.add('booked');
+          }
+          
+          // Remove booking form
+          const formElement = document.getElementById(`form-seat-${seatNumber}`);
+          if (formElement) {
+            formElement.remove();
+          }
+        }
+        
+        // Clear selected seats
+        selectedSeats = {};
+        updateSelectedSeatsDisplay();
+        
+      } catch (error) {
+        console.error("Error submitting bookings:", error);
+        showStatusMessage('Error processing your booking. Please try again later.', 'error');
+      } finally {
+        submitButton.disabled = false;
+        document.getElementById('loader').classList.add('hide');
+      }
+    }
+    
+    // Show status message
+    function showStatusMessage(message, type) {
+      const statusElement = document.getElementById('statusMessage');
+      statusElement.innerText = message;
+      statusElement.className = 'status-message';
+      
+      if (type) {
+        statusElement.classList.add(type);
+      }
+      
+      // Auto-hide success messages after 5 seconds
+      if (type === 'success') {
+        setTimeout(() => {
+          statusElement.innerText = '';
+          statusElement.className = 'status-message hide';
+        }, 5000);
+      }
+    }
+    
+    // Validation helpers
+    function isValidEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    
+    function isValidPhone(phone) {
+      const re = /^\d{10}$/;
+      return re.test(phone);
+    }
+    
+    function isValidAadhaar(aadhaar) {
+      const re = /^\d{12}$/;
+      return re.test(aadhaar);
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h3>Tour Bus Seat Booking</h3>
+      <a href="dashboard.html" style="color:white;">Dashboard</a>
+    </div>
+    
+    <div id="statusMessage" class="status-message hide"></div>
+    <div id="loader" class="loading">Loading tour information...</div>
+    
+    <div class="status-indicator">
+      <div class="status-item">
+        <div class="status-color" style="background-color: #e0e0e0;"></div>
+        <span>Available</span>
+      </div>
+      <div class="status-item">
+        <div class="status-color" style="background-color: green;"></div>
+        <span>Selected</span>
+      </div>
+      <div class="status-item">
+        <div class="status-color" style="background-color: #ff6b6b;"></div>
+        <span>Booked</span>
+      </div>
+    </div>
+
+    <h4 style="text-align: center;">Select Your Seat(s) By Clicking On Them</h4>
+    
+    <div id="selectedSeats">No seats selected</div>
+
+    <div id="sf" class="bus-layout">
+      <table border="1">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span3" onclick="book(this)" class="spanx">3</span></td>
+          <td><span id="span7" onclick="book(this)" class="spanx">7</span></td>
+          <td><span id="span11" onclick="book(this)" class="spanx">11</span></td>
+          <td><span id="span15" onclick="book(this)" class="spanx">15</span></td>
+          <td><span id="span19" onclick="book(this)" class="spanx">19</span></td>
+          <td><span id="span23" onclick="book(this)" class="spanx">23</span></td>
+          <td><span id="span27" onclick="book(this)" class="spanx">27</span></td>
+          <td><span id="span31" onclick="book(this)" class="spanx">31</span></td>
+          <td><span id="span35" onclick="book(this)" class="spanx">35</span></td>
+	  <td><span id="span39" onclick="book(this)" class="spanx">39</span></td>
+        </tr>
+        <tr>
+          <td><span id="span4" onclick="book(this)" class="spanx">4</span></td>
+          <td><span id="span8" onclick="book(this)" class="spanx">8</span></td>
+          <td><span id="span12" onclick="book(this)" class="spanx">12</span></td>
+          <td><span id="span16" onclick="book(this)" class="spanx">16</span></td>
+          <td><span id="span20" onclick="book(this)" class="spanx">20</span></td>
+          <td><span id="span24" onclick="book(this)" class="spanx">24</span></td>
+          <td><span id="span28" onclick="book(this)" class="spanx">28</span></td>
+          <td><span id="span32" onclick="book(this)" class="spanx">32</span></td>
+          <td><span id="span36" onclick="book(this)" class="spanx">36</span></td>
+          <td><span id="span40" onclick="book(this)" class="spanx">40</span></td>
+        </tr>
+        <tr>
+          <td colspan="10" style="text-align: center; background-color: #f0f0f0;"> Walking Path </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><span id="span2" onclick="book(this)" class="spanx">2</span></td>
+	  <td><span id="span6" onclick="book(this)" class="spanx">6</span></td>
+          <td><span id="span10" onclick="book(this)" class="spanx">10</span></td>
+          <td><span id="span14" onclick="book(this)" class="spanx">14</span></td>
+          <td><span id="span18" onclick="book(this)" class="spanx">18</span></td>
+          <td><span id="span22" onclick="book(this)" class="spanx">22</span></td>
+          <td><span id="span26" onclick="book(this)" class="spanx">26</span></td>
+          <td><span id="span30" onclick="book(this)" class="spanx">30</span></td>
+          <td><span id="span34" onclick="book(this)" class="spanx">34</span></td>
+          <td><span id="span38" onclick="book(this)" class="spanx">38</span></td>
+        </tr>
+        <tr>
+          <td class="driver">Door</td>
+          <td>con</td>
+          <td><span id="span5" onclick="book(this)" class="spanx">5</span></td>
+          <td><span id="span9" onclick="book(this)" class="spanx">9</span></td>
+          <td><span id="span13" onclick="book(this)" class="spanx">13</span></td>
+          <td><span id="span17" onclick="book(this)" class="spanx">17</span></td>
+          <td><span id="span21" onclick="book(this)" class="spanx">21</span></td>
+          <td><span id="span25" onclick="book(this)" class="spanx">25</span></td>
+          <td><span id="span29" onclick="book(this)" class="spanx">29</span></td>
+          <td><span id="span33" onclick="book(this)" class="spanx">33</span></td>
+          <td><span id="span37" onclick="book(this)" class="spanx">37</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Booking Forms Container -->
+    <div id="bookingFormsContainer" class="form-container"></div>
+    
+    <!-- Submit Button -->
+    <button onclick="submitAllBookings(event)" id="bookSeats" disabled>Submit Bookings</button>
+  </div>
+</body>
+</html>
