@@ -239,10 +239,7 @@
     async function cancelBooking(bookingId, seatNumber) {
       if (confirm(`Are you sure you want to cancel the booking for seat ${seatNumber}?`)) {
         try {
-          // Update booking status in Firebase
-          await db.collection('bookings').doc(bookingId).update({
-            bookingCustomerStatus: 'cancelled'
-          });
+          await db.collection('bookings').doc(bookingId).delete();
           
           // Update local data
           bookingsMap[seatNumber].bookingCustomerStatus = 'cancelled';
