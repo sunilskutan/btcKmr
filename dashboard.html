@@ -171,7 +171,7 @@
         }
         
         /* Bell icon styling */
-        #bell {
+        #bell,#help {
             cursor: pointer;
             transition: transform 0.3s ease;
         }
@@ -179,7 +179,7 @@
         #bell:hover {
             transform: scale(1.1);
         }
-
+	 
 
 .popup-overlay {
       position: fixed;
@@ -339,8 +339,15 @@
                     <p>Budget Tourism Cell, K S R T C Kilimanoor</p>
                 </div>
                 <div>
-                    <span id="bell" onclick="toggleSidebar()" title="Click to toggle sidebar">
-                        <i class="fas fa-bell" style="font-size: 2rem;"></i>
+
+<span id="bell" onclick="toggleSidebar()" title="Click to toggle sidebar(for Admins only)">
+                        <i class="fas fa-angle-double-left" style="font-size: 2rem;"></i>
+                    </span>
+ </div>
+                <div>
+
+                    <span id="help" onclick="helpMenu()"  title="Help Menu">
+                        <i class="fas fa-question-circle" style="font-size: 2rem;"></i>
                     </span>
                 </div>
             </div>
@@ -561,6 +568,226 @@ function redirectToTours() {
     function hidePopup() {
       document.getElementById("popupOverlay").style.display = "none";
     }
+
+/* Help function general*/
+
+function help(content, title = 'Help') {
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'help-overlay';
+  
+  // Create popup container
+  const popup = document.createElement('div');
+  popup.className = 'help-popup';
+  
+  // Create header with title and close button
+  const header = document.createElement('div');
+  header.className = 'help-header';
+  
+  const titleElement = document.createElement('h2');
+  titleElement.textContent = title;
+  
+  const closeButton = document.createElement('button');
+  closeButton.className = 'help-close';
+  closeButton.innerHTML = '&times;';
+  closeButton.setAttribute('aria-label', 'Close help');
+  
+  header.appendChild(titleElement);
+  header.appendChild(closeButton);
+  
+  // Create content area
+  const contentArea = document.createElement('div');
+  contentArea.className = 'help-content';
+  contentArea.innerHTML = content;
+  
+  // Create timer indicator
+  const timer = document.createElement('div');
+  timer.className = 'help-timer';
+  
+  // Assemble popup
+  popup.appendChild(header);
+  popup.appendChild(contentArea);
+  popup.appendChild(timer);
+  
+  // Add popup to overlay, then add overlay to body
+  overlay.appendChild(popup);
+  document.body.appendChild(overlay);
+  
+  // Add CSS to document if not already present
+  if (!document.getElementById('help-popup-styles')) {
+    const styles = document.createElement('style');
+    styles.id = 'help-popup-styles';
+    styles.textContent = `
+      .help-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      
+      .help-popup {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 500px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        transform: translateY(20px);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        overflow: hidden;
+      }
+      
+      .help-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eaeaea;
+      }
+      
+      .help-header h2 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #333;
+      }
+      
+      .help-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        transition: background-color 0.2s, color 0.2s;
+      }
+      
+      .help-close:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+        color: #333;
+      }
+      
+      .help-content {
+        padding: 20px;
+        overflow-y: auto;
+        line-height: 1.6;
+      }
+      
+      .help-timer {
+        height: 4px;
+        background-color: #4CAF50;
+        width: 100%;
+        transform-origin: left;
+        transition: transform linear 10s;
+      }
+      
+      .help-fade {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      
+      @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.7; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.7; }
+      }
+      
+      .help-popup-active {
+        animation: pulse 2s ease-in-out;
+      }
+    `;
+    document.head.appendChild(styles);
+  }
+  
+  // Functions to show and hide the popup
+  const hidePopup = () => {
+    popup.classList.add('help-fade');
+    overlay.style.opacity = '0';
+    
+    setTimeout(() => {
+      if (overlay.parentNode) {
+        document.body.removeChild(overlay);
+      }
+    }, 300);
+  };
+  
+  // Set up event listeners
+  closeButton.addEventListener('click', hidePopup);
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) {
+      hidePopup();
+    }
+  });
+  
+  // Trigger entrance animation
+  setTimeout(() => {
+    overlay.style.opacity = '1';
+    popup.style.transform = 'translateY(0)';
+    timer.style.transform = 'scaleX(0)'; // Start timer animation
+    
+    // Add pulse effect
+    setTimeout(() => {
+      popup.classList.add('help-popup-active');
+    }, 200);
+  }, 10);
+  
+  // Set up auto-close after 10 seconds
+  const timeout = setTimeout(hidePopup, 10000);
+  
+  // Add keyboard accessibility
+  const handleEscape = (event) => {
+    if (event.key === 'Escape') {
+      hidePopup();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+  
+  // Return an object with methods for controlling the popup
+  return {
+    close: hidePopup,
+    resetTimer: () => {
+      clearTimeout(timeout);
+      timer.style.transition = 'none';
+      timer.style.transform = 'scaleX(1)';
+      
+      setTimeout(() => {
+        timer.style.transition = 'transform linear 10s';
+        timer.style.transform = 'scaleX(0)';
+        setTimeout(hidePopup, 10000);
+      }, 50);
+    }
+  };
+}
+
+
+function helpMenu() {
+	const userName = sessionStorage.getItem('userName');
+    	if (userName === 'Guest') {
+	   help('Create an Account using <b><font color=red>Register</font></b> menu to <b><font color=orange>book a Tour</font></b>');
+	}
+        else if(userRole === "Admin") {
+	   	help('For <b><span style="color: violet;">Admins</span></b> to get detailed help, <b><a href="javascript:void(0);" style="color: purple;" onclick="window.location=\'adminUserManual.html\';">Click Here</a></b>');
+	     }
+	     else {
+	   	help('Click <b><font color=blue>Upcoming Tours</font></b> to <b><font color=green>book a Tour</font></b>');
+	     }
+}
     </script>
 </body>
 </html>
