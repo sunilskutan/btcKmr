@@ -402,7 +402,7 @@
               <th>Total Revenue</th>
             </tr>
             <tr>
-              <td>52</td>
+              <td>51</td>
               <td>${activeBookings.length}</td>
               <td>${51 - activeBookings.length}</td>
               <td>${Math.round((activeBookings.length / 51) * 100)}%</td>
