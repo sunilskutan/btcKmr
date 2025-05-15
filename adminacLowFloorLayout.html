@@ -632,9 +632,13 @@
     async function cancelBooking(bookingId, seatNumber) {
       if (confirm(`Are you sure you want to cancel the booking for seat ${seatNumber}?`)) {
         try {
-          // Update booking status in Firebase
-         await db.collection('bookings').doc(bookingId).delete();
-          
+          // Delete booking status in Firebase
+await db.collection('bookings').doc(bookingId).delete();
+/*
+          await db.collection('bookings').doc(bookingId).update({
+            bookingCustomerStatus: 'cancelled'
+          });
+*/          
           // Update local data
           bookingsMap[seatNumber].bookingCustomerStatus = 'cancelled';
           
@@ -701,7 +705,7 @@
     
     // Update booking statistics
     function updateBookingStats() {
-      const totalSeats = 52; // Total seats in the bus
+      const totalSeats = 31; // Total seats in the bus
       const bookedSeats = bookings.filter(b => b.bookingCustomerStatus === 'confirmed').length;
       const cancelledSeats = bookings.filter(b => b.bookingCustomerStatus === 'cancelled').length;
       const availableSeats = totalSeats - bookedSeats;
@@ -796,9 +800,9 @@
               <th>Total Revenue</th>
             </tr>
             <tr>
-              <td>52</td>
+              <td>31</td>
               <td>${activeBookings.length}</td>
-              <td>${52 - activeBookings.length}</td>
+              <td>${31 - activeBookings.length}</td>
               <td>${Math.round((activeBookings.length / 52) * 100)}%</td>
               <td>₹${activeBookings.length * (tourData ? tourData.tourFare : 0)}</td>
             </tr>
@@ -902,7 +906,7 @@
     };
   </script>
 </head>
-<body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+<body  oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
   <div class="container">
     <div class="header">
       <h1>Tour Bus Booking Management</h1>
@@ -999,7 +1003,7 @@
       <div class="stats-container">
         <div class="stat-card">
           <h4>Total Seats</h4>
-          <div class="stat-value" id="totalSeats">52</div>
+          <div class="stat-value" id="totalSeats">31</div>
         </div>
         <div class="stat-card">
           <h4>Booked Seats</h4>
@@ -1007,7 +1011,7 @@
         </div>
         <div class="stat-card">
           <h4>Available Seats</h4>
-          <div class="stat-value" id="availableSeats">52</div>
+          <div class="stat-value" id="availableSeats">31</div>
         </div>
         <div class="stat-card">
           <h4>Cancelled Seats</h4>
