@@ -179,8 +179,82 @@
         #bell:hover {
             transform: scale(1.1);
         }
+
+
+.popup-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    /* Popup container */
+    .popup {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      position: relative;
+      text-align: center;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Close button */
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      color: #888;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: #000;
+    }
+
+    /* Button styles */
+    .popup button.action-btn {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #3498db;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .popup button.action-btn:hover {
+      background: #2980b9;
+    }
+
+    @media (max-width: 480px) {
+      .popup button.action-btn {
+        font-size: 15px;
+        padding: 10px;
+      }
+    }
     </style>
 </head>
+
+
 <script type="module">
     // Firebase config
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
@@ -223,10 +297,16 @@
     }
 
     updatePageViews();
-	
+
+
+
+
+
+
+
 
 </script>
-<body  oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+<body>
     <div class="container">
         <div class="sidebar" id="sidebar1">
             <div class="sidebar-header">
@@ -241,11 +321,11 @@
                 <a href="#place"><i class="fas fa-user-graduate"></i> Place Management</a>
                 <a href="#bus"><i class="fas fa-calendar-alt"></i> Bus Management</a>
                 <a href="#user"><i class="fas fa-flask"></i> User Management</a>
-                <a href="javascript:void(0);" onclick="alert('You are not Authorised')"><i class="fa-solid fa-gear"></i> Setting</a>
-	        <a href="javascript:void(0);" onclick="window.location='upcomingTours.html';"><i class="fas fa-ticket-alt" ></i>Admin Tour Booking </a>	    
+                <a href="javascript:void(0);" onclick="showPopup()"><i class="fa-solid fa-gear"></i> Setting</a>
+ 		<a href="javascript:void(0);" onclick="window.location='upcomingTours.html';"><i class="fas fa-ticket-alt" ></i>Admin Tour Booking </a>	    
                 <a href="javascript:void(0);" onclick="window.location='adminViewTours.html';"><i class="fas fa-ticket" ></i>View Tour Booking </a>
-                <p id="counter">Loading page views...</p>
-	    </nav>
+		<p id="counter">Loading page views...</p>
+            </nav>
 
             <a href="index.html" class="nav-menu-bottom" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 15px;">
                 <i class="fas fa-sign-out-alt"></i> Logout
@@ -377,6 +457,20 @@
         </div>
     </div>
 
+
+<div class="popup-overlay" id="popupOverlay" style="display:'none';">
+    <div class="popup">
+      <button class="close-btn" onclick="hidePopup()">×</button>
+      <h2>Utilities</h2>
+      <button class="action-btn" onclick="window.location='imageUrlTest.html';">Image Url Test</button>
+      <button class="action-btn" onclick="openPage('page2.html')">Go to Page 2</button>
+      <button class="action-btn" onclick="openPage('page3.html')">Go to Page 3</button>
+      <button class="action-btn" onclick="openPage('page4.html')">Go to Page 4</button>
+      <button class="action-btn" onclick="openPage('page5.html')">Go to Page 5</button>
+    </div>
+  </div>
+
+
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('userId');
@@ -450,7 +544,8 @@
             }
         }
 
-	    function redirectToTours() {
+
+function redirectToTours() {
     const userName = sessionStorage.getItem('userName');
     if (userName === 'Guest') {
         window.location = 'guestupcomingTours.html';
@@ -458,6 +553,14 @@
         window.location = 'upcomingTours.html';
     }
 }
+
+  function showPopup() {
+      document.getElementById("popupOverlay").style.display = "flex";
+    }
+
+    function hidePopup() {
+      document.getElementById("popupOverlay").style.display = "none";
+    }
     </script>
 </body>
 </html>
