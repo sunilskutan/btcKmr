@@ -307,7 +307,7 @@
     
     // Update booking statistics
     function updateBookingStats() {
-      const totalSeats = 52; // Total seats in the bus
+      const totalSeats = 51; // Total seats in the bus
       const bookedSeats = bookings.filter(b => b.bookingCustomerStatus === 'confirmed').length;
       const cancelledSeats = bookings.filter(b => b.bookingCustomerStatus === 'cancelled').length;
       const availableSeats = totalSeats - bookedSeats;
@@ -404,8 +404,8 @@
             <tr>
               <td>52</td>
               <td>${activeBookings.length}</td>
-              <td>${52 - activeBookings.length}</td>
-              <td>${Math.round((activeBookings.length / 52) * 100)}%</td>
+              <td>${51 - activeBookings.length}</td>
+              <td>${Math.round((activeBookings.length / 51) * 100)}%</td>
               <td>₹${activeBookings.length * (tourData ? tourData.tourFare : 0)}</td>
             </tr>
           </table>
