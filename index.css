@@ -26,7 +26,8 @@
             background-position: center;
             background-repeat: no-repeat;
             position: relative;
-	    transition: background-image 1s ease-in-out;
+		 background-image: url("welcome.png");
+	  /*  transition: background-image 1s ease-in-out; */
         }
         
         body::before {
