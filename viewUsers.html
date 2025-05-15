@@ -290,7 +290,7 @@
     }
   </style>
 </head>
-<body  oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+<body>
   <header class="header">
     <div class="container">
       <div class="header-content">
@@ -335,6 +335,12 @@
       </div>
     </div>
   </main>
+
+<div id="userDetailsPopup" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:white; padding:20px; box-shadow:0 0 10px rgba(0,0,0,0.5); z-index:1000; border-radius:10px; width:300px;">
+  <button onclick="closePopup()" style="float:right; background:red; color:white; border:none; border-radius:5px; padding:5px 10px;">X</button>
+  <h3>User Details</h3>
+  <div id="userDetailsContent"></div>
+</div>
 
   <script>
     // Firebase Config
@@ -476,14 +482,46 @@
       displayusers(users);
     }
     
-    // View user details (userholder function)
-    function viewuserDetails(userId) {
-      // This could redirect to a detail page or show a modal
-      alert(`Viewing details for user ID: ${userId}`);
-      // Alternative implementation could be:
-      // window.location.href = `view-user.html?id=${userId}`;
-    }
-    
+
+function viewuserDetails(userId) {
+  const popup = document.getElementById('userDetailsPopup');
+  const content = document.getElementById('userDetailsContent');
+
+  db.collection('users').where("userid", "==", userId).get()
+    .then(querySnapshot => {
+      if (querySnapshot.empty) {
+        content.innerHTML = `<p>No user found with ID: ${userId}</p>`;
+      } else {
+        const doc = querySnapshot.docs[0];
+        const data = doc.data();
+        const createdAt = data.createdAt?.toDate().toLocaleString() || 'N/A';
+
+        content.innerHTML = `
+          <p><strong>User Name:</strong> ${data.userName}</p>
+          <p><strong>Email:</strong> ${data.userEmail}</p>
+          <p><strong>Aadhaar Number:</strong> ${data.userAadhaarNumber}</p>
+          <p><strong>Phone No:</strong> ${data.userPhoneNo}</p>
+          <p><strong>Role:</strong> ${data.userRole}</p>
+          <p><strong>Status:</strong> ${data.userStatus}</p>
+          <p><strong>Password:</strong> ${data.userPassword}</p>
+          <p><strong>Created At:</strong> ${createdAt}</p>
+        `;
+      }
+      popup.style.display = 'block';
+    })
+    .catch(error => {
+      content.innerHTML = `<p>Error fetching user data: ${error.message}</p>`;
+      popup.style.display = 'block';
+    });
+}
+
+function closePopup() {
+  document.getElementById('userDetailsPopup').style.display = 'none';
+}
+
+
+
+
     // Refresh users data
     function refreshusers() {
       searchInput.value = '';
