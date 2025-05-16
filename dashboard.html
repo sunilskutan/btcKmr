@@ -235,16 +235,16 @@
       font-size: 16px;
       border: none;
       border-radius: 8px;
-      background: #3498db;
+      /*background: #3498db;*/
       color: white;
       cursor: pointer;
       transition: background 0.3s ease;
     }
-
+/*
     .popup button.action-btn:hover {
       background: #2980b9;
     }
-
+*/
     @media (max-width: 480px) {
       .popup button.action-btn {
         font-size: 15px;
@@ -284,7 +284,7 @@
           });
           const updatedSnap = await getDoc(docRef);
           document.getElementById("counter").innerText = 
-            "Page Views: " + updatedSnap.data().pageViews;
+            "Total Visitors : " + updatedSnap.data().pageViews;
         } else {
           await setDoc(docRef, { pageViews: 1 });
           document.getElementById("counter").innerText = 
@@ -317,14 +317,15 @@
 
             <nav class="nav-menu">
                 <a href="javascript:void(0);" onclick="alert('Feature coming soon')">  <i class="fas fa-tachometer-alt"></i><font size="2px"><span id="usertype2"></span></font></a>
-                <a href="#tour"><i class="fas fa-book"></i> Tour Management</a>
-                <a href="#place"><i class="fas fa-user-graduate"></i> Place Management</a>
-                <a href="#bus"><i class="fas fa-calendar-alt"></i> Bus Management</a>
-                <a href="#user"><i class="fas fa-flask"></i> User Management</a>
-                <a href="javascript:void(0);" onclick="showPopup()"><i class="fa-solid fa-gear"></i> Setting</a>
+                <a href="#tour"><i class="fas fa-road"></i> Tour Management</a>
+                <a href="#place"><i class="fas fa-globe"></i> Place Management</a>
+                <a href="#bus"><i class="fas fa-bus"></i> Bus Management</a>
+                <a href="#user"><i class="fas fa-users"></i> User Management</a>
+                <a href="javascript:void(0);" onclick="showPopup()"><i class="fas fa-tools"></i> Admin Utilities </a>
  		<a href="javascript:void(0);" onclick="window.location='upcomingTours.html';"><i class="fas fa-ticket-alt" ></i>Admin Tour Booking </a>	    
                 <a href="javascript:void(0);" onclick="window.location='adminViewTours.html';"><i class="fas fa-ticket" ></i>View Tour Booking </a>
-		<p id="counter">Loading page views...</p>
+                <a href="javascript:void(0);" onclick="alert('Total number of people who watched this web site');" id="counter"></a>
+		<!--<p id="counter">Loading page views...</p>-->
             </nav>
 
             <a href="index.html" class="nav-menu-bottom" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 15px;">
@@ -336,12 +337,12 @@
             <div class="welcome-banner">
                 <div>
                     <h1>Welcome <span id="userId"></span></h1>
-                    <p>Budget Tourism Cell, K S R T C Kilimanoor</p>
+                    <p>Budget Tourism Cell, KSRTC Kilimanoor</p>
                 </div>
                 <div>
 
 <span id="bell" onclick="toggleSidebar()" title="Click to toggle sidebar(for Admins only)">
-                        <i class="fas fa-angle-double-left" style="font-size: 2rem;"></i>
+                        <i class="fas fa-arrows-alt-h" style="font-size: 2rem;"></i>
                     </span>
  </div>
                 <div>
@@ -469,11 +470,41 @@
     <div class="popup">
       <button class="close-btn" onclick="hidePopup()">×</button>
       <h2>Utilities</h2>
-      <button class="action-btn" onclick="window.location='imageUrlTest.html';">Image Url Test</button>
-      <button class="action-btn" onclick="openPage('page2.html')">Go to Page 2</button>
-      <button class="action-btn" onclick="openPage('page3.html')">Go to Page 3</button>
-      <button class="action-btn" onclick="openPage('page4.html')">Go to Page 4</button>
-      <button class="action-btn" onclick="openPage('page5.html')">Go to Page 5</button>
+      <button class="action-btn" onclick="window.location='imageUrlTest.html';"  
+style="background-color: #008000;" 
+onmouseover="this.style.backgroundColor=' #003300'" 
+onmouseout="this.style.backgroundColor='#008000'">
+<i class="fas fa-image"></i> Image Url Test</button>
+
+      <button class="action-btn"  onclick="alert('To be added');"
+  style="background-color: #009900; "
+  onmouseover="this.style.backgroundColor=' #003300'"
+  onmouseout="this.style.backgroundColor='#009900'">
+    Utility #1
+</button>
+
+<button class="action-btn"  onclick="alert('To be added');"
+  style="background-color:#00b300; "
+  onmouseover="this.style.backgroundColor=' #003300'"
+  onmouseout="this.style.backgroundColor='#00b300'">
+  Utility #2
+</button>
+
+<button class="action-btn"  onclick="alert('To be added');"
+  style="background-color:#00cc00; "
+  onmouseover="this.style.backgroundColor=' #003300'"
+  onmouseout="this.style.backgroundColor='#00cc00'">
+  Utility #3
+</button>
+
+<button class="action-btn" onclick="alert('To be added');"
+  style="background-color:#00e600; "
+  onmouseover="this.style.backgroundColor=' #003300'"
+  onmouseout="this.style.backgroundColor='#00e600'">
+  <i class="fas fa-cog"></i> Settings
+</button>
+
+
     </div>
   </div>
 
@@ -498,7 +529,7 @@
             place.style.display = "block";
             bus.style.display = "block";
             user.style.display = "block";
-            sidebar.style.display = "block";
+            sidebar.style.display = "none"; //changed to none
 	}
 	else {
 	    tour.style.display = "none";
