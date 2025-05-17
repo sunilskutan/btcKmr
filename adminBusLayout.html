@@ -1,87 +1,708 @@
-
-
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Tour Redirect</title>
-  <script type="module">
-    // Firebase imports (modular SDK)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+  <title>Admin - Tour Bus Booking Management</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center; 
+    }
+    
+    .tour-details {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tour-details h3 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    
+    .tour-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
+    .info-card {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      border-left: 4px solid #2c3e50;
+    }
+    
+    .info-card h4 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    
+    .status-indicator {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+      gap: 20px;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .status-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+    
+    .bus-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+    }
+    
+    table {
+      border-collapse: collapse;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: white;
+    }
+    
+    td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    
+    .spanx {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .spanx:hover {
+      transform: scale(1.05);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .spanx.booked {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .driver {
+      background-color: #b8c6db;
+      font-weight: bold;
+    }
+    
+    .customer-details {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin: 20px 0;
+    }
+    
+    .customer-details h3 {
+      margin-top: 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #2c3e50;
+      color: #2c3e50;
+    }
+    
+    .detail-item {
+      margin-bottom: 15px;
+    }
+    
+    .detail-item label {
+      font-weight: 600;
+      width: 150px;
+      display: inline-block;
+      color: #555;
+    }
+    
+    .detail-item span {
+      color: #333;
+    }
+    
+    .booking-stats {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin: 20px 0;
+    }
+    
+    .booking-stats h3 {
+      margin-top: 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #2c3e50;
+      color: #2c3e50;
+    }
+    
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
+    .stat-card {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      text-align: center;
+    }
+    
+    .stat-card h4 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    
+    .stat-card .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .action-btn {
+      padding: 12px 25px;
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .action-btn:hover {
+      background-color: #1a252f;
+    }
+    
+    .action-btn.print {
+      background-color: #27ae60;
+    }
+    
+    .action-btn.print:hover {
+      background-color: #219955;
+    }
+    
+    .action-btn.export {
+      background-color: #e67e22;
+    }
+    
+    .action-btn.export:hover {
+      background-color: #d35400;
+    }
+    
+    .action-btn.cancel {
+      background-color: #e74c3c;
+    }
+    
+    .action-btn.cancel:hover {
+      background-color: #c0392b;
+    }
 
-
-    // Firebase Configuration
-       const firebaseConfig = {
-  apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
-  authDomain: "btckmr.firebaseapp.com",
-  projectId: "btckmr",
-  storageBucket: "btckmr.firebasestorage.app",
-  messagingSenderId: "1038756102997",
-  appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
-  measurementId: "G-E73FZRNCFM"
-};
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Get URL parameter
-    const queryParams = new URLSearchParams(window.location.search);
-    const tourId = parseInt(queryParams.get("tourId"));
-
-    async function getTourBusidAndRedirect(tourId) {
-      try {
-        const toursRef = collection(db, "tours");
-        const q = query(toursRef, where("tourid", "==", tourId));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-          alert("No tour found with tourId: " + tourId);
-          return;
-        }
-
-        const doc = querySnapshot.docs[0];
-        const tourBusid = parseInt(doc.data().tourBusid);
-
-        // Redirect based on tourBusid
-        switch (tourBusid) {
-          case 1:
-            window.location.href = `adminacLowFloorLayout.html?tourId=${tourId}`;
-            break;
-          case 2:
-          window.location.href = `adminSuperfastLayout.html?tourId=${tourId}`;
-
-            break;
-          case 3:
-               window.location.href = `adminSuperfastLayout.html?tourId=${tourId}`;
-            break;
-             case 4:
-          window.location.href = `adminsuperDeluxeLayout.html?tourId=${tourId}`;
-            break;
-          default:
-              window.location.href = `adminSuperfastLayout.html?tourId=${tourId}`;
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        alert("Error occurred while fetching data.");
+   .action-btn.remittance {
+      background-color: #003399;
+    }
+    
+    .action-btn.remittance:hover {
+      background-color: #00004d;
+    }
+    
+    .status-message {
+      text-align: center;
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .loading {
+      background-color: #e2f3f5;
+      color: #0c7b93;
+    }
+    
+    .hide {
+      display: none;
+    }
+    
+    .bookings-table {
+      width: 100%;
+      margin: 20px 0;
+      border-collapse: collapse;
+    }
+    
+    .bookings-table th {
+      background-color: #2c3e50;
+      color: white;
+      padding: 10px;
+      text-align: left;
+    }
+    
+    .bookings-table td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    
+    .bookings-table tr:hover {
+      background-color: #f5f5f5;
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      width: 60%;
+      max-width: 700px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .close-modal {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close-modal:hover {
+      color: black;
+    }
+    
+    /* Print styles */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      
+      #printSection, #printSection * {
+        visibility: visible;
+      }
+      
+      #printSection {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+      
+      .no-print {
+        display: none !important;
+      }
+      
+      .header {
+        background-color: #fff !important;
+        color: #000 !important;
+        box-shadow: none !important;
+      }
+      
+      table, th, td {
+        border: 1px solid #000 !important;
+      }
+      
+      .info-card {
+        border: 1px solid #000 !important;
+        border-left: 4px solid #000 !important;
       }
     }
-
-    // Only run if tourId is valid
-    if (!isNaN(tourId)) {
-      getTourBusidAndRedirect(tourId);
-    } else {
-      alert("Invalid or missing tourId in URL.");
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .tour-info, .stats-container {
+        grid-template-columns: 1fr;
+      }
+      
+      table {
+        transform: scale(0.9);
+      }
+      
+      .modal-content {
+        width: 90%;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .bookings-table {
+        display: block;
+        overflow-x: auto;
+      }
     }
+  </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <script src="adminBusLayout.js">
+   
+
+
+
   </script>
 </head>
-<body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
-  <h2>
-<div style="text-align: center;">
-<img height="30px" width="30px"  src="https://cdn.pixabay.com/animation/2023/08/11/21/18/21-18-05-265_512.gif">
-Processing tour information...</div>
-</h2>
+<body  oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+  <div class="container">
+    <div class="header">
+      <h1>Tour Bus Booking Management</h1>
+      <a href="dashboard.html" style="color:white;">Admin Dashboard</a>
+    </div>
+    
+    <div id="statusMessage" class="status-message hide"></div>
+    <div id="loader" class="status-message loading"><img src="https://i.gifer.com/ZZ5H.gif" alt="Page " width="32" height="32"> Loading tour data...</div>
+    
+    <!-- Bus layout section -->
+    <div id="busLayout" class="bus-layout">
+      <h3>Bus Seat Layout</h3>
+      
+      <div class="status-indicator">
+        <div class="status-item">
+          <div class="status-color" style="background-color: #e0e0e0;"></div>
+          <span>Available</span>
+        </div>
+        <div class="status-item">
+          <div class="status-color" style="background-color: #e74c3c;"></div>
+          <span>Booked</span>
+        </div>
+        <div class="status-item">
+          <div class="status-color" style="background-color: #003399;"></div>
+          <span>Remitted</span>
+        </div>
+      </div>
+      <table id="superfastbus" style="display:none;">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span3" onclick="viewBookingDetails(this)" class="spanx">3</span></td>
+          <td><span id="span8" onclick="viewBookingDetails(this)" class="spanx">8</span></td>
+          <td><span id="span13" onclick="viewBookingDetails(this)" class="spanx">13</span></td>
+          <td><span id="span18" onclick="viewBookingDetails(this)" class="spanx">18</span></td>
+          <td><span id="span23" onclick="viewBookingDetails(this)" class="spanx">23</span></td>
+          <td><span id="span28" onclick="viewBookingDetails(this)" class="spanx">28</span></td>
+          <td><span id="span32" onclick="viewBookingDetails(this)" class="spanx">32</span></td>
+          <td><span id="span35" onclick="viewBookingDetails(this)" class="spanx">35</span></td>
+          <td><span id="span38" onclick="viewBookingDetails(this)" class="spanx">38</span></td>
+          <td><span id="span41" onclick="viewBookingDetails(this)" class="spanx">41</span></td>
+          <td><span id="span44" onclick="viewBookingDetails(this)" class="spanx">44</span></td>
+        </tr>
+        <tr>
+          <td><span id="span4" onclick="viewBookingDetails(this)" class="spanx">4</span></td>
+          <td><span id="span9" onclick="viewBookingDetails(this)" class="spanx">9</span></td>
+          <td><span id="span14" onclick="viewBookingDetails(this)" class="spanx">14</span></td>
+          <td><span id="span19" onclick="viewBookingDetails(this)" class="spanx">19</span></td>
+          <td><span id="span24" onclick="viewBookingDetails(this)" class="spanx">24</span></td>
+          <td><span id="span29" onclick="viewBookingDetails(this)" class="spanx">29</span></td>
+          <td><span id="span33" onclick="viewBookingDetails(this)" class="spanx">33</span></td>
+          <td><span id="span36" onclick="viewBookingDetails(this)" class="spanx">36</span></td>
+          <td><span id="span39" onclick="viewBookingDetails(this)" class="spanx">39</span></td>
+          <td><span id="span42" onclick="viewBookingDetails(this)" class="spanx">42</span></td>
+          <td><span id="span45" onclick="viewBookingDetails(this)" class="spanx">45</span></td>
+        </tr>
+        <tr>
+          <td><span id="span5" onclick="viewBookingDetails(this)" class="spanx">5</span></td>
+          <td><span id="span10" onclick="viewBookingDetails(this)" class="spanx">10</span></td>
+          <td><span id="span15" onclick="viewBookingDetails(this)" class="spanx">15</span></td>
+          <td><span id="span20" onclick="viewBookingDetails(this)" class="spanx">20</span></td>
+          <td><span id="span25" onclick="viewBookingDetails(this)" class="spanx">25</span></td>
+          <td><span id="span30" onclick="viewBookingDetails(this)" class="spanx">30</span></td>
+          <td><span id="span34" onclick="viewBookingDetails(this)" class="spanx">34</span></td>
+          <td><span id="span37" onclick="viewBookingDetails(this)" class="spanx">37</span></td>
+          <td><span id="span40" onclick="viewBookingDetails(this)" class="spanx">40</span></td>
+          <td><span id="span43" onclick="viewBookingDetails(this)" class="spanx">43</span></td>
+          <td><span id="span46" onclick="viewBookingDetails(this)" class="spanx">46</span></td>
+        </tr>
+        <tr>
+          <td colspan="12" style="text-align: center; background-color: #f0f0f0;">
+            Walking Path
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><span id="span2" onclick="viewBookingDetails(this)" class="spanx">2</span></td>
+          <td rowspan="2" class="driver">Front Door</td>
+          <td><span id="span7" onclick="viewBookingDetails(this)" class="spanx">7</span></td>
+          <td><span id="span12" onclick="viewBookingDetails(this)" class="spanx">12</span></td>
+          <td><span id="span17" onclick="viewBookingDetails(this)" class="spanx">17</span></td>
+          <td><span id="span22" onclick="viewBookingDetails(this)" class="spanx">22</span></td>
+          <td><span id="span27" onclick="viewBookingDetails(this)" class="spanx">27</span></td>
+          <td><span id="span48" onclick="viewBookingDetails(this)" class="spanx">48</span></td>
+          <td rowspan="2" class="driver">Back Door</td>
+          <td><span id="span51" onclick="viewBookingDetails(this)" class="spanx">51</span></td>
+          <td><span id="span50" onclick="viewBookingDetails(this)" class="spanx">50</span></td>
+        </tr>
+        <tr>
+          <td>cond</td>
+          <td><span id="span1" onclick="viewBookingDetails(this)" class="spanx">1</span></td>
+          <td><span id="span6" onclick="viewBookingDetails(this)" class="spanx">6</span></td>
+          <td><span id="span11" onclick="viewBookingDetails(this)" class="spanx">11</span></td>
+          <td><span id="span16" onclick="viewBookingDetails(this)" class="spanx">16</span></td>
+          <td><span id="span21" onclick="viewBookingDetails(this)" class="spanx">21</span></td>
+          <td><span id="span26" onclick="viewBookingDetails(this)" class="spanx">26</span></td>
+          <td><span id="span31" onclick="viewBookingDetails(this)" class="spanx">31</span></td>
+          <td><span id="span47" onclick="viewBookingDetails(this)" class="spanx">47</span></td>
+          <td><span id="span49" onclick="viewBookingDetails(this)" class="spanx">49</span></td>
+        </tr>
+      </table>
+
+
+
+      <table id="superdeluxebus" style="display:none;">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span3" onclick="viewBookingDetails(this)" class="spanx">3</span></td>
+          <td><span id="span7" onclick="viewBookingDetails(this)" class="spanx">7</span></td>
+          <td><span id="span11" onclick="viewBookingDetails(this)" class="spanx">11</span></td>
+          <td><span id="span15" onclick="viewBookingDetails(this)" class="spanx">15</span></td>
+          <td><span id="span19" onclick="viewBookingDetails(this)" class="spanx">19</span></td>
+          <td><span id="span23" onclick="viewBookingDetails(this)" class="spanx">23</span></td>
+          <td><span id="span27" onclick="viewBookingDetails(this)" class="spanx">27</span></td>
+          <td><span id="span31" onclick="viewBookingDetails(this)" class="spanx">31</span></td>
+          <td><span id="span35" onclick="viewBookingDetails(this)" class="spanx">35</span></td>
+	  <td><span id="span39" onclick="viewBookingDetails(this)" class="spanx">39</span></td>
+        </tr>
+        <tr>
+          <td><span id="span4" onclick="viewBookingDetails(this)" class="spanx">4</span></td>
+          <td><span id="span8" onclick="viewBookingDetails(this)" class="spanx">8</span></td>
+          <td><span id="span12" onclick="viewBookingDetails(this)" class="spanx">12</span></td>
+          <td><span id="span16" onclick="viewBookingDetails(this)" class="spanx">16</span></td>
+          <td><span id="span20" onclick="viewBookingDetails(this)" class="spanx">20</span></td>
+          <td><span id="span24" onclick="viewBookingDetails(this)" class="spanx">24</span></td>
+          <td><span id="span28" onclick="viewBookingDetails(this)" class="spanx">28</span></td>
+          <td><span id="span32" onclick="viewBookingDetails(this)" class="spanx">32</span></td>
+          <td><span id="span36" onclick="viewBookingDetails(this)" class="spanx">36</span></td>
+          <td><span id="span40" onclick="viewBookingDetails(this)" class="spanx">40</span></td>
+        </tr>
+        <tr>
+          <td colspan="10" style="text-align: center; background-color: #f0f0f0;"> Walking Path </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><span id="span2" onclick="viewBookingDetails(this)" class="spanx">2</span></td>
+	  <td><span id="span6" onclick="viewBookingDetails(this)" class="spanx">6</span></td>
+          <td><span id="span10" onclick="viewBookingDetails(this)" class="spanx">10</span></td>
+          <td><span id="span14" onclick="viewBookingDetails(this)" class="spanx">14</span></td>
+          <td><span id="span18" onclick="viewBookingDetails(this)" class="spanx">18</span></td>
+          <td><span id="span22" onclick="viewBookingDetails(this)" class="spanx">22</span></td>
+          <td><span id="span26" onclick="viewBookingDetails(this)" class="spanx">26</span></td>
+          <td><span id="span30" onclick="viewBookingDetails(this)" class="spanx">30</span></td>
+          <td><span id="span34" onclick="viewBookingDetails(this)" class="spanx">34</span></td>
+          <td><span id="span38" onclick="viewBookingDetails(this)" class="spanx">38</span></td>
+        </tr>
+        <tr>
+          <td class="driver">Door</td>
+          <td>con</td>
+          <td><span id="span5" onclick="viewBookingDetails(this)" class="spanx">5</span></td>
+          <td><span id="span9" onclick="viewBookingDetails(this)" class="spanx">9</span></td>
+          <td><span id="span13" onclick="viewBookingDetails(this)" class="spanx">13</span></td>
+          <td><span id="span17" onclick="viewBookingDetails(this)" class="spanx">17</span></td>
+          <td><span id="span21" onclick="viewBookingDetails(this)" class="spanx">21</span></td>
+          <td><span id="span25" onclick="viewBookingDetails(this)" class="spanx">25</span></td>
+          <td><span id="span29" onclick="viewBookingDetails(this)" class="spanx">29</span></td>
+          <td><span id="span33" onclick="viewBookingDetails(this)" class="spanx">33</span></td>
+          <td><span id="span37" onclick="viewBookingDetails(this)" class="spanx">37</span></td>
+        </tr>
+      </table>
+
+
+      <table id="aclowfloorbus" style="display:none;">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span3" onclick="viewBookingDetails(this)" class="spanx">3</span></td>
+          <td><span id="span7" onclick="viewBookingDetails(this)" class="spanx">7</span></td>
+          <td><span id="span9" onclick="viewBookingDetails(this)" class="spanx">9</span></td>
+          <td></td>
+          <td><span id="span13" onclick="viewBookingDetails(this)" class="spanx">13</span></td>
+          <td><span id="span17" onclick="viewBookingDetails(this)" class="spanx">17</span></td>
+          <td><span id="span21" onclick="viewBookingDetails(this)" class="spanx">21</span></td>
+          <td><span id="span25" onclick="viewBookingDetails(this)" class="spanx">25</span></td>
+          <td><span id="span31" onclick="viewBookingDetails(this)" class="spanx">31</span></td>
+        </tr>
+        <tr>
+          <td><span id="span4" onclick="viewBookingDetails(this)" class="spanx">4</span></td>
+          <td><span id="span8" onclick="viewBookingDetails(this)" class="spanx">8</span></td>
+          <td><span id="span10" onclick="viewBookingDetails(this)" class="spanx">10</span></td>
+          <td></td>
+          <td><span id="span14" onclick="viewBookingDetails(this)" class="spanx">14</span></td>
+          <td><span id="span18" onclick="viewBookingDetails(this)" class="spanx">18</span></td>
+          <td><span id="span22" onclick="viewBookingDetails(this)" class="spanx">22</span></td>
+          <td><span id="span26" onclick="viewBookingDetails(this)" class="spanx">26</span></td>
+ 
+          <td><span id="span30" onclick="viewBookingDetails(this)" class="spanx">30</span></td>
+        </tr>
+        <tr>
+          <td  colspan="8"></td>
+        
+          <td><span id="span29" onclick="viewBookingDetails(this)" class="spanx">29</span></td>
+        </tr>
+       <!-- <tr> <td colspan="12" style="text-align: center; background-color: #f0f0f0;"> Walking Path </td> </tr> -->
+        <tr>
+          <td></td>
+          <td></td>
+	  <td><span id="span2" onclick="viewBookingDetails(this)" class="spanx">2</span></td>
+          <td><span id="span6" onclick="viewBookingDetails(this)" class="spanx">6</span></td>
+          <td rowspan="2" class="driver">Door</td>
+          
+          <td><span id="span12" onclick="viewBookingDetails(this)" class="spanx">12</span></td>
+          <td><span id="span16" onclick="viewBookingDetails(this)" class="spanx">16</span></td>
+          <td><span id="span20" onclick="viewBookingDetails(this)" class="spanx">20</span></td>
+          <td><span id="span24" onclick="viewBookingDetails(this)" class="spanx">24</span></td>
+
+          <td><span id="span28" onclick="viewBookingDetails(this)" class="spanx">28</span></td>
+        </tr>
+        <tr>
+          <td class="driver">Door</td>
+          <td>con</td>
+          <td><span id="span1" onclick="viewBookingDetails(this)" class="spanx">1</span></td>
+          <td><span id="span5" onclick="viewBookingDetails(this)" class="spanx">5</span></td>
+          <td><span id="span11" onclick="viewBookingDetails(this)" class="spanx">11</span></td>
+          <td><span id="span15" onclick="viewBookingDetails(this)" class="spanx">15</span></td>
+          <td><span id="span19" onclick="viewBookingDetails(this)" class="spanx">19</span></td>
+          <td><span id="span23" onclick="viewBookingDetails(this)" class="spanx">23</span></td>
+
+          <td><span id="span27" onclick="viewBookingDetails(this)" class="spanx">27</span></td>
+        </tr>
+      </table>
+
+
+    </div>
+    
+    <!-- Booking Statistics -->
+    <div class="booking-stats">
+      <h3>Booking Statistics</h3>
+      <div class="stats-container">
+        <div class="stat-card">
+          <h4>Total Seats</h4>
+          <div class="stat-value" id="totalSeats">51</div>
+        </div>
+        <div class="stat-card">
+          <h4>Booked Seats</h4>
+          <div class="stat-value" id="bookedSeats">0</div>
+        </div>
+        <div class="stat-card">
+          <h4>Available Seats</h4>
+          <div class="stat-value" id="availableSeats">51</div>
+        </div>
+        <div class="stat-card">
+          <h4>Cancelled Seats</h4>
+          <div class="stat-value" id="cancelledSeats">0</div>
+        </div>
+        <div class="stat-card">
+          <h4>Occupancy Rate</h4>
+          <div class="stat-value" id="occupancyRate">0%</div>
+        </div>
+        <div class="stat-card">
+          <h4>Total Revenue</h4>
+          <div class="stat-value" id="totalRevenue">₹0</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="action-btn print" onclick="printBookingDetails()">Print Report</button>
+      <button class="action-btn export" onclick="exportBookingsToCSV()">Export to CSV</button>
+    </div>
+    
+    <!-- Bookings Table -->
+    <div class="customer-details">
+      <h3>All Bookings</h3>
+      <table class="bookings-table">
+        <thead>
+          <tr>
+            <th>Seat No</th>
+            <th>Passenger Name</th>
+            <th>Phone No</th>
+            <th>Email</th>
+            <th>Aadhaar No</th>
+            <th>Status</th>
+            <th>Booking Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="bookingsTableBody">
+          <!-- Bookings will be displayed here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Booking Details Modal -->
+  <div id="bookingDetailsModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('bookingDetailsModal')">&times;</span>
+      <div id="bookingDetails" class="customer-details">
+        <!-- Booking details will be displayed here -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Print Section (Hidden) -->
+  <div id="printSection" style="display: none;"></div>
 </body>
 </html>
