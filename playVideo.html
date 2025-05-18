@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-Frame-Options" content="allow">
+  <title>Dynamic YouTube Video by Place</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+    iframe {
+      width: 80%;
+      height: 450px;
+      margin-top: 20px;
+      border: none;
+    }
+    .youtube-button {
+      display: inline-block;
+      background-color: #FF0000;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+  <h2>Auto-Playing Video Based on Place Name</h2>
+  <div id="videoContainer">Loading video...</div>
+  
+  <script>
+    const API_KEY = "AIzaSyBSuwc3OAmEaBipLoVvYP9jFZomtlaI4hw";
+    
+    function getPlaceNameFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let place = urlParams.get("placeName"); // Fixed: "placeName" string in quotes
+      
+      if (!place) return null;
+      
+      // Decode URL-encoded Unicode strings (very important for Malayalam input)
+      place = decodeURIComponent(place.trim().toLowerCase());
+      
+      // Malayalam to English mapping
+      const malToEngMap = {
+        "തിരുവനന്തപുരം": "trivandrum",
+        "കൊച്ചി": "kochi",
+        "കോഴിക്കോട്": "calicut",
+        "അലപ്പുഴ": "alappuzha",
+        "പാലക്കാട്": "palakkad",
+        "കൊല്ലം": "kollam",
+        "തൃശ്ശൂർ": "thrissur",
+        "വാഗമൺ": "vagamon"
+      };
+      
+      if (malToEngMap[place]) {
+        return malToEngMap[place];
+      }
+      return place; // Already English or unmapped Malayalam
+    }
+    
+    // Alternative approach: Direct YouTube link if embedding fails
+    function createDirectYouTubeLink(placeName) {
+      return `
+        <div>
+          <p>Unable to embed video. Click below to watch on YouTube:</p>
+          <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(placeName)}+travel" 
+             target="_blank" 
+             class="youtube-button">
+            Watch on YouTube
+          </a>
+        </div>
+      `;
+    }
+    
+    function embedVideo(videoId) {
+      try {
+        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&origin=${encodeURIComponent(window.location.origin)}&enablejsapi=1`;
+        document.getElementById("videoContainer").innerHTML = `
+          <iframe src="${embedUrl}" allow="autoplay; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          <div id="fallbackContainer" style="display:none; margin-top: 20px;">
+            ${createDirectYouTubeLink(getPlaceNameFromURL())}
+          </div>
+        `;
+        
+        // Set a timeout to check if video loaded properly
+        setTimeout(() => {
+          const iframe = document.querySelector('iframe');
+          if (iframe && (iframe.clientHeight < 50 || iframe.clientWidth < 50)) {
+            document.getElementById("fallbackContainer").style.display = "block";
+          }
+        }, 3000);
+      } catch (e) {
+        console.error("Error embedding video:", e);
+        document.getElementById("videoContainer").innerHTML = createDirectYouTubeLink(getPlaceNameFromURL());
+      }
+    }
+    
+    async function fetchYouTubeVideo(placeName) {
+      const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(placeName)} travel&key=${API_KEY}&maxResults=5&type=video&videoEmbeddable=true`;
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        if (data.items && data.items.length > 0) {
+          // Try to find a video that can be embedded
+          let foundEmbeddableVideo = false;
+          for (let i = 0; i < data.items.length; i++) {
+            const videoId = data.items[i].id.videoId;
+            // Try to use this video
+            embedVideo(videoId);
+            foundEmbeddableVideo = true;
+            break;
+          }
+          
+          if (!foundEmbeddableVideo) {
+            document.getElementById("videoContainer").innerHTML = `
+              <p>No embeddable videos found for "${placeName}".</p>
+              <p>Try opening <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(placeName)}+travel" target="_blank">YouTube directly</a>.</p>
+            `;
+          }
+        } else {
+          document.getElementById("videoContainer").innerHTML = `
+            <p>No videos found for "${placeName}".</p>
+            <p>Try opening <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(placeName)}+travel" target="_blank">YouTube directly</a>.</p>
+          `;
+        }
+      } catch (error) {
+        console.error("Error fetching video:", error);
+        document.getElementById("videoContainer").innerHTML = `
+          <p>Failed to fetch video: ${error.message}</p>
+          <p>Try opening <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(placeName)}+travel" target="_blank">YouTube directly</a>.</p>
+        `;
+      }
+    }
+    
+    // On page load
+    document.addEventListener("DOMContentLoaded", function() {
+      const placeName = getPlaceNameFromURL();
+      if (placeName) {
+        document.getElementById("videoContainer").innerHTML = `<p>Loading video for "${placeName}"...</p>`;
+        fetchYouTubeVideo(placeName);
+      } else {
+        document.getElementById("videoContainer").innerHTML = "<p>No place name specified in URL. Use ?placeName=LocationName in the URL.</p>";
+      }
+    });
+  </script>
+</body>
+</html>
