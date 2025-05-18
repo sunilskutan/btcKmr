@@ -7,104 +7,280 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f7;
-      padding: 30px;
+    :root {
+      --primary-green: #2ecc71;
+      --dark-green: #27ae60;
+      --light-green: #e8f8f2;
+      --accent-green: #1abc9c;
     }
-    h2 {
-      text-align: center;
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f8f1;
+      padding: 30px;
+      margin: 0;
       color: #2c3e50;
     }
+    
+    h2 {
+      text-align: center;
+      color: var(--dark-green);
+      margin-bottom: 25px;
+      font-size: 28px;
+    }
+    
+    .home-link {
+      text-decoration: none;
+      font-size: 24px;
+      transition: transform 0.2s;
+      display: inline-block;
+      margin-left: 10px;
+      color: var(--dark-green);
+    }
+    
+    .home-link:hover {
+      transform: scale(1.1);
+    }
+    
     form {
       background: #ffffff;
       max-width: 500px;
       margin: 0 auto;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(46, 204, 113, 0.15);
+      position: relative;
+      border-top: 5px solid var(--primary-green);
     }
+    
     label {
       display: block;
-      margin-top: 15px;
-      font-weight: bold;
+      margin-top: 18px;
+      font-weight: 600;
+      color: #34495e;
+      font-size: 15px;
     }
+    
     input {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    input[readonly] {
-      background-color: #eee;
-    }
-    button {
-      margin-top: 20px;
-      width: 100%;
       padding: 12px;
-      background: #27ae60;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 2px solid #eaeaea;
+      font-size: 16px;
+      transition: border 0.3s;
+      box-sizing: border-box;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+    }
+    
+    input[readonly] {
+      background-color: var(--light-green);
+      border-color: #d0e7dc;
+    }
+    
+    button {
+      margin-top: 30px;
+      width: 100%;
+      padding: 14px;
+      background: var(--primary-green);
       color: white;
       border: none;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 18px;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px rgba(46, 204, 113, 0.2);
+      position: relative;
+      overflow: hidden;
     }
+    
     button:hover {
-      background: #1e8449;
+      background: var(--dark-green);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
     }
-    .success {
-      text-align: center;
-      color: green;
-      margin-top: 15px;
+    
+    button:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
-    .error {
-      text-align: center;
-      color: red;
-      margin-top: 15px;
+    
+    .bus-icon {
+      margin-right: 8px;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 80px;
+      right: -350px;
+      width: 300px;
+      padding: 20px;
+      background: #fff;
+      border-left: 5px solid var(--primary-green);
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      transition: right 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      z-index: 1000;
+    }
+    
+    .notification.success {
+      border-left-color: var(--primary-green);
+    }
+    
+    .notification.error {
+      border-left-color: #e74c3c;
+    }
+    
+    .notification-icon {
+      margin-right: 15px;
+      font-size: 24px;
+    }
+    
+    .notification.success .notification-icon {
+      color: var(--primary-green);
+    }
+    
+    .notification.error .notification-icon {
+      color: #e74c3c;
+    }
+    
+    .notification-content {
+      flex-grow: 1;
+    }
+    
+    .notification-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
+    
+    .notification-message {
+      font-size: 14px;
+      color: #7f8c8d;
+    }
+    
+    .input-group {
+      position: relative;
+      margin-bottom: 5px;
+    }
+    
+    .input-icon {
+      position: absolute;
+      top: 50%;
+      right: 15px;
+      transform: translateY(-50%);
+      color: #95a5a6;
     }
   </style>
 </head>
-<body  oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+<body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
 
-<h2><i class="fas fa-bus-alt"></i> Add New Bus <a href="dashboard.html" title="Go Back To DashBoard"> 🏠 </a></h2>
+<h2><i class="fas fa-bus-alt bus-icon"></i> Add New Bus <a href="dashboard.html" class="home-link" title="Go Back To Dashboard"><i class="fas fa-home"></i></a></h2>
 
 <form id="busForm">
-  <label for="busid">Bus ID</label>
-  <input type="number" id="busid" readonly>
+  <div class="input-group">
+    <label for="busid">Bus ID</label>
+    <input type="number" id="busid" readonly>
+    <i class="fas fa-fingerprint input-icon"></i>
+  </div>
 
-  <label for="busNumber">Bus Number (e.g., KL15-B1223)</label>
-  <input type="text" id="busNumber" required>
+  <div class="input-group">
+    <label for="busNumber">Bus Number (e.g., KL15-B1223)</label>
+    <input type="text" id="busNumber" required>
+    <i class="fas fa-id-card input-icon"></i>
+  </div>
 
-  <label for="busType">Bus Type (e.g., AC Low Floor)</label>
-  <input type="text" id="busType" required>
+  <div class="input-group">
+    <label for="busType">Bus Type (e.g., AC Low Floor)</label>
+    <input type="text" id="busType" required>
+    <i class="fas fa-bus input-icon"></i>
+  </div>
 
-  <label for="busTotalSeat">Total Seats</label>
-  <input type="number" id="busTotalSeat" required>
+  <div class="input-group">
+    <label for="busTotalSeat">Total Seats</label>
+    <input type="number" id="busTotalSeat" required>
+    <i class="fas fa-chair input-icon"></i>
+  </div>
 
-  <button type="submit">Add Bus</button>
-
-  <div id="msg"></div>
+  <button type="submit" id="submitBtn">
+    <i class="fas fa-plus-circle"></i> Add Bus
+  </button>
 </form>
+
+<!-- Notification Element -->
+<div id="notification" class="notification">
+  <div class="notification-icon">
+    <i class="fas fa-check-circle"></i>
+  </div>
+  <div class="notification-content">
+    <div class="notification-title">Success!</div>
+    <div class="notification-message">Bus added successfully!</div>
+  </div>
+</div>
 
 <script>
   // Firebase Configuration
-       const firebaseConfig = {
-  apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
-  authDomain: "btckmr.firebaseapp.com",
-  projectId: "btckmr",
-  storageBucket: "btckmr.firebasestorage.app",
-  messagingSenderId: "1038756102997",
-  appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
-  measurementId: "G-E73FZRNCFM"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+    authDomain: "btckmr.firebaseapp.com",
+    projectId: "btckmr",
+    storageBucket: "btckmr.firebasestorage.app",
+    messagingSenderId: "1038756102997",
+    appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+    measurementId: "G-E73FZRNCFM"
+  };
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
   const busForm = document.getElementById("busForm");
-  const msgDiv = document.getElementById("msg");
+  const submitBtn = document.getElementById("submitBtn");
   const busidInput = document.getElementById("busid");
+  const notification = document.getElementById("notification");
+
+  // Function to show notification
+  function showNotification(type, title, message) {
+    // Set notification type (success or error)
+    notification.className = "notification " + type;
+    
+    // Update icon
+    const icon = notification.querySelector(".notification-icon i");
+    icon.className = type === "success" ? "fas fa-check-circle" : "fas fa-exclamation-circle";
+    
+    // Update content
+    notification.querySelector(".notification-title").textContent = title;
+    notification.querySelector(".notification-message").textContent = message;
+    
+    // Show notification (slide in from right)
+    notification.style.right = "20px";
+    
+    // Hide notification after 3 seconds if it's a success
+    if (type === "success") {
+      setTimeout(() => {
+        notification.style.right = "-350px";
+        
+        // Redirect to dashboard after notification starts sliding out
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 500);
+      }, 2500);
+    } else {
+      // Just hide the notification after 4 seconds if it's an error
+      setTimeout(() => {
+        notification.style.right = "-350px";
+      }, 4000);
+    }
+  }
 
   // Get next available busid
   async function getNextBusId() {
@@ -118,7 +294,7 @@
       }
     } catch (err) {
       console.error("Failed to fetch busid:", err);
-      msgDiv.innerHTML = '<div class="error">Error fetching next bus ID.</div>';
+      showNotification("error", "Error", "Failed to fetch next bus ID");
     }
   }
 
@@ -127,13 +303,19 @@
   busForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // Disable submit button immediately
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+
     const busid = parseInt(busidInput.value);
     const busNumber = document.getElementById("busNumber").value.trim();
     const busType = document.getElementById("busType").value.trim();
     const busTotalSeat = parseInt(document.getElementById("busTotalSeat").value);
 
     if (!busNumber || !busType || isNaN(busTotalSeat)) {
-      msgDiv.innerHTML = '<div class="error">Please fill all fields correctly.</div>';
+      showNotification("error", "Validation Error", "Please fill all fields correctly.");
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Bus';
       return;
     }
 
@@ -146,12 +328,19 @@
       };
 
       await db.collection("buses").add(newBus);
-      msgDiv.innerHTML = '<div class="success">Bus added successfully!</div>';
+      showNotification("success", "Success!", "Bus added successfully!");
+      
+      // Form will be reset but user won't see it since we're redirecting
       busForm.reset();
-      getNextBusId(); // Prepare for next entry
+      getNextBusId();
+      
     } catch (error) {
       console.error("Add bus error:", error);
-      msgDiv.innerHTML = '<div class="error">Failed to add bus. Try again.</div>';
+      showNotification("error", "Error", "Failed to add bus. Please try again.");
+      
+      // Re-enable the button if there's an error
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Add Bus';
     }
   });
 </script>
