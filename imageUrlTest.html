@@ -77,7 +77,7 @@
     }
   </style>
 </head>
-<body>
+<body  oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
 
   <h1>Image URL Viewer <a href="dashboard.html" title="Go Back To DashBoard"> 🏠 </a></h1>
   <input type="text" id="imageUrl" placeholder="Enter image URL here..." oninput="loadImage()">
