@@ -301,7 +301,7 @@
         const data = doc.data();
         const option = document.createElement('option');
         option.value = doc.id;
-        option.textContent = data.placeid + ". " + data.placeName + " - " + data.placeDescription;
+        option.textContent = data.placeid + ". " + data.placeName;
         placeSelect.appendChild(option);
       });
     } catch (error) {
