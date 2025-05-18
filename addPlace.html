@@ -2,104 +2,321 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add New Place</title>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
+    :root {
+      --primary-color: #3498db;
+      --primary-dark: #2980b9;
+      --secondary-color: #2c3e50;
+      --accent-color: #e74c3c;
+      --light-gray: #f5f7fa;
+      --text-color: #333;
+      --success-color: #2ecc71;
+      --error-color: #e74c3c;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f4f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: var(--text-color);
+    }
+    
+    .container {
+      max-width: 550px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      color: var(--secondary-color);
+      font-weight: 600;
+    }
+    
+    .header i {
+      margin-right: 12px;
+      color: var(--primary-color);
+      font-size: 24px;
+    }
+    
+    .home-link {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px;
+      color: var(--secondary-color);
+      text-decoration: none;
+      transition: transform 0.2s ease;
+    }
+    
+    .home-link:hover {
+      transform: translateY(-50%) scale(1.1);
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
       padding: 30px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    h2 {
-      text-align: center;
-      color: #2c3e50;
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
     }
-    form {
-      background: #fff;
-      max-width: 500px;
-      margin: auto;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    
+    .form-group {
+      margin-bottom: 20px;
     }
+    
     label {
-      margin-top: 15px;
       display: block;
-      font-weight: bold;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--secondary-color);
     }
+    
     input {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+    
     input[readonly] {
-      background-color: #eee;
+      background-color: var(--light-gray);
+      cursor: not-allowed;
     }
-    button {
-      margin-top: 20px;
+    
+    .btn {
+      display: block;
       width: 100%;
-      padding: 12px;
-      background-color: #2980b9;
+      padding: 14px;
+      background-color: var(--primary-color);
       color: white;
       border: none;
       border-radius: 8px;
       font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      position: relative;
+      overflow: hidden;
     }
-    button:hover {
-      background-color: #1c5980;
+    
+    .btn:hover {
+      background-color: var(--primary-dark);
     }
-    .message {
-      margin-top: 15px;
-      text-align: center;
+    
+    .btn:active {
+      transform: scale(0.98);
     }
-    .success { color: green; }
-    .error { color: red; }
+    
+    .btn:disabled {
+      background-color: #a0bcd0;
+      cursor: not-allowed;
+    }
+    
+    .btn i {
+      margin-right: 8px;
+    }
+    
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: -300px;
+      max-width: 300px;
+      transition: right 0.5s ease;
+      z-index: 1000;
+    }
+    
+    .toast {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      border-left: 4px solid var(--primary-color);
+    }
+    
+    .toast.success {
+      border-left-color: var(--success-color);
+    }
+    
+    .toast.error {
+      border-left-color: var(--error-color);
+    }
+    
+    .toast i {
+      margin-right: 10px;
+      font-size: 20px;
+    }
+    
+    .toast.success i {
+      color: var(--success-color);
+    }
+    
+    .toast.error i {
+      color: var(--error-color);
+    }
+    
+    .toast-message {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+      display: none;
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .loader.show {
+      display: inline-block;
+    }
+    
+    .btn-text {
+      display: inline-block;
+    }
   </style>
 </head>
-<body  oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+<body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
 
-<h2><i class="fas fa-map-marker-alt"></i> Add New Place <a href="dashboard.html" title="Go Back To DashBoard"> 🏠 </a></h2>
+<div class="container">
+  <div class="header">
+    <i class="fas fa-map-marker-alt"></i>
+    <h1>Add New Place</h1>
+    <a href="dashboard.html" class="home-link" title="Go Back To Dashboard">
+      <i class="fas fa-home"></i>
+    </a>
+  </div>
+  
+  <div class="card">
+    <form id="placeForm">
+      <div class="form-group">
+        <label for="placeid">Place ID</label>
+        <input type="number" id="placeid" readonly>
+      </div>
+      
+      <div class="form-group">
+        <label for="placeName">Place Name</label>
+        <input type="text" id="placeName" required placeholder="Enter place name">
+      </div>
+      
+      <div class="form-group">
+        <label for="placeDescription">Description</label>
+        <input type="text" id="placeDescription" required placeholder="Enter place description">
+      </div>
+      
+      <div class="form-group">
+        <label for="placeImageUrl">Image URL</label>
+        <input type="text" id="placeImageUrl" required placeholder="Enter image URL">
+      </div>
+      
+      <button type="submit" class="btn" id="submitBtn">
+        <span class="loader" id="btnLoader"></span>
+        <span class="btn-text"><i class="fas fa-plus-circle"></i> Add Place</span>
+      </button>
+    </form>
+  </div>
+</div>
 
-<form id="placeForm">
-  <label for="placeid">Place ID</label>
-  <input type="number" id="placeid" readonly>
-
-  <label for="placeName">Place Name</label>
-  <input type="text" id="placeName" required>
-
-  <label for="placeDescription">Description</label>
-  <input type="text" id="placeDescription" required>
-
-  <label for="placeImageUrl">Image URL</label>
-  <input type="text" id="placeImageUrl" required>
-
-  <button type="submit">Add Place</button>
-  <div id="message" class="message"></div>
-</form>
+<div class="toast-container" id="toastContainer"></div>
 
 <script>
   // Firebase Configuration
-       const firebaseConfig = {
-  apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
-  authDomain: "btckmr.firebaseapp.com",
-  projectId: "btckmr",
-  storageBucket: "btckmr.firebasestorage.app",
-  messagingSenderId: "1038756102997",
-  appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
-  measurementId: "G-E73FZRNCFM"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+    authDomain: "btckmr.firebaseapp.com",
+    projectId: "btckmr",
+    storageBucket: "btckmr.firebasestorage.app",
+    messagingSenderId: "1038756102997",
+    appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+    measurementId: "G-E73FZRNCFM"
+  };
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
   const placeForm = document.getElementById("placeForm");
-  const messageDiv = document.getElementById("message");
   const placeidInput = document.getElementById("placeid");
+  const submitBtn = document.getElementById("submitBtn");
+  const btnLoader = document.getElementById("btnLoader");
+  const toastContainer = document.getElementById("toastContainer");
+
+  // Show toast message
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.classList.add('toast');
+    toast.classList.add(type);
+    
+    const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
+    
+    toast.innerHTML = `
+      <i class="fas fa-${icon}"></i>
+      <span class="toast-message">${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Animate toast in
+    setTimeout(() => {
+      toastContainer.style.right = '20px';
+    }, 100);
+    
+    // Automatically remove toast after 5 seconds
+    setTimeout(() => {
+      toastContainer.style.right = '-300px';
+      
+      // Remove toast from DOM after animation completes
+      setTimeout(() => {
+        toastContainer.removeChild(toast);
+      }, 500);
+    }, 3000);
+  }
 
   // ✅ Auto-generate placeid
   async function generatePlaceId() {
@@ -113,7 +330,7 @@
       }
     } catch (err) {
       console.error("Error fetching placeid:", err);
-      messageDiv.innerHTML = `<p class="error">Failed to generate place ID.</p>`;
+      showToast("Failed to generate place ID", "error");
     }
   }
 
@@ -122,13 +339,19 @@
   placeForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // Disable button and show loader
+    submitBtn.disabled = true;
+    btnLoader.classList.add("show");
+
     const placeid = parseInt(placeidInput.value);
     const placeName = document.getElementById("placeName").value.trim();
     const placeDescription = document.getElementById("placeDescription").value.trim();
     const placeImageUrl = document.getElementById("placeImageUrl").value.trim();
 
     if (!placeName || !placeDescription || !placeImageUrl) {
-      messageDiv.innerHTML = `<p class="error">Please fill in all fields.</p>`;
+      showToast("Please fill in all fields", "error");
+      submitBtn.disabled = false;
+      btnLoader.classList.remove("show");
       return;
     }
 
@@ -141,12 +364,26 @@
 
     try {
       await db.collection("places").add(newPlace);
-      messageDiv.innerHTML = `<p class="success">Place added successfully!</p>`;
+      showToast("Place added successfully!");
+      
+      // Reset form
       placeForm.reset();
-      generatePlaceId(); // Get next placeid
+      
+      // Generate new placeid
+      generatePlaceId();
+      
+      // Redirect to dashboard after delay
+      setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 2000);
+      
     } catch (err) {
       console.error("Error adding place:", err);
-      messageDiv.innerHTML = `<p class="error">Failed to add place.</p>`;
+      showToast("Failed to add place", "error");
+      
+      // Re-enable button
+      submitBtn.disabled = false;
+      btnLoader.classList.remove("show");
     }
   });
 </script>
