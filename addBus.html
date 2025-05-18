@@ -6,6 +6,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
       --primary-green: #2ecc71;
@@ -17,7 +18,7 @@
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f0f8f1;
-      padding: 30px;
+      padding: 20px;
       margin: 0;
       color: #2c3e50;
     }
@@ -25,16 +26,16 @@
     h2 {
       text-align: center;
       color: var(--dark-green);
-      margin-bottom: 25px;
-      font-size: 28px;
+      margin-bottom: 20px;
+      font-size: 24px;
     }
     
     .home-link {
       text-decoration: none;
-      font-size: 24px;
+      font-size: 22px;
       transition: transform 0.2s;
       display: inline-block;
-      margin-left: 10px;
+      margin-left: 8px;
       color: var(--dark-green);
     }
     
@@ -44,18 +45,20 @@
     
     form {
       background: #ffffff;
+      width: 100%;
       max-width: 500px;
       margin: 0 auto;
-      padding: 30px;
+      padding: 20px;
       border-radius: 15px;
       box-shadow: 0 8px 20px rgba(46, 204, 113, 0.15);
       position: relative;
       border-top: 5px solid var(--primary-green);
+      box-sizing: border-box;
     }
     
     label {
       display: block;
-      margin-top: 18px;
+      margin-top: 16px;
       font-weight: 600;
       color: #34495e;
       font-size: 15px;
@@ -84,7 +87,7 @@
     }
     
     button {
-      margin-top: 30px;
+      margin-top: 25px;
       width: 100%;
       padding: 14px;
       background: var(--primary-green);
@@ -119,10 +122,11 @@
     
     .notification {
       position: fixed;
-      top: 80px;
+      top: 20px;
       right: -350px;
-      width: 300px;
-      padding: 20px;
+      width: 85%;
+      max-width: 300px;
+      padding: 15px;
       background: #fff;
       border-left: 5px solid var(--primary-green);
       border-radius: 8px;
@@ -131,6 +135,7 @@
       align-items: center;
       transition: right 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
       z-index: 1000;
+      box-sizing: border-box;
     }
     
     .notification.success {
@@ -144,6 +149,7 @@
     .notification-icon {
       margin-right: 15px;
       font-size: 24px;
+      flex-shrink: 0;
     }
     
     .notification.success .notification-icon {
@@ -180,6 +186,97 @@
       right: 15px;
       transform: translateY(-50%);
       color: #95a5a6;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      
+      h2 {
+        font-size: 22px;
+        margin-bottom: 15px;
+      }
+      
+      form {
+        padding: 15px;
+        border-radius: 12px;
+      }
+      
+      input {
+        padding: 10px;
+        font-size: 15px;
+      }
+      
+      label {
+        font-size: 14px;
+        margin-top: 14px;
+      }
+      
+      button {
+        padding: 12px;
+        font-size: 16px;
+        margin-top: 20px;
+      }
+      
+      .notification {
+        padding: 12px;
+        top: 15px;
+      }
+      
+      .notification-icon {
+        font-size: 20px;
+        margin-right: 10px;
+      }
+      
+      .notification-title {
+        font-size: 15px;
+      }
+      
+      .notification-message {
+        font-size: 13px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      h2 {
+        font-size: 20px;
+      }
+      
+      .home-link {
+        font-size: 20px;
+      }
+      
+      form {
+        padding: 15px 12px;
+        border-radius: 10px;
+      }
+      
+      label {
+        margin-top: 12px;
+      }
+      
+      .notification {
+        width: 90%;
+        max-width: none;
+        right: -100%;
+      }
+    }
+    
+    /* Touch-friendly improvements */
+    @media (hover: none) {
+      button:hover {
+        transform: none;
+      }
+      
+      input, button {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+      }
     }
   </style>
 </head>
