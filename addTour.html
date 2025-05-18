@@ -1,22 +1,24 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Tour Program</title>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     :root {
-      --primary-color: #3498db;
-      --primary-dark: #2980b9;
-      --secondary-color: #f1c40f;
-      --text-color: #34495e;
-      --bg-color: #ecf0f1;
+      --primary-color: #8e44ad;
+      --primary-light: #9b59b6;
+      --primary-dark: #6c3483;
+      --secondary-color: #e84393;
+      --text-color: #2c3e50;
+      --bg-color: #f5f0fa;
       --card-bg: #ffffff;
       --success-color: #2ecc71;
       --error-color: #e74c3c;
+      --input-border: #d6c5e4;
     }
     
     * {
@@ -28,7 +30,7 @@
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: var(--bg-color);
-      padding: 30px;
+      padding: 20px;
       color: var(--text-color);
       min-height: 100vh;
     }
@@ -37,13 +39,14 @@
       max-width: 600px;
       margin: 0 auto;
       position: relative;
+      width: 100%;
     }
     
     header {
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
       position: relative;
     }
     
@@ -77,14 +80,15 @@
     
     .card {
       background: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(142, 68, 173, 0.12);
       padding: 30px;
       transition: all 0.3s ease;
+      border-top: 4px solid var(--primary-color);
     }
     
     .card:hover {
-      box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+      box-shadow: 0 12px 25px rgba(142, 68, 173, 0.2);
       transform: translateY(-5px);
     }
     
@@ -96,33 +100,35 @@
       display: block;
       margin-bottom: 8px;
       font-weight: 600;
-      color: var(--text-color);
+      color: var(--primary-dark);
     }
     
     select, input[type="datetime-local"], input[type="number"], input[type="text"] {
       width: 100%;
-      padding: 12px 15px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
+      padding: 14px 15px;
+      border-radius: 10px;
+      border: 1px solid var(--input-border);
       font-size: 1rem;
       transition: all 0.3s ease;
+      background-color: #fbf9fe;
     }
     
     select:focus, input:focus {
       outline: none;
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+      box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.15);
+      background-color: #fff;
     }
     
     .btn {
       display: inline-block;
       width: 100%;
-      padding: 14px;
+      padding: 16px;
       background: var(--primary-color);
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 1rem;
+      border-radius: 10px;
+      font-size: 1.1rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -133,12 +139,14 @@
     .btn:hover {
       background: var(--primary-dark);
       transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(142, 68, 173, 0.3);
     }
     
     .btn:disabled {
-      background: #95a5a6;
+      background: #b5a8c3;
       cursor: not-allowed;
       transform: none;
+      box-shadow: none;
     }
     
     .btn .spinner {
@@ -163,9 +171,10 @@
       position: fixed;
       top: 80px;
       right: -350px;
-      width: 300px;
-      padding: 15px 20px;
-      border-radius: 8px;
+      width: 90%;
+      max-width: 320px;
+      padding: 16px 20px;
+      border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       color: white;
       transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
@@ -198,11 +207,59 @@
       
       .card {
         padding: 20px;
+        border-radius: 12px;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .notification {
+        max-width: 85%;
+        padding: 14px 16px;
+      }
+      
+      select, input[type="datetime-local"], input[type="number"], input[type="text"] {
+        padding: 12px;
+        font-size: 0.95rem;
+      }
+      
+      .btn {
+        padding: 14px;
+        font-size: 1rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .card {
+        padding: 16px;
+      }
+      
+      h2 {
+        font-size: 1.3rem;
+      }
+      
+      .form-group {
+        margin-bottom: 16px;
+      }
+      
+      label {
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+      }
+      
+      .notification {
+        max-width: 90%;
+        font-size: 0.9rem;
       }
     }
   </style>
 </head>
-<body  oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+<body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
 
 <div class="container">
   <header>
@@ -301,7 +358,7 @@
         const data = doc.data();
         const option = document.createElement('option');
         option.value = doc.id;
-        option.textContent = data.placeid + ". " + data.placeName;
+        option.textContent = data.placeid + ". " + data.placeName ;
         placeSelect.appendChild(option);
       });
     } catch (error) {
