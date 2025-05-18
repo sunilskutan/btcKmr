@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,97 +8,266 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      padding: 30px;
+    :root {
+      --primary-color: #3498db;
+      --primary-dark: #2980b9;
+      --secondary-color: #f1c40f;
+      --text-color: #34495e;
+      --bg-color: #ecf0f1;
+      --card-bg: #ffffff;
+      --success-color: #2ecc71;
+      --error-color: #e74c3c;
     }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-color);
+      padding: 30px;
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+    
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    
+    .home-link {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      text-decoration: none;
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      transition: all 0.3s ease;
+    }
+    
+    .home-link:hover {
+      color: var(--primary-dark);
+      transform: translateY(-50%) scale(1.1);
+    }
+    
     h2 {
       text-align: center;
-      color: #34495e;
+      color: var(--text-color);
+      font-size: 1.8rem;
+      margin-bottom: 10px;
     }
-    form {
-      background: white;
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 20px;
+    
+    h2 i {
+      color: var(--primary-color);
+      margin-right: 10px;
+    }
+    
+    .card {
+      background: var(--card-bg);
       border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      padding: 30px;
+      transition: all 0.3s ease;
     }
+    
+    .card:hover {
+      box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+      transform: translateY(-5px);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
     label {
       display: block;
-      margin-top: 15px;
-      font-weight: bold;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-color);
     }
+    
     select, input[type="datetime-local"], input[type="number"], input[type="text"] {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+      transition: all 0.3s ease;
     }
-    button {
-      margin-top: 20px;
+    
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+    
+    .btn {
+      display: inline-block;
       width: 100%;
-      padding: 12px;
-      background: #2980b9;
+      padding: 14px;
+      background: var(--primary-color);
       color: white;
       border: none;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
-    button:hover {
-      background: #2471a3;
+    
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
     }
-    .success {
-      text-align: center;
-      color: green;
-      margin-top: 15px;
+    
+    .btn:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+      transform: none;
     }
-    .error {
-      text-align: center;
-      color: red;
-      margin-top: 15px;
+    
+    .btn .spinner {
+      display: none;
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: translateY(-50%) rotate(360deg); }
+    }
+    
+    .notification {
+      position: fixed;
+      top: 80px;
+      right: -350px;
+      width: 300px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      color: white;
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+    }
+    
+    .notification.success {
+      background: var(--success-color);
+    }
+    
+    .notification.error {
+      background: var(--error-color);
+    }
+    
+    .notification i {
+      margin-right: 10px;
+      font-size: 1.2rem;
+    }
+    
+    .notification.show {
+      right: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      
+      .card {
+        padding: 20px;
+      }
     }
   </style>
 </head>
 <body  oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
 
-<h2><i class="fas fa-calendar-plus"></i> Add Tour Program <a href="dashboard.html" title="Go Back To DashBoard"> 🏠 </a></h2>
+<div class="container">
+  <header>
+    <h2><i class="fas fa-calendar-plus"></i> Add Tour Program</h2>
+    <a href="dashboard.html" class="home-link" title="Go Back To Dashboard">
+      <i class="fas fa-home"></i>
+    </a>
+  </header>
 
-<form id="tourForm">
-  <label for="place">Select Place</label>
-  <select id="place" required></select>
+  <div class="card">
+    <form id="tourForm">
+      <div class="form-group">
+        <label for="tourid">Tour ID</label>
+        <input type="number" id="tourid" readonly>
+      </div>
 
-  <label for="bus">Select Bus</label>
-  <select id="bus" required></select>
+      <div class="form-group">
+        <label for="place">Select Place</label>
+        <select id="place" required></select>
+      </div>
 
-  <label for="tourDate">Tour Date & Time</label>
-  <input type="datetime-local" id="tourDate" required>
+      <div class="form-group">
+        <label for="bus">Select Bus</label>
+        <select id="bus" required></select>
+      </div>
 
-  <label for="fare">Tour Fare (₹)</label>
-  <input type="number" id="fare" min="0" required>
+      <div class="form-group">
+        <label for="tourDate">Tour Date & Time</label>
+        <input type="datetime-local" id="tourDate" required>
+      </div>
 
-  <label for="details">Tour Details  </label>
-  <input type="text" id="details" placeholder="Enter Full Tour Details here" required >
+      <div class="form-group">
+        <label for="fare">Tour Fare (₹)</label>
+        <input type="number" id="fare" min="0" required>
+      </div>
 
-  <button type="submit">Add Tour Program</button>
+      <div class="form-group">
+        <label for="details">Tour Details</label>
+        <input type="text" id="details" placeholder="Enter Full Tour Details here" required>
+      </div>
 
-  <div id="msg"></div>
-</form>
+      <button type="submit" class="btn" id="submitBtn">
+        Add Tour Program
+        <span class="spinner"></span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="notification" id="notification">
+  <i class="fas fa-check-circle"></i>
+  <span id="notificationText"></span>
+</div>
 
 <script>
-   // Firebase Configuration
-       const firebaseConfig = {
-  apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
-  authDomain: "btckmr.firebaseapp.com",
-  projectId: "btckmr",
-  storageBucket: "btckmr.firebasestorage.app",
-  messagingSenderId: "1038756102997",
-  appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
-  measurementId: "G-E73FZRNCFM"
-};
+  // Firebase Configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+    authDomain: "btckmr.firebaseapp.com",
+    projectId: "btckmr",
+    storageBucket: "btckmr.firebasestorage.app",
+    messagingSenderId: "1038756102997",
+    appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+    measurementId: "G-E73FZRNCFM"
+  };
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
@@ -105,89 +275,148 @@
   const placeSelect = document.getElementById('place');
   const busSelect = document.getElementById('bus');
   const form = document.getElementById('tourForm');
-  const msgDiv = document.getElementById('msg');
+  const submitBtn = document.getElementById('submitBtn');
+  const tourId = document.getElementById("tourid");
+  const notification = document.getElementById('notification');
+  const notificationText = document.getElementById('notificationText');
+  const spinner = document.querySelector('.spinner');
+
+  // Show notification function
+  function showNotification(message, isSuccess = true) {
+    notification.className = isSuccess ? 'notification success' : 'notification error';
+    notification.querySelector('i').className = isSuccess ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+    notificationText.textContent = message;
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+      notification.classList.remove('show');
+    }, 5000);
+  }
 
   // Load places
   async function loadPlaces() {
-    const snapshot = await db.collection("places").get();
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const option = document.createElement('option');
-      option.value = doc.id;
-      option.textContent = data.placeid+". "+data.placeName + " - " + data.placeDescription;
-      placeSelect.appendChild(option);
-    });
+    try {
+      const snapshot = await db.collection("places").get();
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const option = document.createElement('option');
+        option.value = doc.id;
+        option.textContent = data.placeid + ". " + data.placeName + " - " + data.placeDescription;
+        placeSelect.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error loading places:", error);
+      showNotification("Failed to load places data", false);
+    }
   }
 
   // Load buses
   async function loadBuses() {
-    const snapshot = await db.collection("buses").get();
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const option = document.createElement('option');
-      option.value = doc.id;
-      option.textContent = `${data.busid}. ${data.busType} - ${data.busNumber} (${data.busTotalSeat} seats)`;
-      busSelect.appendChild(option);
-    });
+    try {
+      const snapshot = await db.collection("buses").get();
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const option = document.createElement('option');
+        option.value = doc.id;
+        option.textContent = `${data.busid}. ${data.busType} - ${data.busNumber} (${data.busTotalSeat} seats)`;
+        busSelect.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error loading buses:", error);
+      showNotification("Failed to load buses data", false);
+    }
   }
 
+  // Initialize the form
+  async function initForm() {
+    try {
+      // Get the last tourid
+      const lastTourSnapshot = await db.collection("tours")
+        .orderBy("tourid", "desc")
+        .limit(1)
+        .get();
+
+      let newTourid = 1; // Default first tour ID
+      if (!lastTourSnapshot.empty) {
+        const lastTour = lastTourSnapshot.docs[0].data();
+        newTourid = parseInt(lastTour.tourid) + 1;
+      }
+      tourId.value = newTourid;
+    } catch (error) {
+      console.error("Error initializing form:", error);
+    }
+  }
+
+  // Load data
   loadPlaces();
   loadBuses();
+  initForm();
 
+  // Form submission
   form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    
+    // Disable button and show spinner
+    submitBtn.disabled = true;
+    spinner.style.display = 'block';
 
-const placeSelect = document.getElementById('place');
-const fullPlaceValue = placeSelect.options[placeSelect.selectedIndex].text;
-const tourPlaceid = parseInt(fullPlaceValue.split('.')[0].trim());
+    const placeSelect = document.getElementById('place');
+    const fullPlaceValue = placeSelect.options[placeSelect.selectedIndex].text;
+    const tourPlaceid = parseInt(fullPlaceValue.split('.')[0].trim());
 
-const busSelect = document.getElementById('bus');
-const fullBusValue = busSelect.options[busSelect.selectedIndex].text;
-const tourBusid = parseInt(fullBusValue.split('.')[0].trim());
+    const busSelect = document.getElementById('bus');
+    const fullBusValue = busSelect.options[busSelect.selectedIndex].text;
+    const tourBusid = parseInt(fullBusValue.split('.')[0].trim());
 
-  const tourDateInput = document.getElementById("tourDate").value;
-  const tourFare = parseFloat(document.getElementById("fare").value);
+    const tourDateInput = document.getElementById("tourDate").value;
+    const tourFare = parseFloat(document.getElementById("fare").value);
+    const tourDetails = document.getElementById("details").value;
 
-  const tourDetails = document.getElementById("details").value;
-
- if (!tourPlaceid || !tourBusid || !tourDateInput || isNaN(tourFare)) {
-    msgDiv.innerHTML = '<div class="error">Please fill all fields correctly.</div>';
-    return;
-  }
-  const tourDate = new Date(tourDateInput);
-
-  try {
-    // Get the last tourid
-    const lastTourSnapshot = await db.collection("tours")
-      .orderBy("tourid", "desc")
-      .limit(1)
-      .get();
-
-    let newTourid = 1; // Default first tour ID
-    if (!lastTourSnapshot.empty) {
-      const lastTour = lastTourSnapshot.docs[0].data();
-      newTourid = lastTour.tourid + 1;
+    if (!tourPlaceid || !tourBusid || !tourDateInput || isNaN(tourFare)) {
+      showNotification("Please fill all fields correctly.", false);
+      submitBtn.disabled = false;
+      spinner.style.display = 'none';
+      return;
     }
-//alert("busid-"+tourBusid+"  placeid-"+ tourPlaceid);
-    const newTour = {
-      tourPlaceid: tourPlaceid,
-      tourBusid: tourBusid,
-      tourDate: firebase.firestore.Timestamp.fromDate(tourDate),
-      tourFare: tourFare,
-      tourid: newTourid,
-      tourDetails: tourDetails
-    };
+    
+    const tourDate = new Date(tourDateInput);
 
-    await db.collection("tours").add(newTour);
-    msgDiv.innerHTML = '<div class="success">Tour program added successfully!</div>';
-    form.reset();
-  } catch (err) {
-    console.error(err);
-    msgDiv.innerHTML = '<div class="error">Error adding tour. Try again.</div>';
-  }
-});
+    try {
+      // Get the last tourid
+      const lastTourSnapshot = await db.collection("tours")
+        .orderBy("tourid", "desc")
+        .limit(1)
+        .get();
 
+      let newTourid = 1; // Default first tour ID
+      if (!lastTourSnapshot.empty) {
+        const lastTour = lastTourSnapshot.docs[0].data();
+        newTourid = parseInt(lastTour.tourid) + 1;
+      }
+
+      const newTour = {
+        tourPlaceid: tourPlaceid,
+        tourBusid: tourBusid,
+        tourDate: firebase.firestore.Timestamp.fromDate(tourDate),
+        tourFare: tourFare,
+        tourid: newTourid,
+        tourDetails: tourDetails
+      };
+
+      await db.collection("tours").add(newTour);
+      showNotification("Tour program added successfully!");
+      
+      setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 2000);
+      
+    } catch (err) {
+      console.error(err);
+      showNotification("Error adding tour. Try again.", false);
+      submitBtn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  });
 </script>
-
 </body>
 </html>
