@@ -441,6 +441,30 @@
                 </div>
             </div>
 
+
+	<div class="card" id="staff" style="display: none;">
+                <h2><i class="fas fa-bus"></i> Staff Module</h2>
+                <div class="quick-actions">
+                    <div class="action-card" onclick="redirectToTours()">
+                        <i class="fas fa-bus-alt"></i>
+                        <h3>Upcoming Tours</h3>
+                    </div>
+                    <div class="action-card" onclick="window.location='addUser.html';">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>Create A User</h3>
+                    </div>
+                    <div class="action-card" onclick="window.location='addTour.html';">
+                        <i class="fas fa-calendar-plus"></i>
+                        <h3>Create A Tour</h3>
+                    </div>
+                    <div class="action-card" onclick="">
+                        <i class="fas fa-road"></i>
+                        <h3>View Bookings</h3>
+                    </div>
+                </div>
+            </div>
+
+
             <div class="card" id="user">
                 <h2><i class="fas fa-user"></i> User Management</h2>
                 <div class="quick-actions">
@@ -490,11 +514,12 @@ onmouseout="this.style.backgroundColor='#008000'">
   Utility #2
 </button>
 
-<button class="action-btn"  onclick="alert('To be added');"
+<button class="action-btn"  onclick="const code = prompt('Enter admin code to proceed:');if (code === 'niranjana') {window.location.href = 'deleteOldBookings.html';} else if (code !== null) { alert('Incorrect code. Access denied.');}"
+
   style="background-color:#00cc00; "
   onmouseover="this.style.backgroundColor=' #003300'"
   onmouseout="this.style.backgroundColor='#00cc00'">
-  Utility #3
+  Delete Old Bookings
 </button>
 
 <button class="action-btn" onclick="alert('To be added');"
@@ -520,6 +545,7 @@ onmouseout="this.style.backgroundColor='#008000'">
         let place = document.getElementById("place");
         let bus = document.getElementById("bus");
         let user = document.getElementById("user");
+        let staff = document.getElementById("staff");
 
         let isLogin = sessionStorage.getItem('isLogin');
 	let userRole = sessionStorage.getItem('userRole');
@@ -530,6 +556,14 @@ onmouseout="this.style.backgroundColor='#008000'">
             bus.style.display = "block";
             user.style.display = "block";
             sidebar.style.display = "none"; //changed to none
+	}
+	else if (userRole === "Staff"){
+	    tour.style.display = "none";
+            place.style.display = "none";
+            bus.style.display = "none";
+            user.style.display = "none";
+            sidebar.style.display = "none"; 
+	    staff.style.display = "block";
 	}
 	else {
 	    tour.style.display = "none";
