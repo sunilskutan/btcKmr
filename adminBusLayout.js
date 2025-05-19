@@ -1,86 +1,136 @@
+// Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+  authDomain: "btckmr.firebaseapp.com",
+  projectId: "btckmr",
+  storageBucket: "btckmr.firebasestorage.app",
+  messagingSenderId: "1038756102997",
+  appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+  measurementId: "G-E73FZRNCFM"
+};
 
-    // Firebase Configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
-      authDomain: "btckmr.firebaseapp.com",
-      projectId: "btckmr",
-      storageBucket: "btckmr.firebasestorage.app",
-      messagingSenderId: "1038756102997",
-      appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
-      measurementId: "G-E73FZRNCFM"
-    };
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+// Global variables
+let tourData = null;
+let bookings = [];
+let bookingsMap = {};
+let totalSeats = 0;
+
+// Parse URL parameters
+function getUrlParameter(name) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
+}
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', async function() {
+  const tourId = getUrlParameter('tourId');
+  
+  if (!tourId) {
+    showStatusMessage('Tour ID is missing from URL. Please provide a valid tour ID.', 'error');
+    document.getElementById('busLayout').style.display = 'none';
+    return;
+  }
+  
+  document.getElementById('loader').classList.remove('hide');
+  
+  try {
+    // Fetch tour details
+    await fetchTourDetails(parseInt(tourId));
     
-    // Global variables
-    let tourData = null;
-    let bookings = [];
-    let bookingsMap = {};
-    let totalSeats = 0;
+    // Fetch existing bookings
+    await fetchBookings(parseInt(tourId));
     
-    // Parse URL parameters
-    function getUrlParameter(name) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(name);
+    // Update statistics
+    updateBookingStats();
+    
+    document.getElementById('loader').classList.add('hide');
+  } catch (error) {
+    console.error("Error initializing page:", error);
+    showStatusMessage('Error loading tour data. Please try again later.', 'error');
+    document.getElementById('loader').classList.add('hide');
+  }
+});
+
+// Fetch tour details from Firestore
+async function fetchTourDetails(tourId) {
+  try {
+    const toursSnapshot = await db.collection('tours')
+      .where('tourid', '==', tourId)
+      .limit(1)
+      .get();
+    
+    if (toursSnapshot.empty) {
+      showStatusMessage('Tour not found. Please check the tour ID.', 'error');
+      document.getElementById('busLayout').style.display = 'none';
+      return;
     }
     
-    // Initialize the page
-    document.addEventListener('DOMContentLoaded', async function() {
-      const tourId = getUrlParameter('tourId');
-      
-      if (!tourId) {
-        showStatusMessage('Tour ID is missing from URL. Please provide a valid tour ID.', 'error');
-        document.getElementById('busLayout').style.display = 'none';
-        return;
-      }
-      
-      document.getElementById('loader').classList.remove('hide');
-      
-      try {
-        // Fetch tour details
-        await fetchTourDetails(parseInt(tourId));
-        
-        // Fetch existing bookings
-        await fetchBookings(parseInt(tourId));
-        
-        // Update statistics
-        updateBookingStats();
-        
-        document.getElementById('loader').classList.add('hide');
-      } catch (error) {
-        console.error("Error initializing page:", error);
-        showStatusMessage('Error loading tour data. Please try again later.', 'error');
-        document.getElementById('loader').classList.add('hide');
-      }
-    });
+    tourData = toursSnapshot.docs[0].data();
+    displayTourDetails(tourData);
+  } catch (error) {
+    console.error("Error fetching tour details:", error);
+    showStatusMessage('Error loading tour details. Please try again later.', 'error');
+    throw error;
+  }
+}
+
+// Handle specific bus type UI changes based on busid
+function displayBusLayout(busid) {
+  // Hide all bus layouts first
+  document.getElementById("aclowfloorbus").style.display = "none";
+  document.getElementById("superfastbus").style.display = "none";
+  document.getElementById("superdeluxebus").style.display = "none";
+  
+  // Show the appropriate bus layout
+  switch (busid) {
+    case 1: document.getElementById("aclowfloorbus").style.display = "block"; break;
+    case 2: document.getElementById("superfastbus").style.display = "block"; break;
+    case 4: document.getElementById("superdeluxebus").style.display = "block"; break;
+    default: document.getElementById("superfastbus").style.display = "block"; break;
+  }
+}
+
+
+
+
+// Update booking status in the bus layout
+function updateSeatStatusInBusLayout() {
+  // Reset all seats to their default state first
+  const allSeats = document.querySelectorAll('.seat-number');
+  allSeats.forEach(seat => {
+    seat.classList.remove('booked');
+    seat.style.backgroundColor = '';
+    seat.style.color = '';
+  });
+  
+  // Apply booking status to seats
+  for (const seatNo in bookingsMap) {
+    const booking = bookingsMap[seatNo];
+    const seatElement = document.getElementById('span' + seatNo);
     
-    // Fetch tour details from Firestore
-    async function fetchTourDetails(tourId) {
-      try {
-        const toursSnapshot = await db.collection('tours')
-          .where('tourid', '==', tourId)
-          .limit(1)
-          .get();
-        
-        if (toursSnapshot.empty) {
-          showStatusMessage('Tour not found. Please check the tour ID.', 'error');
-          document.getElementById('busLayout').style.display = 'none';
-          return;
-        }
-        
-        tourData = toursSnapshot.docs[0].data();
-        displayTourDetails(tourData);
-      } catch (error) {
-        console.error("Error fetching tour details:", error);
-        showStatusMessage('Error loading tour details. Please try again later.', 'error');
-        throw error;
+    if (seatElement) {
+      seatElement.classList.add('booked');
+      
+      // Apply specific styling based on booking status
+      if (booking.bookingCustomerStatus === 'remitted') {
+        seatElement.style.backgroundColor = '#003399';
+        seatElement.style.color = 'white';
+      } else if (booking.bookingCustomerStatus === 'confirmed') {
+        seatElement.style.backgroundColor = '#e74c3c';
+        seatElement.style.color = 'white';
+      } else if (booking.bookingCustomerStatus === 'cancelled') {
+        seatElement.style.backgroundColor = '#dc3545';
+        seatElement.style.color = 'white';
       }
     }
-    
+  }
+}
 
-
+// Modify displayTourDetails to show bus layout and update seat status
 async function displayTourDetails(tour) {
   const tourDetailsDiv = document.createElement('div');
   tourDetailsDiv.className = 'tour-details';
@@ -111,41 +161,16 @@ async function displayTourDetails(tour) {
       const TotalSeats = busDoc.data().busTotalSeat;
       totalSeats = parseInt(TotalSeats);
     } else {
-      alert("No matching bus found.");
+      showStatusMessage("No matching bus found.", "error");
+      totalSeats = 51; // Default fallback if no bus data is found
     }
   } catch (error) {
     console.error("Error getting bus data:", error);
+    totalSeats = 51; // Default fallback if there's an error
   }
 
-  
-
-
-
-
-
-
-
-
-
-
-
-// Handle specific bus type UI changes
-  switch (busid) {
-    case 1: document.getElementById("aclowfloorbus").style.display = "block"; break;
-    case 2: document.getElementById("superfastbus").style.display = "block"; break;
-    case 4: document.getElementById("superdeluxebus").style.display = "block"; break;
-    default: document.getElementById("superfastbus").style.display = "block"; break;
-  }
-
-
-
-
-
-
-
-
-
-
+  // Show the appropriate bus layout
+  displayBusLayout(busid);
 
   // Show tour details
   tourDetailsDiv.innerHTML = `
@@ -179,8 +204,7 @@ async function displayTourDetails(tour) {
   container.insertBefore(tourDetailsDiv, document.getElementById('statusMessage').nextSibling);
 }
 
-
-// Fetch existing bookings for this tour
+// Fetch bookings function to update seat status after fetching bookings
 async function fetchBookings(tourId) {
   try {
     const bookingsSnapshot = await db.collection('bookings')
@@ -199,22 +223,18 @@ async function fetchBookings(tourId) {
         booking.id = doc.id;
         bookings.push(booking);
         bookingsMap[seatNo] = booking;
-        
-        // Mark the seat with appropriate status in UI
-        const seatElement = document.getElementById('span' + seatNo);
-        if (seatElement) {
-          seatElement.classList.add('booked');
-          
-          // Apply specific styling based on booking status
-          if (booking.bookingCustomerStatus === 'remitted') {
-            seatElement.style.backgroundColor = '#003399';
-            seatElement.style.color = 'white';
-          } else if (booking.bookingCustomerStatus === 'cancelled') {
-            // Optional: You could style cancelled seats differently
-            // seatElement.style.backgroundColor = '#f8d7da';
-          }
-        }
+
+
+           
+ markSeatAsBooked(seatNo);
+
+
+
+
       });
+      
+      // Update seat status in the bus layout
+      updateSeatStatusInBusLayout();
       
       // Display bookings in the table
       displayBookingsInTable();
@@ -224,6 +244,22 @@ async function fetchBookings(tourId) {
     showStatusMessage('Error loading bookings. Please try again later.', 'error');
   }
 }
+
+
+
+    // Mark a seat as booked in all bus layouts
+    function markSeatAsBooked(seatNo) {
+      // Find all elements with id "spanX" across all bus layouts
+      const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus"];
+      
+      busTypes.forEach(busType => {
+        const seatElement = document.querySelector(`#${busType} #span${seatNo}`);
+        if (seatElement) {
+          seatElement.classList.add('booked');
+        }
+      });
+    }
+    
 
 
 
@@ -309,11 +345,11 @@ function viewBookingDetails(element) {
         <button class="action-btn remittance" onclick="enterRemittance('${booking.id}', ${seatNumber})">Enter Remittance</button>
         <button class="action-btn cancel" onclick="cancelBooking('${booking.id}', ${seatNumber})">Cancel Booking</button>`;
     } else if (booking.bookingCustomerStatus === 'remitted') {
-      // For remitted bookings, show a disabled indicator or a print receipt button
+      // For remitted bookings, show a print receipt button
       detailsHTML += `
         <button class="action-btn print" onclick="printReceipt('${booking.id}', ${seatNumber})">Print Receipt</button>`;
     } else if (booking.bookingCustomerStatus === 'cancelled') {
-      // For cancelled bookings, maybe show a restore button or other options
+      // For cancelled bookings, show a restore button
       detailsHTML += `
         <button class="action-btn" onclick="restoreBooking('${booking.id}', ${seatNumber})">Restore Booking</button>`;
     }
@@ -330,11 +366,7 @@ function viewBookingDetails(element) {
   }
 }
 
-
-
-
-
-// Function to enter remittance amount for a booking
+// Enter remittance function to update seat status after remittance
 async function enterRemittance(bookingId, seatNumber) {
   // Prompt for remittance amount
   const remittanceAmount = prompt(`Enter remittance amount for seat ${seatNumber}:`, "");
@@ -362,13 +394,8 @@ async function enterRemittance(bookingId, seatNumber) {
     bookingsMap[seatNumber].bookingAmount = amount;
     bookingsMap[seatNumber].bookingCustomerStatus = 'remitted';
     
-    // Update the seat appearance in UI
-    const seatElement = document.getElementById('span' + seatNumber);
-    if (seatElement) {
-      seatElement.classList.add('booked');
-      seatElement.style.backgroundColor = '#003399';
-      seatElement.style.color = 'white';
-    }
+    // Update seat status in the bus layout
+    updateSeatStatusInBusLayout();
     
     // Close the modal and show success message
     closeModal('bookingDetailsModal');
@@ -377,44 +404,461 @@ async function enterRemittance(bookingId, seatNumber) {
     // Refresh bookings table to show updated status
     displayBookingsInTable();
     
+    // Update statistics
+    updateBookingStats();
+    
   } catch (error) {
     console.error("Error recording remittance:", error);
     showStatusMessage('Error recording remittance. Please try again later.', 'error');
   }
 }
 
+// Cancel booking function to update seat status after cancellation
+async function cancelBooking(bookingId, seatNumber) {
+  if (confirm(`Are you sure you want to cancel the booking for seat ${seatNumber}?`)) {
+    try {
+      // Update booking status in Firebase
+      await db.collection('bookings').doc(bookingId).delete();
+      
+
+      
+      // Update UI
+      showStatusMessage(`Booking for seat ${seatNumber} has been cancelled.`, 'success');
+      closeModal('bookingDetailsModal');
+      
+      // Update seat status in the bus layout
+      updateSeatStatusInBusLayout();
+      
+      // Refresh bookings table
+      displayBookingsInTable();
+      
+      // Update statistics
+      updateBookingStats();
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      showStatusMessage('Error cancelling booking. Please try again later.', 'error');
+    }
+  }
+}
+
+// Restore a previously cancelled booking
+async function restoreBooking(bookingId, seatNumber) {
+  if (confirm(`Are you sure you want to restore the booking for seat ${seatNumber}?`)) {
+    try {
+      // Update booking status in Firebase
+      await db.collection('bookings').doc(bookingId).update({
+        bookingCustomerStatus: 'confirmed'
+      });
+      
+      // Update local data
+      bookingsMap[seatNumber].bookingCustomerStatus = 'confirmed';
+      
+      // Update UI
+      showStatusMessage(`Booking for seat ${seatNumber} has been restored.`, 'success');
+      closeModal('bookingDetailsModal');
+      
+      // Update seat status in the bus layout
+      updateSeatStatusInBusLayout();
+      
+      // Refresh bookings table
+      displayBookingsInTable();
+      
+      // Update statistics
+      updateBookingStats();
+    } catch (error) {
+      console.error("Error restoring booking:", error);
+      showStatusMessage('Error restoring booking. Please try again later.', 'error');
+    }
+  }
+}
 
 
 
-    // Cancel a booking
-    async function cancelBooking(bookingId, seatNumber) {
-      if (confirm(`Are you sure you want to cancel the booking for seat ${seatNumber}?`)) {
-        try {
-          // Update booking status in Firebase
-	await db.collection('bookings').doc(bookingId).delete();
-       /*   await db.collection('bookings').doc(bookingId).update({
-            bookingCustomerStatus: 'cancelled'
-          });
-      */    
-          // Update local data
-          bookingsMap[seatNumber].bookingCustomerStatus = 'cancelled';
-          
-          // Update UI
-          showStatusMessage(`Booking for seat ${seatNumber} has been cancelled.`, 'success');
-          closeModal('bookingDetailsModal');
-          
-          // Refresh bookings table
-          displayBookingsInTable();
-          
-          // Update statistics
-          updateBookingStats();
-        } catch (error) {
-          console.error("Error cancelling booking:", error);
-          showStatusMessage('Error cancelling booking. Please try again later.', 'error');
-        }
+// View booking details from table
+function viewBookingDetailsFromTable(seatNumber) {
+  const seatElement = document.getElementById(`span${seatNumber}`);
+  if (seatElement) {
+    viewBookingDetails(seatElement);
+  } else {
+    // If element not found, create a temporary element with the seat number
+    const tempElement = document.createElement('span');
+    tempElement.innerText = seatNumber;
+    viewBookingDetails(tempElement);
+  }
+}
+
+// Update booking statistics
+function updateBookingStats() {
+  const bookedSeats = bookings.filter(b => b.bookingCustomerStatus === 'confirmed').length;
+  const remittedSeats = bookings.filter(b => b.bookingCustomerStatus === 'remitted').length;
+  const cancelledSeats = bookings.filter(b => b.bookingCustomerStatus === 'cancelled').length;
+  const availableSeats = totalSeats - (bookedSeats + remittedSeats);
+  
+  let totalRevenue = 0;
+  let remittedRevenue = 0;
+  
+  if (tourData) {
+    totalRevenue = bookedSeats * tourData.tourFare;
+    
+    // Calculate actual remitted amount
+    bookings.forEach(booking => {
+      if (booking.bookingCustomerStatus === 'remitted' && booking.bookingAmount) {
+        remittedRevenue += parseFloat(booking.bookingAmount);
       }
+    });
+  }
+  
+  document.getElementById('totalSeats').innerText = totalSeats;
+  document.getElementById('bookedSeats').innerText = bookedSeats;
+  document.getElementById('availableSeats').innerText = availableSeats;
+  document.getElementById('cancelledSeats').innerText = cancelledSeats;
+  document.getElementById('occupancyRate').innerText = `${Math.round(((bookedSeats + remittedSeats) / totalSeats) * 100)}%`;
+  document.getElementById('totalRevenue').innerText = `₹${totalRevenue + remittedRevenue}`;
+}
+
+// Print booking details
+function printBookingDetails() {
+  const printSection = document.getElementById('printSection');
+  printSection.innerHTML = '';
+  
+  // Clone tour details
+  const tourDetailsClone = document.getElementById('tourDetails').cloneNode(true);
+  
+  // Create bookings table for printing
+  const bookingsTable = document.createElement('div');
+  bookingsTable.className = 'booking-details';
+  
+  // Get current date and time
+  const now = new Date();
+  const formattedDate = now.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  
+  // Get active bookings only (confirmed and remitted)
+  const activeBookings = bookings.filter(b => 
+    b.bookingCustomerStatus === 'confirmed' || 
+    b.bookingCustomerStatus === 'remitted'
+  );
+  
+  bookingsTable.innerHTML = `
+    <h3>Booking Report</h3>
+    <p>Generated on: ${formattedDate}</p>
+    <p>Total Bookings: ${activeBookings.length}</p>
+    <table class="bookings-table" border="1" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Seat No</th>
+          <th>Passenger Name</th>
+          <th>Phone Number</th>
+          <th>Email</th>
+          <th>Aadhaar Number</th>
+          <th>Status</th>
+          <th>Booking Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${activeBookings.map(booking => {
+          // Format booking date
+          let bookingDate = booking.bookingDate;
+          if (bookingDate && bookingDate.toDate) {
+            bookingDate = bookingDate.toDate().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            });
+          }
+          
+          // Format status
+          let status = booking.bookingCustomerStatus;
+          if (status === 'remitted') {
+            status = `Remitted (₹${booking.bookingAmount || 0})`;
+          }
+          
+          return `
+            <tr>
+              <td>${booking.bookingCustomerSeatNo}</td>
+              <td>${booking.bookingCustomerName}</td>
+              <td>${booking.bookingCustomerPhoneNo}</td>
+              <td>${booking.bookingCustomerEmail}</td>
+              <td>${booking.bookingCustomerAadhaarNo}</td>
+              <td>${status}</td>
+              <td>${bookingDate}</td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+    
+    <div style="margin-top: 30px;">
+      <h4>Booking Summary</h4>
+      <table border="1" cellspacing="0" style="width: 100%;">
+        <tr>
+          <th>Total Seats</th>
+          <th>Booked Seats</th>
+          <th>Available Seats</th>
+          <th>Occupancy Rate</th>
+          <th>Total Revenue</th>
+        </tr>
+        <tr>
+          <td>${totalSeats}</td>
+          <td>${activeBookings.length}</td>
+          <td>${totalSeats - activeBookings.length}</td>
+          <td>${Math.round((activeBookings.length / totalSeats) * 100)}%</td>
+          <td>₹${activeBookings.reduce((total, booking) => {
+            if (booking.bookingCustomerStatus === 'remitted' && booking.bookingAmount) {
+              return total + parseFloat(booking.bookingAmount);
+            } else {
+              return total + parseFloat(tourData ? tourData.tourFare : 0);
+            }
+          }, 0)}</td>
+        </tr>
+      </table>
+    </div>
+  `;
+  
+  printSection.appendChild(tourDetailsClone);
+  printSection.appendChild(bookingsTable);
+  
+  window.print();
+}
+
+// Export booking details to CSV
+function exportBookingsToCSV() {
+  // Get active bookings only (confirmed and remitted)
+  const activeBookings = bookings.filter(b => 
+    b.bookingCustomerStatus === 'confirmed' || 
+    b.bookingCustomerStatus === 'remitted'
+  );
+  
+  if (activeBookings.length === 0) {
+    showStatusMessage('No bookings to export.', 'error');
+    return;
+  }
+  
+  // Create CSV content
+  let csvContent = 'Seat No,Passenger Name,Phone Number,Email,Aadhaar Number,Booking Status,Amount,Booking Date\n';
+  
+  activeBookings.forEach(booking => {
+    // Format booking date
+    let bookingDate = booking.bookingDate;
+    if (bookingDate && bookingDate.toDate) {
+      bookingDate = bookingDate.toDate().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
     
+    // Escape fields that might contain commas
+    const escapeCsv = (field) => {
+      if (field === null || field === undefined) return '';
+      return `"${String(field).replace(/"/g, '""')}"`;
+    };
+    
+    // Determine amount based on status
+    let amount = '';
+    if (booking.bookingCustomerStatus === 'remitted' && booking.bookingAmount) {
+      amount = booking.bookingAmount;
+    } else {
+      amount = tourData ? tourData.tourFare : '';
+    }
+    
+    csvContent += [
+      booking.bookingCustomerSeatNo,
+      escapeCsv(booking.bookingCustomerName),
+      escapeCsv(booking.bookingCustomerPhoneNo),
+      escapeCsv(booking.bookingCustomerEmail),
+      booking.bookingCustomerAadhaarNo,
+      booking.bookingCustomerStatus,
+      amount,
+      escapeCsv(bookingDate)
+    ].join(',') + '\n';
+  });
+  
+  // Create downloadable link
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `tour_${tourData.tourid}_bookings.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+
+
+ // Close modal
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+    
+    // Window click event to close modals
+    window.onclick = function(event) {
+      const modals = document.getElementsByClassName('modal');
+      for (let i = 0; i < modals.length; i++) {
+        if (event.target === modals[i]) {
+          modals[i].style.display = 'none';
+        }
+      }
+    };
+
+
+function showStatusMessage(message, type) {
+  // Inject CSS only once
+  if (!document.getElementById('statusMessageStyles')) {
+    const style = document.createElement('style');
+    style.id = 'statusMessageStyles';
+    style.textContent = `
+      #statusMessage {
+        position: fixed;
+        top: 20px;
+        left: 0;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+        z-index: 9999;
+        transform: translateX(-100%);
+        opacity: 0;
+        transition: all 0.5s ease;
+      }
+      #statusMessage.slide-in-left {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      #statusMessage.info {
+        background-color: #3498db;
+        color: white;
+      }
+      #statusMessage.error {
+        background-color: #e74c3c;
+        color: white;
+      }
+      #statusMessage.success {
+        background-color: #2ecc71;
+        color: white;
+      }
+      #statusMessage.hide {
+        opacity: 0;
+        transform: translateX(-100%);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Get or create the status message element
+  let statusElement = document.getElementById('statusMessage');
+  if (!statusElement) {
+    statusElement = document.createElement('div');
+    statusElement.id = 'statusMessage';
+    document.body.appendChild(statusElement);
+  }
+
+  statusElement.innerText = message;
+  statusElement.className = ''; // Clear all previous classes
+  void statusElement.offsetWidth; // Trigger reflow for animation
+
+  if (type) {
+    statusElement.classList.add(type, 'slide-in-left');
+  }
+
+  // Auto-hide success messages after 2 seconds
+//  if (type === 'success') {
+    setTimeout(() => {
+      statusElement.innerText = '';
+      statusElement.className = 'hide';
+    }, 2000);
+ // }
+}
+
+
+/*
+
+// Print receipt for a remitted booking
+function printReceipt(bookingId, seatNumber) {
+  const booking = bookingsMap[seatNumber];
+  if (!booking) {
+    showStatusMessage(`No booking found for seat ${seatNumber}.`, 'error');
+    return;
+  }
+  
+  const printSection = document.getElementById('printSection');
+  printSection.innerHTML = '';
+  
+  // Format booking date
+  let bookingDate = booking.bookingDate;
+  if (bookingDate && bookingDate.toDate) {
+    bookingDate = bookingDate.toDate().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+  
+  // Format tour date
+  let tourDate = tourData.tourDate;
+  if (tourDate && tourDate.toDate) {
+    tourDate = tourDate.toDate().toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+  
+  // Create receipt content
+  const receiptContent = document.createElement('div');
+  receiptContent.className = 'receipt';
+  receiptContent.innerHTML = `
+    <div class="receipt-header">
+      <h2>Payment Receipt</h2>
+      <p>Receipt No: REC-${booking.bookingid}</p>
+      <p>Date: ${new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })}</p>
+    </div>
+    
+    <div class="receipt-details">
+      <h3>Tour Details</h3>
+      <p><strong>Tour ID:</strong> ${tourData.tourid}</p>
+      <p><strong>Date:</strong> ${tourDate}</p>
+      
+      <h3>Passenger Details</h3>
+      <p><strong>Name:</strong> ${booking.bookingCustomerName}</p>
+      <p><strong>Seat No:</strong> ${booking.bookingCustomerSeatNo}</p>
+      <p><strong>Phone:</strong> ${booking.bookingCustomerPhoneNo}</p>
+      <p><strong>Email:</strong> ${booking.bookingCustomerEmail}</p>
+      <p><strong>Booking Date:</strong> ${bookingDate}</p>
+      
+      <h3>Payment Details</h3>
+      <p><strong>Amount:</strong> ₹${booking.bookingAmount}</p>
+      <p><strong>Status:</strong> Paid</p>
+      
+      <div class="receipt-footer">
+        <p>Thank you for your business!</p>
+        <p>For any inquiries, please contact our support team.</p>
+      </div>
+    </div>
+  `;
+  
+  printSection.appendChild(receiptContent);
+  window.print();
+}
+
+
+*/
+
 
 // Display bookings in the table
 function displayBookingsInTable() {
@@ -463,218 +907,6 @@ function displayBookingsInTable() {
   });
 }
 
-   
-    // View booking details from table
-    function viewBookingDetailsFromTable(seatNumber) {
-      const seatElement = document.getElementById(`span${seatNumber}`);
-      if (seatElement) {
-        viewBookingDetails(seatElement);
-      }
-    }
-    
-    // Update booking statistics
-    function updateBookingStats() {
-     // const totalSeats = 51; // Total seats in the bus
-      const bookedSeats = bookings.filter(b => b.bookingCustomerStatus === 'confirmed').length;
-      const cancelledSeats = bookings.filter(b => b.bookingCustomerStatus === 'cancelled').length;
-      const availableSeats = totalSeats - bookedSeats;
-      
-      let totalRevenue = 0;
-      if (tourData) {
-        totalRevenue = bookedSeats * tourData.tourFare;
-      }
-      
-      document.getElementById('totalSeats').innerText = totalSeats;
-      document.getElementById('bookedSeats').innerText = bookedSeats;
-      document.getElementById('availableSeats').innerText = availableSeats;
-      document.getElementById('cancelledSeats').innerText = cancelledSeats;
-      document.getElementById('occupancyRate').innerText = `${Math.round((bookedSeats / totalSeats) * 100)}%`;
-      document.getElementById('totalRevenue').innerText = `₹${totalRevenue}`;
-    }
-    
-    // Print booking details
-    function printBookingDetails() {
-      const printSection = document.getElementById('printSection');
-      printSection.innerHTML = '';
-      
-      // Clone tour details
-      const tourDetailsClone = document.getElementById('tourDetails').cloneNode(true);
-      
-      // Create bookings table for printing
-      const bookingsTable = document.createElement('div');
-      bookingsTable.className = 'booking-details';
-      
-      // Get current date and time
-      const now = new Date();
-      const formattedDate = now.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      
-      // Get active bookings only
-      const activeBookings = bookings.filter(b => b.bookingCustomerStatus === 'confirmed');
-      
-      bookingsTable.innerHTML = `
-        <h3>Booking Report</h3>
-        <p>Generated on: ${formattedDate}</p>
-        <p>Total Bookings: ${activeBookings.length}</p>
-        <table class="bookings-table" border="1" cellspacing="0">
-          <thead>
-            <tr>
-              <th>Seat No</th>
-              <th>Passenger Name</th>
-              <th>Phone Number</th>
-              <th>Email</th>
-              <th>Aadhaar Number</th>
-              <th>Booking Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${activeBookings.map(booking => {
-              // Format booking date
-              let bookingDate = booking.bookingDate;
-              if (bookingDate && bookingDate.toDate) {
-                bookingDate = bookingDate.toDate().toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric'
-                });
-              }
-              
-              return `
-                <tr>
-                  <td>${booking.bookingCustomerSeatNo}</td>
-                  <td>${booking.bookingCustomerName}</td>
-                  <td>${booking.bookingCustomerPhoneNo}</td>
-                  <td>${booking.bookingCustomerEmail}</td>
-                  <td>${booking.bookingCustomerAadhaarNo}</td>
-                  <td>${bookingDate}</td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-        
-        <div style="margin-top: 30px;">
-          <h4>Booking Summary</h4>
-          <table border="1" cellspacing="0" style="width: 100%;">
-            <tr>
-              <th>Total Seats</th>
-              <th>Booked Seats</th>
-              <th>Available Seats</th>
-              <th>Occupancy Rate</th>
-              <th>Total Revenue</th>
-            </tr>
-            <tr>
-              <td>51</td>
-              <td>${activeBookings.length}</td>
-              <td>${51 - activeBookings.length}</td>
-              <td>${Math.round((activeBookings.length / 51) * 100)}%</td>
-              <td>₹${activeBookings.length * (tourData ? tourData.tourFare : 0)}</td>
-            </tr>
-          </table>
-        </div>
-      `;
-      
-      printSection.appendChild(tourDetailsClone);
-      printSection.appendChild(bookingsTable);
-      
-      window.print();
-    }
-    
-    // Export booking details to CSV
-    function exportBookingsToCSV() {
-      // Get active bookings only
-      const activeBookings = bookings.filter(b => b.bookingCustomerStatus === 'confirmed');
-      
-      if (activeBookings.length === 0) {
-        showStatusMessage('No bookings to export.', 'error');
-        return;
-      }
-      
-      // Create CSV content
-      let csvContent = 'Seat No,Passenger Name,Phone Number,Email,Aadhaar Number,Booking Status,Booking Date\n';
-      
-      activeBookings.forEach(booking => {
-        // Format booking date
-        let bookingDate = booking.bookingDate;
-        if (bookingDate && bookingDate.toDate) {
-          bookingDate = bookingDate.toDate().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-        }
-        
-        // Escape fields that might contain commas
-        const escapeCsv = (field) => {
-          if (field === null || field === undefined) return '';
-          return `"${String(field).replace(/"/g, '""')}"`;
-        };
-        
-        csvContent += [
-          booking.bookingCustomerSeatNo,
-          escapeCsv(booking.bookingCustomerName),
-          escapeCsv(booking.bookingCustomerPhoneNo),
-          escapeCsv(booking.bookingCustomerEmail),
-          booking.bookingCustomerAadhaarNo,
-          booking.bookingCustomerStatus,
-          escapeCsv(bookingDate)
-        ].join(',') + '\n';
-      });
-      
-      // Create downloadable link
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `tour_${tourData.tourid}_bookings.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-    
-    // Show status message
-    function showStatusMessage(message, type) {
-      const statusElement = document.getElementById('statusMessage');
-      statusElement.innerText = message;
-      statusElement.className = 'status-message';
-      
-      if (type) {
-        statusElement.classList.add(type);
-      }
-      
-      // Auto-hide success messages after 5 seconds
-      if (type === 'success') {
-        setTimeout(() => {
-          statusElement.innerText = '';
-          statusElement.className = 'status-message hide';
-        }, 5000);
-      }
-    }
-    
-    // Close modal
-    function closeModal(modalId) {
-      document.getElementById(modalId).style.display = 'none';
-    }
-    
-    // Window click event to close modals
-    window.onclick = function(event) {
-      const modals = document.getElementsByClassName('modal');
-      for (let i = 0; i < modals.length; i++) {
-        if (event.target === modals[i]) {
-          modals[i].style.display = 'none';
-        }
-      }
-    };
-
-
 
 
 
@@ -693,15 +925,11 @@ async function printReceipt(bookingId, seatNumber) {
       return;
     }
 
-    seatNumber = String(seatNumber);
-    showStatusMessage('Generating receipt...', 'info');
-
-    const fetchPromise = db.collection('bookings').doc(bookingId).get();
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Database request timed out')), 10000)
-    );
-
-    const doc = await Promise.race([fetchPromise, timeoutPromise]);
+    // Get the booking document reference
+    const bookingRef = db.collection('bookings').doc(bookingId);
+    
+    // Fetch the booking
+    const doc = await bookingRef.get();
 
     if (!doc.exists) {
       showStatusMessage(`Booking ID ${bookingId} not found.`, 'error');
@@ -709,6 +937,26 @@ async function printReceipt(bookingId, seatNumber) {
     }
 
     const booking = doc.data();
+
+    // Check if receipt has already been printed
+    if (booking.receiptPrinted) {
+      if (confirm('Receipt has already been printed once. Do you still want to print it again?')) {
+        // Continue with printing - but we won't mark it again
+        console.log('Reprinting receipt that was already printed before');
+      } else {
+        // User declined to print again
+        return;
+      }
+    }
+
+    // Mark receipt as printed in the database
+    await bookingRef.update({
+      receiptPrinted: true,
+      receiptPrintedTime: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    seatNumber = String(seatNumber);
+    showStatusMessage('Generating receipt...', 'info');
 
     const requiredFields = [
       { key: 'bookingid', label: 'Booking ID' },
@@ -780,6 +1028,28 @@ Date: ${bookingDate}
       return;
     }
 
+    // Update the HTML to include a "PRINTED" watermark if it's a reprint
+    const watermarkStyle = booking.receiptPrinted ? 
+      `
+      .receipt-box {
+        position: relative;
+        overflow: hidden;
+      }
+      .receipt-box::before {
+        content: "DUPLICATE";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 60px;
+        color: rgba(255, 0, 0, 0.1);
+        font-weight: bold;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 1;
+      }
+      ` : '';
+
     const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -817,6 +1087,7 @@ Date: ${bookingDate}
       border: 1px solid #e0e0e0; border-radius: 8px;
       padding: 20px; background-color: #fafafa;
     }
+    ${watermarkStyle}
     .left { flex: 1; min-width: 280px; }
     .row { display: flex; margin-bottom: 12px; font-size: 14px; }
     .label { font-weight: 600; width: 160px; color: #003399; }
@@ -857,6 +1128,7 @@ Date: ${bookingDate}
         <div class="row"><span class="label">Seat Number:</span><span class="value"><b>${sanitizeHtml(seatNumber)}</b></span></div>
         <div class="row"><span class="label">Amount Paid:</span><span class="value">₹${sanitizeHtml(formattedAmount)}</span></div>
         <div class="row"><span class="label">Booking Date:</span><span class="value">${sanitizeHtml(bookingDate)}</span></div>
+        ${booking.receiptPrinted ? `<div class="row"><span class="label">Original Print:</span><span class="value">This is a duplicate receipt</span></div>` : ''}
       </div>
       <div class="qr"><div id="qrcode"></div></div>
     </div>
@@ -902,8 +1174,15 @@ Date: ${bookingDate}
 
     showStatusMessage('Receipt generated successfully.', 'success');
     receiptWindow.focus();
+    
+    // Also update the local bookings data
+    if (bookingsMap[seatNumber]) {
+      bookingsMap[seatNumber].receiptPrinted = true;
+    }
+    
   } catch (error) {
     console.error('Error printing receipt:', error);
     showStatusMessage(`Failed to generate receipt: ${error.message || 'Unknown error'}`, 'error');
   }
 }
+
