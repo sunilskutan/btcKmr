@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tour Bus Seat Booking</title>
   <style>
     body {
@@ -13,10 +14,10 @@
     }
     
     .container {
-      width: 50%;
+      width: 90%;
       max-width: 1200px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 10px;
     }
     
     .header {
@@ -24,49 +25,67 @@
       color: white;
       padding: 10px;
       border-radius: 8px;
-      margin-bottom: 50px;
+      margin-bottom: 20px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       text-align: center; 
-      height:80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 60px;
+    }
+    
+    .header h3 {
+      margin: 0;
+      margin-bottom: 5px;
+    }
+    
+    .header a {
+      color: white;
+      text-decoration: none;
+    }
+    
+    .header a:hover {
+      text-decoration: underline;
     }
     
     .tour-details {
       background-color: white;
       border-radius: 8px;
-      padding: 20px;
+      padding: 15px;
       margin-bottom: 20px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     
-    .tour-details h3 {
+    .tour-details h4 {
       margin-top: 0;
-      color: #0c3e50;
+      color: #2c3e50;
+      margin-bottom: 10px;
     }
     
     .tour-info {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
     }
     
     .info-card {
       background-color: #f8f9fa;
-      padding: 5px;
+      padding: 10px;
       border-radius: 5px;
       border-left: 4px solid #3498db;
-      height:70px;
     }
     
     .info-card h6 {
-      margin-top: 0;
+      margin: 5px 0;
       color: #3498db;
     }
     
     .status-indicator {
       display: flex;
+      flex-wrap: wrap;
       justify-content: center;
-      margin: 20px 0;
-      gap: 20px;
+      margin: 15px 0;
+      gap: 15px;
     }
     
     .status-item {
@@ -86,30 +105,34 @@
       flex-direction: column;
       align-items: center;
       margin: 20px 0;
+      overflow-x: auto;
+      width: 100%;
     }
     
     table {
       border-collapse: collapse;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       background-color: white;
+      margin: 0 auto;
     }
     
     td {
-      padding: 10px;
+      padding: 5px;
       text-align: center;
       border: 1px solid #ddd;
     }
     
     .spanx {
       display: inline-block;
-      width: 40px;
-      height: 40px;
-      line-height: 40px;
+      width: 35px;
+      height: 35px;
+      line-height: 35px;
       text-align: center;
       background-color: #e0e0e0;
       border-radius: 5px;
       cursor: pointer;
       transition: all 0.3s ease;
+      font-size: 14px;
     }
     
     .spanx:hover {
@@ -131,22 +154,24 @@
     .driver {
       background-color: #b8c6db;
       font-weight: bold;
+      font-size: 12px;
     }
     
     .form-container {
       display: flex;
       flex-wrap: wrap;
-      justify-content: space-around;
+      justify-content: center;
       gap: 15px;
       margin: 20px 0;
     }
     
     .booking-form {
       background-color: white;
-      padding: 20px;
+      padding: 15px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      width: 300px;
+      width: 100%;
+      max-width: 300px;
       margin-bottom: 15px;
       position: relative;
     }
@@ -155,26 +180,29 @@
       margin-top: 0;
       padding-bottom: 10px;
       border-bottom: 2px solid #3498db;
-      color: #ac3e50;
+      color: #2c3e50;
+      font-size: 16px;
     }
     
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
     
     .form-group label {
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
       font-weight: 600;
-      color: #a55;
+      color: #555;
+      font-size: 14px;
     }
     
     .form-group input {
       width: 100%;
-      padding: 10px;
+      padding: 8px;
       border: 1px solid #ddd;
       border-radius: 4px;
       font-size: 14px;
+      box-sizing: border-box;
     }
     
     .close-btn {
@@ -229,6 +257,8 @@
       font-size: 16px;
       cursor: pointer;
       transition: background-color 0.3s;
+      width: 100%;
+      max-width: 300px;
     }
     
     #bookSeats:hover {
@@ -242,19 +272,86 @@
     
     #selectedSeats {
       color: #2c3e50;
+      text-align: center;
+      margin: 15px 0;
+      font-weight: bold;
+    }
+
+    .bus-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
     }
     
+    .bus-tab {
+      padding: 8px 15px;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .bus-tab.active {
+      background-color: #3498db;
+      color: white;
+    }
+
+    /* Mobile Specific Styles */
     @media (max-width: 768px) {
+      .container {
+        width: 95%;
+        padding: 5px;
+      }
+      
       .tour-info {
         grid-template-columns: 1fr;
       }
       
-      table {
-        transform: scale(0.9);
+      .spanx {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 12px;
+      }
+      
+      td {
+        padding: 3px;
+        font-size: 12px;
+      }
+      
+      .header {
+        margin-bottom: 15px;
+      }
+      
+      .header h3 {
+        font-size: 18px;
+      }
+      
+      .status-indicator {
+        flex-direction: row;
+        justify-content: space-around;
+      }
+      
+      .status-item {
+        font-size: 12px;
+      }
+      
+      .form-container {
+        justify-content: center;
       }
       
       .booking-form {
         width: 100%;
+      }
+      
+      .bus-layout {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      table {
+        min-width: 320px;
       }
     }
   </style>
@@ -283,6 +380,7 @@
     let tourData = null;
     let selectedSeats = {};
     let bookedSeats = [];
+    let currentBusId = null;
     
     // Parse URL parameters
     function getUrlParameter(name) {
@@ -358,47 +456,46 @@
         });
       }
  
-
-
-     
-  // Get busid and fetch totalSeats from Firestore
-  let busid = parseInt(tour.tourBusid);
-
-// Handle specific bus type UI changes
-  switch (busid) {
-    case 1: document.getElementById("aclowfloorbus").style.display = "block"; break;
-    case 2: document.getElementById("superfastbus").style.display = "block"; break;
-    case 4: document.getElementById("superdeluxebus").style.display = "block"; break;
-    default: document.getElementById("superfastbus").style.display = "block"; break;
-  }
-
-
-
-
+      // Get busid and show appropriate bus layout
+      currentBusId = parseInt(tour.tourBusid);
+      showBusLayout(currentBusId);
 
       tourDetailsDiv.innerHTML = `
         <h4>Tour Information</h4>
         <div class="tour-info">
           <div class="info-card">
-            <h6>Tour ID. ${tour.tourid}</h6>
-          
-            <h6>Bus ID. ${tour.tourBusid}</h6>
+            <h6>Tour ID: ${tour.tourid}</h6>
+            <h6>Bus ID: ${tour.tourBusid}</h6>
           </div>
           <div class="info-card">
-            <h6>Date. ${tourDate}</h6>
+            <h6>Date: ${tourDate}</h6>
           </div>
           <div class="info-card">
-            <h6>Fare. ₹${tour.tourFare}</h6>
-
-            <h6>Place ID. ${tour.tourPlaceid}</h6>
+            <h6>Fare: ₹${tour.tourFare}</h6>
+            <h6>Place ID: ${tour.tourPlaceid}</h6>
           </div>
         </div>
-
       `;
       
       // Insert tour details at the top of the container
       const container = document.querySelector('.container');
-      container.insertBefore(tourDetailsDiv, container.firstChild);
+      container.insertBefore(tourDetailsDiv, container.firstChild.nextSibling);
+    }
+    
+    // Show appropriate bus layout based on bus ID
+    function showBusLayout(busid) {
+      // Hide all bus layouts first
+      document.getElementById("aclowfloorbus").style.display = "none";
+      document.getElementById("superfastbus").style.display = "none";
+      document.getElementById("superdeluxebus").style.display = "none";
+      
+      // Show appropriate bus layout
+      switch (busid) {
+        case 1: document.getElementById("aclowfloorbus").style.display = "table"; break;
+        case 2: document.getElementById("superfastbus").style.display = "table"; break;
+        case 4: document.getElementById("superdeluxebus").style.display = "table"; break;
+        default: document.getElementById("superfastbus").style.display = "table"; break;
+      }
     }
     
     // Fetch existing bookings for this tour
@@ -414,17 +511,27 @@
             const seatNo = booking.bookingCustomerSeatNo;
             bookedSeats.push(seatNo);
             
-            // Mark the seat as booked in UI
-            const seatElement = document.getElementById('span' + seatNo);
-            if (seatElement) {
-              seatElement.classList.add('booked');
-            }
+            // Mark all seat elements with this number as booked across all bus layouts
+            markSeatAsBooked(seatNo);
           });
         }
       } catch (error) {
         console.error("Error fetching bookings:", error);
         showStatusMessage('Error loading booked seats. Some seats might appear available even though they are booked.', 'error');
       }
+    }
+    
+    // Mark a seat as booked in all bus layouts
+    function markSeatAsBooked(seatNo) {
+      // Find all elements with id "spanX" across all bus layouts
+      const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus"];
+      
+      busTypes.forEach(busType => {
+        const seatElement = document.querySelector(`#${busType} #span${seatNo}`);
+        if (seatElement) {
+          seatElement.classList.add('booked');
+        }
+      });
     }
     
     // Handle seat selection
@@ -479,7 +586,7 @@
         </div>
         <div class="form-group">
           <label for="email-${seatNumber}">Email</label>
-          <input type="email" id="email-${seatNumber}" required  value="example@abc.com">
+          <input type="email" id="email-${seatNumber}" required placeholder="Enter email address">
         </div>
         <div class="form-group">
           <label for="phone-${seatNumber}">Phone Number</label>
@@ -487,11 +594,14 @@
         </div>
         <div class="form-group">
           <label for="aadhaar-${seatNumber}">Aadhaar Number</label>
-          <input type="text" id="aadhaar-${seatNumber}" required value="222244446666">
+          <input type="text" id="aadhaar-${seatNumber}" required placeholder="Enter 12-digit Aadhaar number">
         </div>
       `;
       
       formsContainer.appendChild(formElement);
+      
+      // Scroll to the form
+      formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     
     // Remove booking form when deselected
@@ -501,11 +611,15 @@
         formElement.remove();
       }
       
-      // Deselect the seat
-      const seatElement = document.getElementById(`span${seatNumber}`);
-      if (seatElement) {
-        seatElement.classList.remove('selected');
-      }
+      // Deselect the seat in all bus layouts
+      const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus"];
+      
+      busTypes.forEach(busType => {
+        const seatElement = document.querySelector(`#${busType} #span${seatNumber}`);
+        if (seatElement) {
+          seatElement.classList.remove('selected');
+        }
+      });
       
       delete selectedSeats[seatNumber];
       updateSelectedSeatsDisplay();
@@ -619,11 +733,9 @@
         // Mark the booked seats
         for (const seatNumber of seatNumbers) {
           bookedSeats.push(parseInt(seatNumber));
-          const seatElement = document.getElementById(`span${seatNumber}`);
-          if (seatElement) {
-            seatElement.classList.remove('selected');
-            seatElement.classList.add('booked');
-          }
+          
+          // Mark as booked in all bus layouts
+          markSeatAsBooked(parseInt(seatNumber));
           
           // Remove booking form
           const formElement = document.getElementById(`form-seat-${seatNumber}`);
@@ -662,6 +774,9 @@
           statusElement.className = 'status-message hide';
         }, 5000);
       }
+      
+      // Scroll to status message
+      statusElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     
     // Validation helpers
@@ -681,11 +796,11 @@
     }
   </script>
 </head>
-<body  oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+<body>
   <div class="container">
     <div class="header">
       <h3>Tour Bus Seat Booking</h3>
-      <a href="dashboard.html" style="color:white;">Dashboard</a>
+      <a href="dashboard.html">Dashboard</a>
     </div>
     
     <div id="statusMessage" class="status-message hide"></div>
@@ -706,12 +821,12 @@
       </div>
     </div>
 
-    <h4 style="text-align: center;">Select Your Seat(s) By Clicking On Them</h4>
+    <h4 style="text-align: center;">Select Your Seat(s)</h4>
     
     <div id="selectedSeats">No seats selected</div>
 
     <div id="sf" class="bus-layout">
-     <table id="superfastbus" style="display:none;">
+      <table id="superfastbus" style="display:none;">
         <tr>
           <td rowspan="3" class="driver">Driver</td>
           <td><span id="span3" onclick="book(this)" class="spanx">3</span></td>
@@ -739,6 +854,7 @@
           <td><span id="span42" onclick="book(this)" class="spanx">42</span></td>
           <td><span id="span45" onclick="book(this)" class="spanx">45</span></td>
         </tr>
+       
         <tr>
           <td><span id="span5" onclick="book(this)" class="spanx">5</span></td>
           <td><span id="span10" onclick="book(this)" class="spanx">10</span></td>
