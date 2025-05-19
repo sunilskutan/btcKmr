@@ -434,7 +434,8 @@ async function cancelBooking(bookingId, seatNumber) {
       
       // Update statistics
       updateBookingStats();
-      location.reload();
+
+	location.reload();
     } catch (error) {
       console.error("Error cancelling booking:", error);
       showStatusMessage('Error cancelling booking. Please try again later.', 'error');
@@ -488,12 +489,17 @@ function viewBookingDetailsFromTable(seatNumber) {
   }
 }
 
+
+
+
+
 // Update booking statistics
 function updateBookingStats() {
-  const bookedSeats = bookings.filter(b => b.bookingCustomerStatus === 'confirmed').length;
-  const remittedSeats = bookings.filter(b => b.bookingCustomerStatus === 'remitted').length;
+  let bookedSeats = bookings.filter(b => b.bookingCustomerStatus === 'confirmed').length;
+  const remittedSeats = bookings.filter(b =>  b.bookingCustomerStatus.includes('remitted')).length;
+  bookedSeats=bookedSeats+remittedSeats;
   const cancelledSeats = bookings.filter(b => b.bookingCustomerStatus === 'cancelled').length;
-  const availableSeats = totalSeats - (bookedSeats + remittedSeats);
+  const availableSeats = totalSeats - bookedSeats;
   
   let totalRevenue = 0;
   let remittedRevenue = 0;
