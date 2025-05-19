@@ -434,6 +434,7 @@ async function cancelBooking(bookingId, seatNumber) {
       
       // Update statistics
       updateBookingStats();
+      location.reload();
     } catch (error) {
       console.error("Error cancelling booking:", error);
       showStatusMessage('Error cancelling booking. Please try again later.', 'error');
