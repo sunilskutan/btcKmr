@@ -117,18 +117,19 @@ function updateSeatStatusInBusLayout() {
       
       // Apply specific styling based on booking status
       if (booking.bookingCustomerStatus === 'remitted') {
-        seatElement.style.backgroundColor = '#003399';
+        seatElement.style.backgroundColor = '#003399'; // Blue color for remitted bookings
         seatElement.style.color = 'white';
       } else if (booking.bookingCustomerStatus === 'confirmed') {
-        seatElement.style.backgroundColor = '#e74c3c';
+        seatElement.style.backgroundColor = '#28a745'; // Green color for confirmed bookings
         seatElement.style.color = 'white';
       } else if (booking.bookingCustomerStatus === 'cancelled') {
-        seatElement.style.backgroundColor = '#dc3545';
+        seatElement.style.backgroundColor = '#dc3545'; // Red color for cancelled bookings
         seatElement.style.color = 'white';
       }
     }
   }
 }
+
 
 // Modify displayTourDetails to show bus layout and update seat status
 async function displayTourDetails(tour) {
@@ -247,19 +248,24 @@ async function fetchBookings(tourId) {
 
 
 
-    // Mark a seat as booked in all bus layouts
-    function markSeatAsBooked(seatNo) {
-      // Find all elements with id "spanX" across all bus layouts
-      const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus"];
+// Also update the markSeatAsBooked function to handle different booking statuses
+function markSeatAsBooked(seatNo) {
+  const booking = bookingsMap[seatNo];
+  const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus"];
+  
+  busTypes.forEach(busType => {
+    const seatElement = document.querySelector(`#${busType} #span${seatNo}`);
+    if (seatElement) {
+      seatElement.classList.add('booked');
       
-      busTypes.forEach(busType => {
-        const seatElement = document.querySelector(`#${busType} #span${seatNo}`);
-        if (seatElement) {
-          seatElement.classList.add('booked');
-        }
-      });
+      // Apply color based on booking status
+      if (booking && booking.bookingCustomerStatus === 'remitted') {
+        seatElement.style.backgroundColor = '#003399';
+        seatElement.style.color = 'white';
+      }
     }
-    
+  });
+}
 
 
 
@@ -476,6 +482,28 @@ async function restoreBooking(bookingId, seatNumber) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//upto here
 // View booking details from table
 function viewBookingDetailsFromTable(seatNumber) {
   const seatElement = document.getElementById(`span${seatNumber}`);
@@ -518,9 +546,9 @@ function updateBookingStats() {
   document.getElementById('totalSeats').innerText = totalSeats;
   document.getElementById('bookedSeats').innerText = bookedSeats;
   document.getElementById('availableSeats').innerText = availableSeats;
-  document.getElementById('cancelledSeats').innerText = cancelledSeats;
-  document.getElementById('occupancyRate').innerText = `${Math.round(((bookedSeats + remittedSeats) / totalSeats) * 100)}%`;
-  document.getElementById('totalRevenue').innerText = `₹${totalRevenue + remittedRevenue}`;
+  document.getElementById('cancelledSeats').innerText = remittedSeats;
+  document.getElementById('occupancyRate').innerText = `${Math.round((bookedSeats / totalSeats) * 100)}%`;
+  document.getElementById('totalRevenue').innerText = `₹${totalRevenue }`;
 }
 
 // Print booking details
@@ -786,85 +814,6 @@ function showStatusMessage(message, type) {
 }
 
 
-/*
-
-// Print receipt for a remitted booking
-function printReceipt(bookingId, seatNumber) {
-  const booking = bookingsMap[seatNumber];
-  if (!booking) {
-    showStatusMessage(`No booking found for seat ${seatNumber}.`, 'error');
-    return;
-  }
-  
-  const printSection = document.getElementById('printSection');
-  printSection.innerHTML = '';
-  
-  // Format booking date
-  let bookingDate = booking.bookingDate;
-  if (bookingDate && bookingDate.toDate) {
-    bookingDate = bookingDate.toDate().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-  
-  // Format tour date
-  let tourDate = tourData.tourDate;
-  if (tourDate && tourDate.toDate) {
-    tourDate = tourDate.toDate().toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  }
-  
-  // Create receipt content
-  const receiptContent = document.createElement('div');
-  receiptContent.className = 'receipt';
-  receiptContent.innerHTML = `
-    <div class="receipt-header">
-      <h2>Payment Receipt</h2>
-      <p>Receipt No: REC-${booking.bookingid}</p>
-      <p>Date: ${new Date().toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })}</p>
-    </div>
-    
-    <div class="receipt-details">
-      <h3>Tour Details</h3>
-      <p><strong>Tour ID:</strong> ${tourData.tourid}</p>
-      <p><strong>Date:</strong> ${tourDate}</p>
-      
-      <h3>Passenger Details</h3>
-      <p><strong>Name:</strong> ${booking.bookingCustomerName}</p>
-      <p><strong>Seat No:</strong> ${booking.bookingCustomerSeatNo}</p>
-      <p><strong>Phone:</strong> ${booking.bookingCustomerPhoneNo}</p>
-      <p><strong>Email:</strong> ${booking.bookingCustomerEmail}</p>
-      <p><strong>Booking Date:</strong> ${bookingDate}</p>
-      
-      <h3>Payment Details</h3>
-      <p><strong>Amount:</strong> ₹${booking.bookingAmount}</p>
-      <p><strong>Status:</strong> Paid</p>
-      
-      <div class="receipt-footer">
-        <p>Thank you for your business!</p>
-        <p>For any inquiries, please contact our support team.</p>
-      </div>
-    </div>
-  `;
-  
-  printSection.appendChild(receiptContent);
-  window.print();
-}
-
-
-*/
 
 
 // Display bookings in the table
