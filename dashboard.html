@@ -298,8 +298,114 @@
 
     updatePageViews();
 
+initViewerCounter();
 
+function initViewerCounter() {
+  // Create the counter container
+  const counterContainer = document.createElement('div');
+  counterContainer.id = 'viewer-counter-container';
+  counterContainer.style.cssText = `
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 6px 12px;
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.3s;
+  `;
 
+  // Create the counter display
+  const counterDisplay = document.createElement('div');
+  counterDisplay.id = 'viewer-count';
+  counterDisplay.textContent = '1';
+  counterDisplay.style.cssText = `
+    margin-left: 5px;
+    font-weight: bold;
+    color: #4285f4;
+  `;
+
+  // Create the online indicator dot
+  const onlineDot = document.createElement('div');
+  onlineDot.id = 'online-indicator';
+  onlineDot.style.cssText = `
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #34a853;
+    margin-right: 5px;
+  `;
+
+  // Create the label
+  const label = document.createElement('span');
+  label.textContent = 'Online:';
+  label.style.cssText = `
+    color: #333;
+  `;
+
+  // Assemble the container
+  counterContainer.appendChild(onlineDot);
+  counterContainer.appendChild(label);
+  counterContainer.appendChild(counterDisplay);
+  
+  // Append to body
+  document.body.appendChild(counterContainer);
+
+  // Get Firebase database reference
+  const db = firebase.database();
+  
+  // Reference to your viewers database path
+  const viewersRef = db.ref("site_visitors/btcKmr");
+
+  // Generate a unique ID for this viewer
+  const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+  // Create a connection status reference
+  const connectedRef = db.ref(".info/connected");
+  
+  connectedRef.on("value", (snap) => {
+    if (snap.val() === true) {
+      // Connection established
+      onlineDot.style.backgroundColor = '#34a853'; // Green dot
+      
+      // Add this user to the viewers list
+      const myConnectionRef = viewersRef.child(sessionId);
+      
+      // Add user with timestamp
+      myConnectionRef.set({
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        page: window.location.pathname
+      });
+      
+      // Remove user data when they disconnect
+      myConnectionRef.onDisconnect().remove();
+    } else {
+      // Disconnected
+      onlineDot.style.backgroundColor = '#ea4335'; // Red dot
+    }
+  });
+
+  // Listen for changes in viewer count
+  viewersRef.on("value", (snapshot) => {
+    const count = snapshot.numChildren();
+    counterDisplay.textContent = count;
+  });
+
+  // Error handling
+  viewersRef.on("error", (error) => {
+    console.error("Viewer counter database error:", error);
+    onlineDot.style.backgroundColor = '#ea4335'; // Red dot
+    counterDisplay.textContent = '!';
+  });
+
+  // Return the container element in case you want to customize it further
+  return counterContainer;
+}
 
 
 
@@ -386,9 +492,9 @@
                         <i class="fas fa-calendar-check"></i>
                         <h3>Modify A Tour</h3>
                     </div>
-                    <div class="action-card" onclick="window.location='deleteTour.html';">
+                    <div class="action-card" onclick="const code = prompt('Enter admin code to proceed:');if (code === 'niranjana') {window.location.href = 'deleteOldTours.html';} else if (code !== null) { alert('Incorrect code. Access denied.');}">
                         <i class="fas fa-calendar-day"></i>
-                        <h3>Delete A Tour</h3>
+                        <h3>Delete Old Tours</h3>
                     </div>
                     <div class="action-card" onclick="window.location='upcomingTours.html';">
                         <i class="fas fa-calendar-week"></i>
