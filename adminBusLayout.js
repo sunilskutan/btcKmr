@@ -84,12 +84,14 @@ function displayBusLayout(busid) {
   document.getElementById("aclowfloorbus").style.display = "none";
   document.getElementById("superfastbus").style.display = "none";
   document.getElementById("superdeluxebus").style.display = "none";
+  document.getElementById("shortwheelbus").style.display = "none";
   
   // Show the appropriate bus layout
   switch (busid) {
     case 1: document.getElementById("aclowfloorbus").style.display = "block"; break;
     case 2: document.getElementById("superfastbus").style.display = "block"; break;
     case 4: document.getElementById("superdeluxebus").style.display = "block"; break;
+    case 9: document.getElementById("shortwheelbus").style.display = "block"; break;
     default: document.getElementById("superfastbus").style.display = "block"; break;
   }
 }
@@ -251,7 +253,7 @@ async function fetchBookings(tourId) {
 // Also update the markSeatAsBooked function to handle different booking statuses
 function markSeatAsBooked(seatNo) {
   const booking = bookingsMap[seatNo];
-  const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus"];
+  const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus","shortwheelbus"];
   
   busTypes.forEach(busType => {
     const seatElement = document.querySelector(`#${busType} #span${seatNo}`);
