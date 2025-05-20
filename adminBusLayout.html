@@ -119,6 +119,11 @@
       background-color: #e74c3c;
       color: white;
     }
+
+     .spanx.remitted {
+      background-color: #003399;
+      color: white;
+    }
     
     .driver {
       background-color: #b8c6db;
@@ -172,13 +177,13 @@
     
     .stats-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 15px;
     }
     
     .stat-card {
       background-color: #f8f9fa;
-      padding: 15px;
+      padding: 10px;
       border-radius: 5px;
       text-align: center;
     }
@@ -649,7 +654,7 @@
           <div class="stat-value" id="availableSeats">51</div>
         </div>
         <div class="stat-card">
-          <h4>Cancelled Seats</h4>
+          <h4>Remitted Seats</h4>
           <div class="stat-value" id="cancelledSeats">0</div>
         </div>
         <div class="stat-card">
