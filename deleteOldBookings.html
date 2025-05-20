@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Bookings</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #ff0066;
+      --primary-light: #ff4d94;
+      --primary-dark: #cc0052;
+      --gradient-bg: linear-gradient(135deg, var(--primary) 0%, #ff66a3 100%);
+      --white: #ffffff;
+      --light-bg: #f8f9fa;
+      --border: #e9ecef;
+      --text: #212529;
+      --text-light: #6c757d;
+      --shadow: 0 4px 12px rgba(255, 0, 102, 0.15);
+      --radius: 8px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: var(--text);
+      background-color: var(--light-bg);
+      line-height: 1.6;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .card {
+      background-color: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 30px;
+      margin-bottom: 20px;
+    }
+    
+    h1, h2 {
+      font-weight: 600;
+      margin-bottom: 20px;
+      background: var(--gradient-bg);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .input-container {
+      position: relative;
+      flex-grow: 1;
+      min-width: 150px;
+    }
+    
+    input[type="number"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.3s;
+    }
+    
+    input[type="number"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(255, 0, 102, 0.2);
+    }
+    
+    label {
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background: var(--gradient-bg);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: all 0.3s;
+      text-align: center;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 0, 102, 0.25);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn-secondary {
+      background: #f8f9fa;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    
+    .btn-delete {
+      background: linear-gradient(135deg, #ff3333 0%, #ff0066 100%);
+    }
+    
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    
+    th, td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    th {
+      background: var(--gradient-bg);
+      color: var(--white);
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+    }
+    
+    tr:nth-child(even) {
+      background-color: rgba(255, 0, 102, 0.05);
+    }
+    
+    tr:hover {
+      background-color: rgba(255, 0, 102, 0.1);
+    }
+    
+    .checkbox-container {
+      display: block;
+      position: relative;
+      padding-left: 35px;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .checkbox-container input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+    
+    .checkmark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 20px;
+      width: 20px;
+      background-color: #eee;
+      border-radius: 4px;
+    }
+    
+    .checkbox-container:hover input ~ .checkmark {
+      background-color: #ccc;
+    }
+    
+    .checkbox-container input:checked ~ .checkmark {
+      background: var(--gradient-bg);
+    }
+    
+    .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+    }
+    
+    .checkbox-container input:checked ~ .checkmark:after {
+      display: block;
+    }
+    
+    .checkbox-container .checkmark:after {
+      left: 7px;
+      top: 3px;
+      width: 5px;
+      height: 9px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .status-confirmed {
+      background-color: rgba(0, 200, 83, 0.2);
+      color: #00c853;
+    }
+    
+    .status-pending {
+      background-color: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+    }
+    
+    .status-cancelled {
+      background-color: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+    }
+    
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+    
+    .loading-spinner {
+      border: 4px solid rgba(255, 0, 102, 0.1);
+      border-radius: 50%;
+      border-top: 4px solid var(--primary);
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    
+    .select-all {
+      margin-bottom: 10px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-light);
+    }
+    
+    .empty-state p {
+      margin-top: 10px;
+      font-size: 1.1rem;
+    }
+    
+    .error {
+      background-color: rgba(244, 67, 54, 0.1);
+      color: #f44336;
+      padding: 15px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 10px;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+      
+      th, td {
+        padding: 10px;
+      }
+      
+      .btn {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      h1, h2 {
+        font-size: 1.5rem;
+      }
+      
+      .input-container {
+        width: 100%;
+      }
+      
+      th, td {
+        font-size: 0.85rem;
+      }
+      
+      .hide-mobile {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Booking Management System</h1>
+      
+      <div class="input-group">
+        <div class="input-container">
+          <label for="days">Show Bookings (Tour Date)</label>
+          <input type="number" id="days" min="1" placeholder="Enter days ago" onblur="checkDays()">
+        </div>
+      </div>
+      
+      <div class="actions">
+        <button class="btn" onclick="showBookings()">Show Bookings</button>
+        <button class="btn btn-delete" onclick="deleteSelected()">Delete Selected</button>
+      </div>
+      
+      <div id="output"></div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+      authDomain: "btckmr.firebaseapp.com",
+      projectId: "btckmr",
+      storageBucket: "btckmr.firebasestorage.app",
+      messagingSenderId: "1038756102997",
+      appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+      measurementId: "G-E73FZRNCFM"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function formatDate(date) {
+      return date.toISOString().split('T')[0]; // "YYYY-MM-DD"
+    }
+
+    function toggleAllCheckboxes() {
+      const mainCheckbox = document.getElementById('select-all');
+      const checkboxes = document.querySelectorAll('.delete-check');
+      
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = mainCheckbox.checked;
+      });
+    }
+
+function checkDays() {
+    let days = parseInt(document.getElementById("days").value);
+    if (isNaN(days) || days < 4) {
+        alert("Not allowed: Minimum 4 days required.");
+        return false; // stops further action
+    }
+    return true; // continue if valid
+}
+ 
+
+    async function showBookings() {
+      const daysInput = document.getElementById("days");
+      if (!daysInput.value) {
+        document.getElementById("output").innerHTML = '<div class="error">Please enter the number of days.</div>';
+        return;
+      }
+
+      document.getElementById("output").innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+      
+      let days = parseInt(document.getElementById("days").value);
+
+      const today = new Date();
+      const targetDate = new Date(today.setDate(today.getDate() - days));
+      const targetTimestamp = firebase.firestore.Timestamp.fromDate(targetDate);
+
+      try {
+        // Step 1: Get tour IDs where tourDate equals targetTimestamp (firestore Timestamp)
+        const toursSnapshot = await db.collection("tours")
+          .where("tourDate", "<=", targetTimestamp)
+          .get();
+
+        const tourIds = toursSnapshot.docs.map(doc => doc.data().tourid);
+
+        if (tourIds.length === 0) {
+          document.getElementById("output").innerHTML = `
+            <div class="empty-state">
+              <p>No tours found for ${days} days ago.</p>
+            </div>`;
+          return;
+        }
+
+        // Step 2: Get bookings matching those tour IDs
+        const bookingsSnapshot = await db.collection("bookings")
+          .where("bookingTourid", "in", tourIds)
+          .get();
+
+        if (bookingsSnapshot.empty) {
+          document.getElementById("output").innerHTML = `
+            <div class="empty-state">
+              <p>No bookings found for those tours.</p>
+            </div>`;
+          return;
+        }
+
+        // Step 3: Show bookings with checkboxes
+        let html = `
+          <div class="select-all">
+            <label class="checkbox-container">Select All
+              <input type="checkbox" id="select-all" checked onchange="toggleAllCheckboxes()">
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <div class="table-container">
+            <table>
+              <tr>
+                <th>Select</th>
+                <th>ID</th>
+                <th>Customer Name</th>
+                <th>Phone</th>
+                <th class="hide-mobile">Seat</th>
+                <th>Status</th>
+                <th class="hide-mobile">Booking Date</th>
+                <th class="hide-mobile">Tour ID</th>
+              </tr>`;
+
+        bookingsSnapshot.forEach(doc => {
+          const data = doc.data();
+          
+          // Determine status class
+          let statusClass = 'status-pending';
+          if (data.bookingCustomerStatus && data.bookingCustomerStatus.toLowerCase() === 'confirmed') {
+            statusClass = 'status-confirmed';
+          } else if (data.bookingCustomerStatus && data.bookingCustomerStatus.toLowerCase() === 'cancelled') {
+            statusClass = 'status-cancelled';
+          }
+          
+          html += `<tr>
+                    <td>
+                      <label class="checkbox-container">
+                        <input type="checkbox" class="delete-check" data-id="${doc.id}" checked>
+                        <span class="checkmark"></span>
+                      </label>
+                    </td>
+                    <td>${data.bookingid || '-'}</td>
+                    <td>${data.bookingCustomerName || '-'}</td>
+                    <td>${data.bookingCustomerPhoneNo || '-'}</td>
+                    <td class="hide-mobile">${data.bookingCustomerSeatNo || '-'}</td>
+                    <td><span class="status-badge ${statusClass}">${data.bookingCustomerStatus || 'Unknown'}</span></td>
+                    <td class="hide-mobile">${data.bookingDate ? data.bookingDate.toDate().toLocaleString() : '-'}</td>
+                    <td class="hide-mobile">${data.bookingTourid || '-'}</td>
+                  </tr>`;
+        });
+
+        html += `</table></div>`;
+        document.getElementById("output").innerHTML = html;
+
+      } catch (error) {
+        document.getElementById("output").innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        console.error("Error fetching bookings:", error);
+      }
+    }
+
+    async function deleteSelected() {
+      const checkboxes = document.querySelectorAll(".delete-check:checked");
+      if (checkboxes.length === 0) {
+        alert("No bookings selected for deletion.");
+        return;
+      }
+
+      if (!confirm(`Are you sure you want to delete ${checkboxes.length} booking(s)?`)) return;
+
+      document.getElementById("output").innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+      
+      let deleted = 0;
+      let failed = 0;
+
+      for (let cb of checkboxes) {
+        const docId = cb.getAttribute("data-id");
+        try {
+          await db.collection("bookings").doc(docId).delete();
+          deleted++;
+        } catch (error) {
+          failed++;
+          console.error("Error deleting", docId, error.message);
+        }
+      }
+
+      if (failed > 0) {
+        alert(`Deleted ${deleted} booking(s). Failed to delete ${failed} booking(s).`);
+      } else {
+        alert(`Successfully deleted ${deleted} booking(s).`);
+      }
+      
+      showBookings(); // Refresh list
+    }
+  </script>
+</body>
+</html>
