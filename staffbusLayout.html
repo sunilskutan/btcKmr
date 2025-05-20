@@ -586,7 +586,7 @@
         </div>
         <div class="form-group">
           <label for="email-${seatNumber}">Email</label>
-          <input type="email" id="email-${seatNumber}" required  value="example@abc.com">
+          <input type="email" id="email-${seatNumber}" required value="example@abc.com">
         </div>
         <div class="form-group">
           <label for="phone-${seatNumber}">Phone Number</label>
@@ -594,7 +594,7 @@
         </div>
         <div class="form-group">
           <label for="aadhaar-${seatNumber}">Aadhaar Number</label>
-          <input type="text" id="aadhaar-${seatNumber}" required  value="111122223333">
+          <input type="text" id="aadhaar-${seatNumber}" required value="999988887777">
         </div>
       `;
       
@@ -646,117 +646,132 @@
       document.getElementById('bookSeats').disabled = seatCount === 0;
     }
     
-    // Submit all bookings
+
+
+
     async function submitAllBookings(event) {
-      event.preventDefault();
-      
-      const seatNumbers = Object.keys(selectedSeats);
-      if (seatNumbers.length === 0) {
-        showStatusMessage('Please select at least one seat to book.', 'error');
-        return;
-      }
-      
-      // Validate all forms
-      for (const seatNumber of seatNumbers) {
-        const nameInput = document.getElementById(`name-${seatNumber}`);
-        const emailInput = document.getElementById(`email-${seatNumber}`);
-        const phoneInput = document.getElementById(`phone-${seatNumber}`);
-        const aadhaarInput = document.getElementById(`aadhaar-${seatNumber}`);
-        
-        if (!nameInput.value) {
-          showStatusMessage(`Please enter name for seat ${seatNumber}.`, 'error');
-          nameInput.focus();
-          return;
-        }
-        
-        if (!emailInput.value || !isValidEmail(emailInput.value)) {
-          showStatusMessage(`Please enter a valid email for seat ${seatNumber}.`, 'error');
-          emailInput.focus();
-          return;
-        }
-        
-        if (!phoneInput.value || !isValidPhone(phoneInput.value)) {
-          showStatusMessage(`Please enter a valid 10-digit phone number for seat ${seatNumber}.`, 'error');
-          phoneInput.focus();
-          return;
-        }
-        
-        if (!aadhaarInput.value || !isValidAadhaar(aadhaarInput.value)) {
-          showStatusMessage(`Please enter a valid 12-digit Aadhaar number for seat ${seatNumber}.`, 'error');
-          aadhaarInput.focus();
-          return;
-        }
-        
-        // Store form data in selectedSeats object
-        selectedSeats[seatNumber] = {
-          seatNumber: parseInt(seatNumber),
-          name: nameInput.value,
-          email: emailInput.value,
-          phone: phoneInput.value,
-          aadhaar: aadhaarInput.value
-        };
-      }
-      
-      // Disable the submit button and show loading
-      const submitButton = document.getElementById('bookSeats');
-      submitButton.disabled = true;
-      document.getElementById('loader').classList.remove('hide');
-      showStatusMessage('Processing your bookings...', 'loading');
-      
-      try {
-        // Submit each booking to Firebase
-        const promises = [];
-        
-        for (const seatNumber of seatNumbers) {
-          const seatData = selectedSeats[seatNumber];
-          
-          const bookingData = {
-            bookingCustomerAadhaarNo: parseInt(seatData.aadhaar),
-            bookingCustomerEmail: seatData.email,
-            bookingCustomerName: seatData.name,
-            bookingCustomerPhoneNo: seatData.phone,
-            bookingCustomerSeatNo: parseInt(seatNumber),
-            bookingCustomerStatus: 'confirmed',
-            bookingDate: firebase.firestore.Timestamp.now(),
-            bookingTourid: tourData.tourid,
-            bookingid: Date.now() + parseInt(seatNumber) // Generate a unique booking ID
-          };
-          
-          promises.push(db.collection('bookings').add(bookingData));
-        }
-        
-        await Promise.all(promises);
-        
-        // Show success message
-        showStatusMessage('Booking successful! Your seats have been reserved.', 'success');
-        
-        // Mark the booked seats
-        for (const seatNumber of seatNumbers) {
-          bookedSeats.push(parseInt(seatNumber));
-          
-          // Mark as booked in all bus layouts
-          markSeatAsBooked(parseInt(seatNumber));
-          
-          // Remove booking form
-          const formElement = document.getElementById(`form-seat-${seatNumber}`);
-          if (formElement) {
-            formElement.remove();
-          }
-        }
-        
-        // Clear selected seats
-        selectedSeats = {};
-        updateSelectedSeatsDisplay();
-        
-      } catch (error) {
-        console.error("Error submitting bookings:", error);
-        showStatusMessage('Error processing your booking. Please try again later.', 'error');
-      } finally {
-        submitButton.disabled = false;
-        document.getElementById('loader').classList.add('hide');
+  event.preventDefault();
+
+  const seatNumbers = Object.keys(selectedSeats);
+  if (seatNumbers.length === 0) {
+    showStatusMessage('Please select at least one seat to book.', 'error');
+    return;
+  }
+
+  // Validate all forms
+  for (const seatNumber of seatNumbers) {
+    const nameInput = document.getElementById(`name-${seatNumber}`);
+    const emailInput = document.getElementById(`email-${seatNumber}`);
+    const phoneInput = document.getElementById(`phone-${seatNumber}`);
+    const aadhaarInput = document.getElementById(`aadhaar-${seatNumber}`);
+
+    if (!nameInput.value) {
+      showStatusMessage(`Please enter name for seat ${seatNumber}.`, 'error');
+      nameInput.focus();
+      return;
+    }
+
+    if (!emailInput.value || !isValidEmail(emailInput.value)) {
+      showStatusMessage(`Please enter a valid email for seat ${seatNumber}.`, 'error');
+      emailInput.focus();
+      return;
+    }
+
+    if (!phoneInput.value || !isValidPhone(phoneInput.value)) {
+      showStatusMessage(`Please enter a valid 10-digit phone number for seat ${seatNumber}.`, 'error');
+      phoneInput.focus();
+      return;
+    }
+
+    if (!aadhaarInput.value || !isValidAadhaar(aadhaarInput.value)) {
+      showStatusMessage(`Please enter a valid 12-digit Aadhaar number for seat ${seatNumber}.`, 'error');
+      aadhaarInput.focus();
+      return;
+    }
+
+    selectedSeats[seatNumber] = {
+      seatNumber: parseInt(seatNumber),
+      name: nameInput.value,
+      email: emailInput.value,
+      phone: phoneInput.value,
+      aadhaar: aadhaarInput.value
+    };
+  }
+
+  const submitButton = document.getElementById('bookSeats');
+  submitButton.disabled = true;
+  document.getElementById('loader').classList.remove('hide');
+  showStatusMessage('Processing your bookings...', 'loading');
+
+  try {
+    const tourId = parseInt(tourData.tourid); // Ensure it's a number
+
+    // Count existing bookings for this tourid
+    const snapshot = await db.collection('bookings')
+      .where('bookingTourid', '==', tourId)
+      .get();
+    let currentCount = snapshot.size;
+
+    const promises = [];
+    const bookingIds = [];
+
+    for (const seatNumber of seatNumbers) {
+      const seatData = selectedSeats[seatNumber];
+
+      const nextId = currentCount + 1;
+      currentCount++;
+
+      // Format: tourid + '000' + nextId (e.g., 1230006)
+      const bookingId = `${tourId}000${nextId}`;
+
+ 	const userID = parseInt(sessionStorage.getItem("userid"));
+
+      const bookingData = {
+        bookingCustomerAadhaarNo: parseInt(seatData.aadhaar),
+        bookingCustomerEmail: seatData.email,
+        bookingCustomerName: seatData.name,
+        bookingCustomerPhoneNo: seatData.phone,
+        bookingCustomerSeatNo: parseInt(seatNumber),
+        bookingCustomerStatus: 'confirmed',
+        bookingDate: firebase.firestore.Timestamp.now(),
+        bookingTourid: tourId,
+	bookingUserid: userID,
+        bookingid: bookingId
+      };
+
+      bookingIds.push(bookingId);
+      promises.push(db.collection('bookings').add(bookingData));
+    }
+
+    await Promise.all(promises);
+
+    const idsText = bookingIds.join(', ');
+    showStatusMessage(`Booking successful! Your seats have been reserved. Booking ID(s): ${idsText}`, 'success');
+
+    for (const seatNumber of seatNumbers) {
+      bookedSeats.push(parseInt(seatNumber));
+      markSeatAsBooked(parseInt(seatNumber));
+
+      const formElement = document.getElementById(`form-seat-${seatNumber}`);
+      if (formElement) {
+        formElement.remove();
       }
     }
-    
+
+    selectedSeats = {};
+    updateSelectedSeatsDisplay();
+
+  } catch (error) {
+    console.error("Error submitting bookings:", error);
+    showStatusMessage('Error processing your booking. Please try again later.', 'error');
+  } finally {
+    submitButton.disabled = false;
+    document.getElementById('loader').classList.add('hide');
+  }
+}
+
+
+
     // Show status message
     function showStatusMessage(message, type) {
       const statusElement = document.getElementById('statusMessage');
