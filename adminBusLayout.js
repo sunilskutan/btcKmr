@@ -299,6 +299,12 @@ function viewBookingDetails(element) {
         <label>Booking ID:</label>
         <span>${booking.bookingid}</span>
       </div>
+
+      <div class="detail-item">
+        <label>Booked By User id:</label>
+        <span>${booking.bookingUserid}</span>
+      </div>
+
       <div class="detail-item">
         <label>Passenger Name:</label>
         <span>${booking.bookingCustomerName}</span>
@@ -422,6 +428,7 @@ async function enterRemittance(bookingId, seatNumber) {
 // Cancel booking function to update seat status after cancellation
 async function cancelBooking(bookingId, seatNumber) {
   if (confirm(`Are you sure you want to cancel the booking for seat ${seatNumber}?`)) {
+     if (confirm(`BOOKING DATA WILL BE DELETED PERMANENTLY. Are you sure AGAIN you want to cancel the booking for seat ${seatNumber}?`)) {
     try {
       // Update booking status in Firebase
       await db.collection('bookings').doc(bookingId).delete();
@@ -447,6 +454,7 @@ async function cancelBooking(bookingId, seatNumber) {
       showStatusMessage('Error cancelling booking. Please try again later.', 'error');
     }
   }
+ }
 }
 
 // Restore a previously cancelled booking
