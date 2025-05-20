@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bus Seat Pattern</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      text-align: center; 
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .header a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 15px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      display: inline-block;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+    }
+    
+    .header a:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    .bus-type-heading {
+      text-align: center;
+      margin: 30px 0 20px;
+      font-size: 1.8rem;
+      color: #2c3e50;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      padding-bottom: 15px;
+    }
+    
+    .bus-type-heading:after {
+      content: '';
+      position: absolute;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(to right, #1a2a6c, #b21f1f);
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 2px;
+    }
+    
+    .bus-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 30px 0;
+      padding: 20px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    table {
+      border-collapse: collapse;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    td {
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .spanx {
+      display: inline-block;
+      width: 45px;
+      height: 45px;
+      line-height: 45px;
+      text-align: center;
+      background-color: #e8f4f8;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      color: #2c3e50;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .spanx:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      background-color: #d1e7f0;
+    }
+    
+    .spanx.booked {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    .spanx.remitted {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    .driver {
+      background-color: #34495e;
+      color: white;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+    
+    tr td[style*="Walking Path"] {
+      background: linear-gradient(to right, #e0e0e0, #f5f5f5, #e0e0e0) !important;
+      color: #555;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+    
+    .status-indicator {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+      gap: 30px;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 15px;
+      background-color: white;
+      border-radius: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .status-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
+    
+    .color-available {
+      background-color: #e8f4f8;
+    }
+    
+    .color-booked {
+      background-color: #e74c3c;
+    }
+    
+    .color-remitted {
+      background-color: #3498db;
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+  <div class="container">
+    <div class="header">
+      <h1>Bus Seat Pattern Viewer</h1>
+      <a href="viewBuses.html">← Back to Buses</a>
+    </div>
+    
+    <!-- Bus type heading (dynamically generated) -->
+    <h2 id="busTypeHeading" class="bus-type-heading">Bus Type</h2>
+    
+  
+    
+    <!-- Bus layout section -->
+    <div id="busLayout" class="bus-layout">
+      <!-- AC Low Floor Bus -->
+      <table id="aclowfloorbus" style="display:none;">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span3" onclick="viewBookingDetails(this)" class="spanx">3</span></td>
+          <td><span id="span7" onclick="viewBookingDetails(this)" class="spanx">7</span></td>
+          <td><span id="span9" onclick="viewBookingDetails(this)" class="spanx">9</span></td>
+          <td></td>
+          <td><span id="span13" onclick="viewBookingDetails(this)" class="spanx">13</span></td>
+          <td><span id="span17" onclick="viewBookingDetails(this)" class="spanx">17</span></td>
+          <td><span id="span21" onclick="viewBookingDetails(this)" class="spanx">21</span></td>
+          <td><span id="span25" onclick="viewBookingDetails(this)" class="spanx">25</span></td>
+          <td><span id="span31" onclick="viewBookingDetails(this)" class="spanx">31</span></td>
+        </tr>
+        <tr>
+          <td><span id="span4" onclick="viewBookingDetails(this)" class="spanx">4</span></td>
+          <td><span id="span8" onclick="viewBookingDetails(this)" class="spanx">8</span></td>
+          <td><span id="span10" onclick="viewBookingDetails(this)" class="spanx">10</span></td>
+          <td></td>
+          <td><span id="span14" onclick="viewBookingDetails(this)" class="spanx">14</span></td>
+          <td><span id="span18" onclick="viewBookingDetails(this)" class="spanx">18</span></td>
+          <td><span id="span22" onclick="viewBookingDetails(this)" class="spanx">22</span></td>
+          <td><span id="span26" onclick="viewBookingDetails(this)" class="spanx">26</span></td>
+          <td><span id="span30" onclick="viewBookingDetails(this)" class="spanx">30</span></td>
+        </tr>
+        <tr>
+          <td colspan="8"></td>
+          <td><span id="span29" onclick="viewBookingDetails(this)" class="spanx">29</span></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td><span id="span2" onclick="viewBookingDetails(this)" class="spanx">2</span></td>
+          <td><span id="span6" onclick="viewBookingDetails(this)" class="spanx">6</span></td>
+          <td rowspan="2" class="driver">Door</td>
+          <td><span id="span12" onclick="viewBookingDetails(this)" class="spanx">12</span></td>
+          <td><span id="span16" onclick="viewBookingDetails(this)" class="spanx">16</span></td>
+          <td><span id="span20" onclick="viewBookingDetails(this)" class="spanx">20</span></td>
+          <td><span id="span24" onclick="viewBookingDetails(this)" class="spanx">24</span></td>
+          <td><span id="span28" onclick="viewBookingDetails(this)" class="spanx">28</span></td>
+        </tr>
+        <tr>
+          <td class="driver">Door</td>
+          <td>Con</td>
+          <td><span id="span1" onclick="viewBookingDetails(this)" class="spanx">1</span></td>
+          <td><span id="span5" onclick="viewBookingDetails(this)" class="spanx">5</span></td>
+          <td><span id="span11" onclick="viewBookingDetails(this)" class="spanx">11</span></td>
+          <td><span id="span15" onclick="viewBookingDetails(this)" class="spanx">15</span></td>
+          <td><span id="span19" onclick="viewBookingDetails(this)" class="spanx">19</span></td>
+          <td><span id="span23" onclick="viewBookingDetails(this)" class="spanx">23</span></td>
+          <td><span id="span27" onclick="viewBookingDetails(this)" class="spanx">27</span></td>
+        </tr>
+      </table>
+
+      <!-- Super Fast Bus -->
+      <table id="superfastbus" style="display:none;">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span3" onclick="viewBookingDetails(this)" class="spanx">3</span></td>
+          <td><span id="span8" onclick="viewBookingDetails(this)" class="spanx">8</span></td>
+          <td><span id="span13" onclick="viewBookingDetails(this)" class="spanx">13</span></td>
+          <td><span id="span18" onclick="viewBookingDetails(this)" class="spanx">18</span></td>
+          <td><span id="span23" onclick="viewBookingDetails(this)" class="spanx">23</span></td>
+          <td><span id="span28" onclick="viewBookingDetails(this)" class="spanx">28</span></td>
+          <td><span id="span32" onclick="viewBookingDetails(this)" class="spanx">32</span></td>
+          <td><span id="span35" onclick="viewBookingDetails(this)" class="spanx">35</span></td>
+          <td><span id="span38" onclick="viewBookingDetails(this)" class="spanx">38</span></td>
+          <td><span id="span41" onclick="viewBookingDetails(this)" class="spanx">41</span></td>
+          <td><span id="span44" onclick="viewBookingDetails(this)" class="spanx">44</span></td>
+        </tr>
+        <tr>
+          <td><span id="span4" onclick="viewBookingDetails(this)" class="spanx">4</span></td>
+          <td><span id="span9" onclick="viewBookingDetails(this)" class="spanx">9</span></td>
+          <td><span id="span14" onclick="viewBookingDetails(this)" class="spanx">14</span></td>
+          <td><span id="span19" onclick="viewBookingDetails(this)" class="spanx">19</span></td>
+          <td><span id="span24" onclick="viewBookingDetails(this)" class="spanx">24</span></td>
+          <td><span id="span29" onclick="viewBookingDetails(this)" class="spanx">29</span></td>
+          <td><span id="span33" onclick="viewBookingDetails(this)" class="spanx">33</span></td>
+          <td><span id="span36" onclick="viewBookingDetails(this)" class="spanx">36</span></td>
+          <td><span id="span39" onclick="viewBookingDetails(this)" class="spanx">39</span></td>
+          <td><span id="span42" onclick="viewBookingDetails(this)" class="spanx">42</span></td>
+          <td><span id="span45" onclick="viewBookingDetails(this)" class="spanx">45</span></td>
+        </tr>
+        <tr>
+          <td><span id="span5" onclick="viewBookingDetails(this)" class="spanx">5</span></td>
+          <td><span id="span10" onclick="viewBookingDetails(this)" class="spanx">10</span></td>
+          <td><span id="span15" onclick="viewBookingDetails(this)" class="spanx">15</span></td>
+          <td><span id="span20" onclick="viewBookingDetails(this)" class="spanx">20</span></td>
+          <td><span id="span25" onclick="viewBookingDetails(this)" class="spanx">25</span></td>
+          <td><span id="span30" onclick="viewBookingDetails(this)" class="spanx">30</span></td>
+          <td><span id="span34" onclick="viewBookingDetails(this)" class="spanx">34</span></td>
+          <td><span id="span37" onclick="viewBookingDetails(this)" class="spanx">37</span></td>
+          <td><span id="span40" onclick="viewBookingDetails(this)" class="spanx">40</span></td>
+          <td><span id="span43" onclick="viewBookingDetails(this)" class="spanx">43</span></td>
+          <td><span id="span46" onclick="viewBookingDetails(this)" class="spanx">46</span></td>
+        </tr>
+        <tr>
+          <td colspan="12" style="text-align: center; background-color: #f0f0f0;">
+            Walking Path
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><span id="span2" onclick="viewBookingDetails(this)" class="spanx">2</span></td>
+          <td rowspan="2" class="driver">Front Door</td>
+          <td><span id="span7" onclick="viewBookingDetails(this)" class="spanx">7</span></td>
+          <td><span id="span12" onclick="viewBookingDetails(this)" class="spanx">12</span></td>
+          <td><span id="span17" onclick="viewBookingDetails(this)" class="spanx">17</span></td>
+          <td><span id="span22" onclick="viewBookingDetails(this)" class="spanx">22</span></td>
+          <td><span id="span27" onclick="viewBookingDetails(this)" class="spanx">27</span></td>
+          <td><span id="span48" onclick="viewBookingDetails(this)" class="spanx">48</span></td>
+          <td rowspan="2" class="driver">Back Door</td>
+          <td><span id="span51" onclick="viewBookingDetails(this)" class="spanx">51</span></td>
+          <td><span id="span50" onclick="viewBookingDetails(this)" class="spanx">50</span></td>
+        </tr>
+        <tr>
+          <td>Con</td>
+          <td><span id="span1" onclick="viewBookingDetails(this)" class="spanx">1</span></td>
+          <td><span id="span6" onclick="viewBookingDetails(this)" class="spanx">6</span></td>
+          <td><span id="span11" onclick="viewBookingDetails(this)" class="spanx">11</span></td>
+          <td><span id="span16" onclick="viewBookingDetails(this)" class="spanx">16</span></td>
+          <td><span id="span21" onclick="viewBookingDetails(this)" class="spanx">21</span></td>
+          <td><span id="span26" onclick="viewBookingDetails(this)" class="spanx">26</span></td>
+          <td><span id="span31" onclick="viewBookingDetails(this)" class="spanx">31</span></td>
+          <td><span id="span47" onclick="viewBookingDetails(this)" class="spanx">47</span></td>
+          <td><span id="span49" onclick="viewBookingDetails(this)" class="spanx">49</span></td>
+        </tr>
+      </table>
+
+      <!-- Super Deluxe Bus -->
+      <table id="superdeluxebus" style="display:none;">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span3" onclick="viewBookingDetails(this)" class="spanx">3</span></td>
+          <td><span id="span7" onclick="viewBookingDetails(this)" class="spanx">7</span></td>
+          <td><span id="span11" onclick="viewBookingDetails(this)" class="spanx">11</span></td>
+          <td><span id="span15" onclick="viewBookingDetails(this)" class="spanx">15</span></td>
+          <td><span id="span19" onclick="viewBookingDetails(this)" class="spanx">19</span></td>
+          <td><span id="span23" onclick="viewBookingDetails(this)" class="spanx">23</span></td>
+          <td><span id="span27" onclick="viewBookingDetails(this)" class="spanx">27</span></td>
+          <td><span id="span31" onclick="viewBookingDetails(this)" class="spanx">31</span></td>
+          <td><span id="span35" onclick="viewBookingDetails(this)" class="spanx">35</span></td>
+          <td><span id="span39" onclick="viewBookingDetails(this)" class="spanx">39</span></td>
+        </tr>
+        <tr>
+          <td><span id="span4" onclick="viewBookingDetails(this)" class="spanx">4</span></td>
+          <td><span id="span8" onclick="viewBookingDetails(this)" class="spanx">8</span></td>
+          <td><span id="span12" onclick="viewBookingDetails(this)" class="spanx">12</span></td>
+          <td><span id="span16" onclick="viewBookingDetails(this)" class="spanx">16</span></td>
+          <td><span id="span20" onclick="viewBookingDetails(this)" class="spanx">20</span></td>
+          <td><span id="span24" onclick="viewBookingDetails(this)" class="spanx">24</span></td>
+          <td><span id="span28" onclick="viewBookingDetails(this)" class="spanx">28</span></td>
+          <td><span id="span32" onclick="viewBookingDetails(this)" class="spanx">32</span></td>
+          <td><span id="span36" onclick="viewBookingDetails(this)" class="spanx">36</span></td>
+          <td><span id="span40" onclick="viewBookingDetails(this)" class="spanx">40</span></td>
+        </tr>
+        <tr>
+          <td colspan="10" style="text-align: center; background-color: #f0f0f0;"> Walking Path </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><span id="span2" onclick="viewBookingDetails(this)" class="spanx">2</span></td>
+          <td><span id="span6" onclick="viewBookingDetails(this)" class="spanx">6</span></td>
+          <td><span id="span10" onclick="viewBookingDetails(this)" class="spanx">10</span></td>
+          <td><span id="span14" onclick="viewBookingDetails(this)" class="spanx">14</span></td>
+          <td><span id="span18" onclick="viewBookingDetails(this)" class="spanx">18</span></td>
+          <td><span id="span22" onclick="viewBookingDetails(this)" class="spanx">22</span></td>
+          <td><span id="span26" onclick="viewBookingDetails(this)" class="spanx">26</span></td>
+          <td><span id="span30" onclick="viewBookingDetails(this)" class="spanx">30</span></td>
+          <td><span id="span34" onclick="viewBookingDetails(this)" class="spanx">34</span></td>
+          <td><span id="span38" onclick="viewBookingDetails(this)" class="spanx">38</span></td>
+        </tr>
+        <tr>
+          <td class="driver">Door</td>
+          <td>Con</td>
+          <td><span id="span5" onclick="viewBookingDetails(this)" class="spanx">5</span></td>
+          <td><span id="span9" onclick="viewBookingDetails(this)" class="spanx">9</span></td>
+          <td><span id="span13" onclick="viewBookingDetails(this)" class="spanx">13</span></td>
+          <td><span id="span17" onclick="viewBookingDetails(this)" class="spanx">17</span></td>
+          <td><span id="span21" onclick="viewBookingDetails(this)" class="spanx">21</span></td>
+          <td><span id="span25" onclick="viewBookingDetails(this)" class="spanx">25</span></td>
+          <td><span id="span29" onclick="viewBookingDetails(this)" class="spanx">29</span></td>
+          <td><span id="span33" onclick="viewBookingDetails(this)" class="spanx">33</span></td>
+          <td><span id="span37" onclick="viewBookingDetails(this)" class="spanx">37</span></td>
+        </tr>
+      </table>
+
+      <!-- Short Wheel Bus -->
+      <table id="shortwheelbus" style="display:none;">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span4" onclick="viewBookingDetails(this)" class="spanx">4</span></td>
+          <td><span id="span8" onclick="viewBookingDetails(this)" class="spanx">8</span></td>
+          <td><span id="span12" onclick="viewBookingDetails(this)" class="spanx">12</span></td>
+          <td><span id="span16" onclick="viewBookingDetails(this)" class="spanx">16</span></td>
+          <td><span id="span20" onclick="viewBookingDetails(this)" class="spanx">20</span></td>
+          <td><span id="span24" onclick="viewBookingDetails(this)" class="spanx">24</span></td>
+          <td><span id="span28" onclick="viewBookingDetails(this)" class="spanx">28</span></td>
+          <td><span id="span32" onclick="viewBookingDetails(this)" class="spanx">32</span></td>
+          <td><span id="span34" onclick="viewBookingDetails(this)" class="spanx">34</span></td>
+        </tr>
+        <tr>
+          <td><span id="span5" onclick="viewBookingDetails(this)" class="spanx">5</span></td>
+          <td><span id="span9" onclick="viewBookingDetails(this)" class="spanx">9</span></td>
+          <td><span id="span13" onclick="viewBookingDetails(this)" class="spanx">13</span></td>
+          <td><span id="span17" onclick="viewBookingDetails(this)" class="spanx">17</span></td>
+          <td><span id="span21" onclick="viewBookingDetails(this)" class="spanx">21</span></td>
+          <td><span id="span25" onclick="viewBookingDetails(this)" class="spanx">25</span></td>
+          <td><span id="span29" onclick="viewBookingDetails(this)" class="spanx">29</span></td>
+          <td><span id="span33" onclick="viewBookingDetails(this)" class="spanx">33</span></td>
+          <td><span id="span35" onclick="viewBookingDetails(this)" class="spanx">35</span></td>
+        </tr>
+        <tr>
+          <td colspan="10" style="text-align: center; background-color: #f0f0f0;"> Walking Path </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td><span id="span3" onclick="viewBookingDetails(this)" class="spanx">3</span></td>
+          <td><span id="span7" onclick="viewBookingDetails(this)" class="spanx">7</span></td>
+          <td><span id="span11" onclick="viewBookingDetails(this)" class="spanx">11</span></td>
+          <td><span id="span15" onclick="viewBookingDetails(this)" class="spanx">15</span></td>
+          <td><span id="span19" onclick="viewBookingDetails(this)" class="spanx">19</span></td>
+          <td><span id="span23" onclick="viewBookingDetails(this)" class="spanx">23</span></td>
+          <td><span id="span27" onclick="viewBookingDetails(this)" class="spanx">27</span></td>
+          <td><span id="span31" onclick="viewBookingDetails(this)" class="spanx">31</span></td>
+        </tr>
+        <tr>
+          <td class="driver">Door</td>
+          <td>Con</td>
+          <td><span id="span2" onclick="viewBookingDetails(this)" class="spanx">2</span></td>
+          <td><span id="span6" onclick="viewBookingDetails(this)" class="spanx">6</span></td>
+          <td><span id="span10" onclick="viewBookingDetails(this)" class="spanx">10</span></td>
+          <td><span id="span14" onclick="viewBookingDetails(this)" class="spanx">14</span></td>
+          <td><span id="span18" onclick="viewBookingDetails(this)" class="spanx">18</span></td>
+          <td><span id="span22" onclick="viewBookingDetails(this)" class="spanx">22</span></td>
+          <td><span id="span26" onclick="viewBookingDetails(this)" class="spanx">26</span></td>
+          <td><span id="span30" onclick="viewBookingDetails(this)" class="spanx">30</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  
+  <script>
+
+   
+        const urlParams = new URLSearchParams(window.location.search);
+        const busid = parseInt(urlParams.get('busId'));
+  	let busType = document.getElementById("busTypeHeading");
+
+ // Show appropriate bus layout based on bus ID
+    function showBusLayout(busid) {
+      // Hide all bus layouts first
+      document.getElementById("aclowfloorbus").style.display = "none";
+      document.getElementById("superfastbus").style.display = "none";
+      document.getElementById("superdeluxebus").style.display = "none";
+      document.getElementById("shortwheelbus").style.display = "none";
+      
+      // Show appropriate bus layout
+      switch (busid) {
+        case 1: document.getElementById("aclowfloorbus").style.display = "block"; busType.innerHTML="ac low floor bus"; break;
+        case 2: document.getElementById("superfastbus").style.display = "block"; busType.innerHTML="super fast bus";  break;
+        case 4: document.getElementById("superdeluxebus").style.display = "block"; busType.innerHTML="super deluxe bus";  break;
+        case 9: document.getElementById("shortwheelbus").style.display = "block";  busType.innerHTML="short wheel bus"; break;
+        default: document.getElementById("superfastbus").style.display = "block";  busType.innerHTML="general format bus";
+      }
+    }
+ showBusLayout(busid);
+
+    
+
+</script>
+</body>
+</html>
