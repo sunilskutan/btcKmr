@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -489,12 +488,14 @@
       document.getElementById("aclowfloorbus").style.display = "none";
       document.getElementById("superfastbus").style.display = "none";
       document.getElementById("superdeluxebus").style.display = "none";
+      document.getElementById("shortwheelbus").style.display = "none";
       
       // Show appropriate bus layout
       switch (busid) {
         case 1: document.getElementById("aclowfloorbus").style.display = "table"; break;
         case 2: document.getElementById("superfastbus").style.display = "table"; break;
         case 4: document.getElementById("superdeluxebus").style.display = "table"; break;
+        case 9: document.getElementById("shortwheelbus").style.display = "table"; break;
         default: document.getElementById("superfastbus").style.display = "table"; break;
       }
     }
@@ -525,7 +526,7 @@
     // Mark a seat as booked in all bus layouts
     function markSeatAsBooked(seatNo) {
       // Find all elements with id "spanX" across all bus layouts
-      const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus"];
+      const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus","shortwheelbus"];
       
       busTypes.forEach(busType => {
         const seatElement = document.querySelector(`#${busType} #span${seatNo}`);
@@ -613,7 +614,7 @@
       }
       
       // Deselect the seat in all bus layouts
-      const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus"];
+      const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus","shortwheelbus"];
       
       busTypes.forEach(busType => {
         const seatElement = document.querySelector(`#${busType} #span${seatNumber}`);
@@ -1035,6 +1036,60 @@
           <td><span id="span27" onclick="book(this)" class="spanx">27</span></td>
         </tr>
       </table>
+
+    <table id="shortwheelbus" style="display:none;">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span4" onclick="book(this)" class="spanx">4</span></td>
+          <td><span id="span8" onclick="book(this)" class="spanx">8</span></td>
+          <td><span id="span12" onclick="book(this)" class="spanx">12</span></td>
+          <td><span id="span16" onclick="book(this)" class="spanx">16</span></td>
+          <td><span id="span20" onclick="book(this)" class="spanx">20</span></td>
+          <td><span id="span24" onclick="book(this)" class="spanx">24</span></td>
+          <td><span id="span28" onclick="book(this)" class="spanx">28</span></td>
+          <td><span id="span32" onclick="book(this)" class="spanx">32</span></td>
+          <td><span id="span34" onclick="book(this)" class="spanx">34</span></td>
+        </tr>
+        <tr>
+          <td><span id="span5" onclick="book(this)" class="spanx">5</span></td>
+          <td><span id="span9" onclick="book(this)" class="spanx">9</span></td>
+          <td><span id="span13" onclick="book(this)" class="spanx">13</span></td>
+          <td><span id="span17" onclick="book(this)" class="spanx">17</span></td>
+          <td><span id="span21" onclick="book(this)" class="spanx">21</span></td>
+          <td><span id="span25" onclick="book(this)" class="spanx">25</span></td>
+          <td><span id="span29" onclick="book(this)" class="spanx">29</span></td>
+          <td><span id="span33" onclick="book(this)" class="spanx">33</span></td>
+          <td><span id="span35" onclick="book(this)" class="spanx">35</span></td>
+        </tr>
+        <tr>
+          <td colspan="10" style="text-align: center; background-color: #f0f0f0;"> Walking Path </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td><span id="span3" onclick="book(this)" class="spanx">3</span></td>
+          <td><span id="span7" onclick="book(this)" class="spanx">7</span></td>
+          <td><span id="span11" onclick="book(this)" class="spanx">11</span></td>
+          <td><span id="span15" onclick="book(this)" class="spanx">15</span></td>
+          <td><span id="span19" onclick="book(this)" class="spanx">19</span></td>
+          <td><span id="span23" onclick="book(this)" class="spanx">23</span></td>
+          <td><span id="span27" onclick="book(this)" class="spanx">27</span></td>
+          <td><span id="span31" onclick="book(this)" class="spanx">31</span></td>
+        </tr>
+        <tr>
+          <td class="driver">Door</td>
+          <td>Con</td>
+          <td><span id="span2" onclick="book(this)" class="spanx">2</span></td>
+          <td><span id="span6" onclick="book(this)" class="spanx">6</span></td>
+          <td><span id="span10" onclick="book(this)" class="spanx">10</span></td>
+          <td><span id="span14" onclick="book(this)" class="spanx">14</span></td>
+          <td><span id="span18" onclick="book(this)" class="spanx">18</span></td>
+          <td><span id="span22" onclick="book(this)" class="spanx">22</span></td>
+          <td><span id="span26" onclick="book(this)" class="spanx">26</span></td>
+          <td><span id="span30" onclick="book(this)" class="spanx">30</span></td>
+        </tr>
+      </table>
+
 
     </div>
 
