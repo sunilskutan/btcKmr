@@ -272,33 +272,44 @@
   <div class="card">
     <form id="tourForm">
       <div class="form-group">
-        <label for="tourid">Tour ID</label>
-        <input type="number" id="tourid" readonly>
+        <label for="tourid">Tour ID.
+        <span type="number" id="tourid" title="പുതിയതായി ചേര്‍ക്കുന്ന ടൂറിന്റെ ID ഇതാണ്."></span>
+	 </label>
       </div>
 
       <div class="form-group">
         <label for="place">Select Place</label>
-        <select id="place" required></select>
+        <select id="place" required title="ടൂര്‍ പോകേണ്ട സ്ഥലം സെലക്ട്‌ ചെയ്യുക. ലിസ്റ്റില്‍ ഇല്ലെങ്കില്‍ Add A Place മെനു വഴി സ്ഥലം ചേര്‍ക്കുക."></select>
       </div>
 
       <div class="form-group">
         <label for="bus">Select Bus</label>
-        <select id="bus" required></select>
+        <select id="bus" required title="യാത്ര പോകേണ്ട ബസ് സെലക്ട്‌ ചെയ്യുക. ലിസ്റ്റില്‍ ഇല്ലെങ്കില്‍ Add A Bus മെനു വഴി ബസ് ചേര്‍ക്കുക."></select>
       </div>
 
       <div class="form-group">
         <label for="tourDate">Tour Date & Time</label>
-        <input type="datetime-local" id="tourDate" required>
+        <input type="datetime-local" id="tourDate" required
+	title="ടൂര്‍ പോകുന്ന  തീയതി സെലക്ട്‌ ചെയ്യുക.">
       </div>
 
       <div class="form-group">
         <label for="fare">Tour Fare (₹)</label>
-        <input type="number" id="fare" min="0" required>
+        <input type="number" id="fare" min="0" placeholder="Enter Tour Fare in ₹ here"  required
+	title="യാത്രക്ക് ഒരാളിനുള്ള ചാര്‍ജ്ജ് ഇവിടെ ചേര്‍ക്കുക.">
       </div>
 
       <div class="form-group">
         <label for="details">Tour Details</label>
-        <input type="text" id="details" placeholder="Enter Full Tour Details here" required>
+        <input type="text" id="details" placeholder="Enter Full Tour Details here" required
+	title="യാത്രയുടെ തുടക്കം മുതല്‍ ഒടുക്കം വരെയുള്ള വിവരങ്ങള്‍ ഇവിടെ ചേര്‍ക്കുക.">
+      </div>
+
+
+      <div class="form-group">
+        <label for="wagroup">Tour WhatsApp Group Invitation Link</label>
+        <input type="text" id="wagroup" placeholder="Enter Tour WhatsApp Group Invitation Link here" required
+	title="ഈ യാത്രക്കായി രൂപീകരിച്ച WhatsApp Group ന്‍റെ Invitation Link ഇവിടെ ചേര്‍ക്കുക.">
       </div>
 
       <button type="submit" class="btn" id="submitBtn">
@@ -398,7 +409,8 @@
         const lastTour = lastTourSnapshot.docs[0].data();
         newTourid = parseInt(lastTour.tourid) + 1;
       }
-      tourId.value = newTourid;
+     // tourId.value = newTourid;
+      tourId.innerHTML = newTourid;
     } catch (error) {
       console.error("Error initializing form:", error);
     }
@@ -428,6 +440,7 @@
     const tourDateInput = document.getElementById("tourDate").value;
     const tourFare = parseFloat(document.getElementById("fare").value);
     const tourDetails = document.getElementById("details").value;
+    const whatsappLink = document.getElementById('wagroup').value;
 
     if (!tourPlaceid || !tourBusid || !tourDateInput || isNaN(tourFare)) {
       showNotification("Please fill all fields correctly.", false);
@@ -457,7 +470,8 @@
         tourDate: firebase.firestore.Timestamp.fromDate(tourDate),
         tourFare: tourFare,
         tourid: newTourid,
-        tourDetails: tourDetails
+        tourDetails: tourDetails,
+	tourWhatsAppLink: whatsappLink
       };
 
       await db.collection("tours").add(newTour);
