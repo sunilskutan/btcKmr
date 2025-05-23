@@ -198,7 +198,7 @@
     }
   </style>
 </head>
-<body  oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+<body>
   <div class="container">
     <div class="header">
       <h1><i class="fas fa-route"></i> Edit tour</h1>
@@ -242,6 +242,11 @@
 	<div class="form-group">
           <label for="tourDetails">Tour Details</label>
           <textarea id="tourDetails" rows="4" cols="50" placeholder="tour details" required></textarea>
+        </div>
+
+	<div class="form-group">
+          <label for="tourWAlink">Tour WhatsApp Group Invitation Link</label>
+          <input type="text" id="tourWAlink" placeholder="tour WhatsApp Group Invitation Link" required>
         </div>
 
         <div class="button-group">
@@ -316,6 +321,7 @@ document.getElementById("tourDate").value = formattedDate;
         document.getElementById("tourFare").value = data.tourFare;
         document.getElementById("tourBusid").value = data.tourBusid;
         document.getElementById("tourDetails").value = data.tourDetails;
+        document.getElementById("tourWAlink").value = data.tourWhatsAppLink;
 
         showMessage("tour details loaded successfully!");
       } catch (err) {
@@ -335,6 +341,7 @@ document.getElementById("tourDate").value = formattedDate;
       const tourFare = document.getElementById("tourFare").value.trim();
       const tourBusid = document.getElementById("tourBusid").value.trim();
       const tourDetails = document.getElementById("tourDetails").value.trim();
+      const tourWAlink = document.getElementById("tourWAlink").value.trim();
 
 const formattedDate2 = document.getElementById("tourDate").value; 
 const dateObj = new Date(formattedDate2); 
@@ -351,8 +358,8 @@ const tourDate = firebase.firestore.Timestamp.fromDate(dateObj);
           tourDate: tourDate,
           tourFare: tourFare,
           tourBusid: tourBusid,
-          tourDetails: tourDetails
-
+          tourDetails: tourDetails,
+	  tourWhatsAppLink: tourWAlink
         });
         showMessage("tour updated successfully!");
       } catch (err) {
