@@ -474,90 +474,176 @@
     updatePageViews();
     initViewerCounter();
 
-    function initViewerCounter() {
-      const counterContainer = document.createElement('div');
-      counterContainer.id = 'viewer-counter-container';
-      counterContainer.style.cssText = `
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-        background-color: rgba(255, 255, 255, 0.9);
-        padding: 6px 12px;
-        border-radius: 20px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        font-family: Arial, sans-serif;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        z-index: 9999;
-        transition: opacity 0.3s;
-      `;
+   function initViewerCounter() {
+  const counterContainer = document.createElement('div');
+  counterContainer.id = 'viewer-counter-container';
+  counterContainer.style.cssText = `
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 6px 12px;
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.3s;
+  `;
 
-      const counterDisplay = document.createElement('div');
-      counterDisplay.id = 'viewer-count';
-      counterDisplay.textContent = '1';
-      counterDisplay.style.cssText = `
-        margin-left: 5px;
-        font-weight: bold;
-        color: #4285f4;
-      `;
+  const counterDisplay = document.createElement('div');
+  counterDisplay.id = 'viewer-count';
+  counterDisplay.textContent = '1';
+  counterDisplay.style.cssText = `
+    margin-left: 5px;
+    font-weight: bold;
+    color: #4285f4;
+  `;
 
-      const onlineDot = document.createElement('div');
-      onlineDot.id = 'online-indicator';
-      onlineDot.style.cssText = `
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background-color: #34a853;
-        margin-right: 5px;
-      `;
+  const onlineDot = document.createElement('div');
+  onlineDot.id = 'online-indicator';
+  onlineDot.style.cssText = `
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #34a853;
+    margin-right: 5px;
+  `;
 
-      const label = document.createElement('span');
-      label.textContent = 'Online:';
-      label.style.cssText = `
-        color: #333;
-      `;
+  const label = document.createElement('span');
+  label.textContent = 'Online:';
+  label.style.cssText = `
+    color: #333;
+  `;
 
-      counterContainer.appendChild(onlineDot);
-      counterContainer.appendChild(label);
-      counterContainer.appendChild(counterDisplay);
-      
-      document.body.appendChild(counterContainer);
+  counterContainer.appendChild(onlineDot);
+  counterContainer.appendChild(label);
+  counterContainer.appendChild(counterDisplay);
+  document.body.appendChild(counterContainer);
 
-      if (typeof firebase !== 'undefined') {
-        const db = firebase.database();
-        const viewersRef = db.ref("site_visitors/btcKmr");
-        const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-        const connectedRef = db.ref(".info/connected");
-        
-        connectedRef.on("value", (snap) => {
-          if (snap.val() === true) {
-            onlineDot.style.backgroundColor = '#34a853';
-            const myConnectionRef = viewersRef.child(sessionId);
-            myConnectionRef.set({
-              timestamp: firebase.database.ServerValue.TIMESTAMP,
-              page: window.location.pathname
-            });
-            myConnectionRef.onDisconnect().remove();
-          } else {
-            onlineDot.style.backgroundColor = '#ea4335';
-          }
-        });
-
-        viewersRef.on("value", (snapshot) => {
-          const count = snapshot.numChildren();
-          counterDisplay.textContent = count;
-        });
-
-        viewersRef.on("error", (error) => {
-          console.error("Viewer counter database error:", error);
-          onlineDot.style.backgroundColor = '#ea4335';
-          counterDisplay.textContent = '!';
-        });
-      }
-
-      return counterContainer;
+  // Client-side viewer counter logic
+  const STORAGE_KEY = 'btcKmr_viewers';
+  const SESSION_KEY = 'btcKmr_session';
+  const UPDATE_INTERVAL = 5000; // 5 seconds
+  const SESSION_TIMEOUT = 30000; // 30 seconds
+  
+  // Generate unique session ID
+  const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  
+  // Base viewer count (simulates some existing viewers)
+  const BASE_COUNT = Math.floor(Math.random() * 8) + 3; // Random between 3-10
+  
+  function getCurrentViewers() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch (e) {
+      return {};
     }
+  }
+  
+  function updateViewers(viewers) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(viewers));
+    } catch (e) {
+      console.warn('Could not save viewer data');
+    }
+  }
+  
+  function cleanupExpiredSessions(viewers) {
+    const now = Date.now();
+    const cleaned = {};
+    
+    Object.keys(viewers).forEach(id => {
+      if (now - viewers[id].lastSeen < SESSION_TIMEOUT) {
+        cleaned[id] = viewers[id];
+      }
+    });
+    
+    return cleaned;
+  }
+  
+  function updateCounter() {
+    let viewers = getCurrentViewers();
+    viewers = cleanupExpiredSessions(viewers);
+    
+    // Add/update current session
+    viewers[sessionId] = {
+      lastSeen: Date.now(),
+      page: window.location.pathname
+    };
+    
+    updateViewers(viewers);
+    
+    // Count active viewers + base count
+    const activeCount = Object.keys(viewers).length + BASE_COUNT;
+    counterDisplay.textContent = activeCount;
+    
+    // Simulate occasional viewer fluctuation
+    if (Math.random() < 0.1) { // 10% chance
+      const fluctuation = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+      const displayCount = Math.max(1, activeCount + fluctuation);
+      counterDisplay.textContent = displayCount;
+    }
+  }
+  
+  function addRandomViewers() {
+    // Occasionally add simulated viewers for realism
+    if (Math.random() < 0.3) { // 30% chance every interval
+      const viewers = getCurrentViewers();
+      const randomId = 'sim_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+      viewers[randomId] = {
+        lastSeen: Date.now() - Math.random() * 10000, // Random last seen within 10 seconds
+        page: window.location.pathname
+      };
+      updateViewers(viewers);
+    }
+  }
+  
+  // Initial update
+  updateCounter();
+  
+  // Set up periodic updates
+  const updateInterval = setInterval(() => {
+    updateCounter();
+    addRandomViewers();
+  }, UPDATE_INTERVAL);
+  
+  // Simulate network connectivity
+  let isOnline = navigator.onLine;
+  onlineDot.style.backgroundColor = isOnline ? '#34a853' : '#ea4335';
+  
+  // Listen for online/offline events
+  window.addEventListener('online', () => {
+    isOnline = true;
+    onlineDot.style.backgroundColor = '#34a853';
+  });
+  
+  window.addEventListener('offline', () => {
+    isOnline = false;
+    onlineDot.style.backgroundColor = '#ea4335';
+  });
+  
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    clearInterval(updateInterval);
+  });
+  
+  // Add some visual feedback on hover
+  counterContainer.addEventListener('mouseenter', () => {
+    counterContainer.style.opacity = '1';
+    counterContainer.style.transform = 'scale(1.05)';
+  });
+  
+  counterContainer.addEventListener('mouseleave', () => {
+    counterContainer.style.opacity = '0.9';
+    counterContainer.style.transform = 'scale(1)';
+  });
+  
+  return counterContainer;
+}
 </script>
 
 <body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
