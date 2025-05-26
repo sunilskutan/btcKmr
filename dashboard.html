@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
+    <script href="fbc.js"></script>
+  <style>
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
             --background-light: #f4f7f9;
             --text-color: #333;
             --card-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            --header-height: 80px;
         }
 
         * {
@@ -25,11 +27,66 @@
             background-color: var(--background-light);
             color: var(--text-color);
             line-height: 1.6;
+            padding-top: var(--header-height);
         }
 
         .container {
             display: flex;
             min-height: 100vh;
+        }
+
+        /* Fixed Header */
+        .fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px 20px;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-left h1 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .header-left p {
+            font-size: 0.8rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .header-icon {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            font-size: 1.5rem;
+        }
+
+        .header-icon:hover {
+            transform: scale(1.1);
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
         }
 
         .sidebar {
@@ -39,37 +96,59 @@
             padding: 30px 20px;
             display: flex;
             flex-direction: column;
-            display: none; /* Hide sidebar by default */
+            display: none;
             transition: all 0.3s ease;
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            bottom: 0;
+            z-index: 999;
+            overflow-y: auto;
+        }
+
+        .sidebar.mobile-open {
+            display: flex;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
         }
 
         .sidebar-header {
             display: flex;
-            justify-content: center; /* centers horizontally */
-            align-items: center;     /* centers vertically */
-            flex-direction: column;  /* if you want image + text stacked */
-            text-align: center;      /* to center text inside */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         .sidebar-header img {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            margin: 0 auto; /* centers image if not using flex */
-        }
-
-        .sidebar-header .profile-info {
-            flex-grow: 1;
+            margin: 0 auto;
         }
 
         .sidebar-header .profile-info h3 {
-            margin: 0;
-            font-size: 1.2rem;
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
         }
 
         .sidebar-header .profile-info p {
-            margin: 0;
-            font-size: 0.9rem;
+            margin: 5px 0 0 0;
+            font-size: 0.8rem;
             color: rgba(255,255,255,0.7);
         }
 
@@ -82,16 +161,17 @@
             align-items: center;
             color: rgba(255,255,255,0.8);
             text-decoration: none;
-            padding: 12px 20px;
-            margin-bottom: 10px;
+            padding: 12px 15px;
+            margin-bottom: 8px;
             border-radius: 8px;
             transition: all 0.3s ease;
+            font-size: 0.9rem;
         }
 
         .nav-menu a i {
-            margin-right: 15px;
-            font-size: 1.2rem;
-            width: 25px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 20px;
             text-align: center;
         }
 
@@ -103,177 +183,272 @@
 
         .main-content {
             flex-grow: 1;
-            padding: 30px;
+            padding: 20px;
             background-color: var(--background-light);
             overflow-y: auto;
-        }
-
-        .welcome-banner {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            width: 100%;
         }
 
         .card {
             background: white;
             border-radius: 12px;
             box-shadow: var(--card-shadow);
-            padding: 25px;
-            margin-bottom: 25px;
+            padding: 20px;
+            margin-bottom: 20px;
             transition: all 0.3s ease;
         }
 
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-2px);
             box-shadow: 0 12px 20px rgba(0,0,0,0.12);
         }
 
         .card h2 {
             color: var(--primary-color);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border-bottom: 2px solid var(--secondary-color);
-            padding-bottom: 10px;
+            padding-bottom: 8px;
+            font-size: 1.3rem;
         }
 
         .quick-actions {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
         }
 
         .action-card {
             background-color: #f9f9f9;
             border-radius: 10px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .action-card:hover {
             background-color: var(--secondary-color);
             color: white;
+            transform: translateY(-3px);
         }
 
         .action-card i {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
+            font-size: 2rem;
+            margin-bottom: 10px;
             color: var(--primary-color);
         }
 
         .action-card:hover i {
             color: white;
         }
-        
-        /* Bell icon styling */
-        #bell,#help {
+
+        .action-card h3 {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* Popup Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .popup {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            position: relative;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in-out;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        @keyframes fadeIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            color: #888;
+            background: none;
+            border: none;
             cursor: pointer;
-            transition: transform 0.3s ease;
         }
-        
-        #bell:hover {
-            transform: scale(1.1);
+
+        .close-btn:hover {
+            color: #000;
         }
-	 
 
-.popup-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.5);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
+        .popup button.action-btn {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
 
-    /* Popup container */
-    .popup {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      position: relative;
-      text-align: center;
-      animation: fadeIn 0.3s ease-in-out;
-    }
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            :root {
+                --header-height: 70px;
+            }
 
-    @keyframes fadeIn {
-      from { transform: scale(0.95); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
+            .fixed-header {
+                padding: 10px 15px;
+                height: var(--header-height);
+            }
 
-    /* Close button */
-    .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 24px;
-      color: #888;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
+            .header-left h1 {
+                font-size: 1rem;
+            }
 
-    .close-btn:hover {
-      color: #000;
-    }
+            .header-left p {
+                font-size: 0.7rem;
+            }
 
-    /* Button styles */
-    .popup button.action-btn {
-      display: block;
-      width: 100%;
-      margin: 10px 0;
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      /*background: #3498db;*/
-      color: white;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-/*
-    .popup button.action-btn:hover {
-      background: #2980b9;
-    }
-*/
-    @media (max-width: 480px) {
-      .popup button.action-btn {
-        font-size: 15px;
-        padding: 10px;
-      }
-    }
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .header-right {
+                gap: 10px;
+            }
+
+            .header-icon {
+                font-size: 1.3rem;
+            }
+
+            .sidebar {
+                width: 280px;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .card h2 {
+                font-size: 1.1rem;
+                margin-bottom: 12px;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+            }
+
+            .action-card {
+                padding: 12px;
+                min-height: 100px;
+            }
+
+            .action-card i {
+                font-size: 1.5rem;
+                margin-bottom: 8px;
+            }
+
+            .action-card h3 {
+                font-size: 0.8rem;
+            }
+
+            .popup {
+                margin: 20px;
+                max-height: calc(100vh - 40px);
+            }
+
+            .popup button.action-btn {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .action-card {
+                min-height: 90px;
+                padding: 10px;
+            }
+
+            .action-card i {
+                font-size: 1.3rem;
+            }
+
+            .action-card h3 {
+                font-size: 0.75rem;
+            }
+
+            .header-left h1 {
+                font-size: 0.9rem;
+            }
+
+            .header-left p {
+                display: none;
+            }
+        }
+
+        /* Viewer Counter Responsive */
+        #viewer-counter-container {
+            position: fixed !important;
+            bottom: 10px !important;
+            right: 10px !important;
+            font-size: 12px !important;
+            padding: 4px 8px !important;
+            z-index: 10000 !important;
+        }
+
+        @media (max-width: 480px) {
+            #viewer-counter-container {
+                bottom: 5px !important;
+                right: 5px !important;
+                font-size: 10px !important;
+                padding: 3px 6px !important;
+            }
+        }
     </style>
 </head>
-
 
 <script type="module">
     // Firebase config
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
-      authDomain: "btckmr.firebaseapp.com",
-      projectId: "btckmr",
-      storageBucket: "btckmr.firebasestorage.app",
-      messagingSenderId: "1038756102997",
-      appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
-      measurementId: "G-E73FZRNCFM"
-    };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const docRef = doc(db, "views", "counter"); // 'counter' is your document ID
+    const docRef = doc(db, "views", "counter");
 
     async function updatePageViews() {
       try {
@@ -297,141 +472,146 @@
     }
 
     updatePageViews();
+    initViewerCounter();
 
-initViewerCounter();
+    function initViewerCounter() {
+      const counterContainer = document.createElement('div');
+      counterContainer.id = 'viewer-counter-container';
+      counterContainer.style.cssText = `
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 6px 12px;
+        border-radius: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.3s;
+      `;
 
-function initViewerCounter() {
-  // Create the counter container
-  const counterContainer = document.createElement('div');
-  counterContainer.id = 'viewer-counter-container';
-  counterContainer.style.cssText = `
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 6px 12px;
-    border-radius: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    z-index: 9999;
-    transition: opacity 0.3s;
-  `;
+      const counterDisplay = document.createElement('div');
+      counterDisplay.id = 'viewer-count';
+      counterDisplay.textContent = '1';
+      counterDisplay.style.cssText = `
+        margin-left: 5px;
+        font-weight: bold;
+        color: #4285f4;
+      `;
 
-  // Create the counter display
-  const counterDisplay = document.createElement('div');
-  counterDisplay.id = 'viewer-count';
-  counterDisplay.textContent = '1';
-  counterDisplay.style.cssText = `
-    margin-left: 5px;
-    font-weight: bold;
-    color: #4285f4;
-  `;
+      const onlineDot = document.createElement('div');
+      onlineDot.id = 'online-indicator';
+      onlineDot.style.cssText = `
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #34a853;
+        margin-right: 5px;
+      `;
 
-  // Create the online indicator dot
-  const onlineDot = document.createElement('div');
-  onlineDot.id = 'online-indicator';
-  onlineDot.style.cssText = `
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #34a853;
-    margin-right: 5px;
-  `;
+      const label = document.createElement('span');
+      label.textContent = 'Online:';
+      label.style.cssText = `
+        color: #333;
+      `;
 
-  // Create the label
-  const label = document.createElement('span');
-  label.textContent = 'Online:';
-  label.style.cssText = `
-    color: #333;
-  `;
-
-  // Assemble the container
-  counterContainer.appendChild(onlineDot);
-  counterContainer.appendChild(label);
-  counterContainer.appendChild(counterDisplay);
-  
-  // Append to body
-  document.body.appendChild(counterContainer);
-
-  // Get Firebase database reference
-  const db = firebase.database();
-  
-  // Reference to your viewers database path
-  const viewersRef = db.ref("site_visitors/btcKmr");
-
-  // Generate a unique ID for this viewer
-  const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-
-  // Create a connection status reference
-  const connectedRef = db.ref(".info/connected");
-  
-  connectedRef.on("value", (snap) => {
-    if (snap.val() === true) {
-      // Connection established
-      onlineDot.style.backgroundColor = '#34a853'; // Green dot
+      counterContainer.appendChild(onlineDot);
+      counterContainer.appendChild(label);
+      counterContainer.appendChild(counterDisplay);
       
-      // Add this user to the viewers list
-      const myConnectionRef = viewersRef.child(sessionId);
-      
-      // Add user with timestamp
-      myConnectionRef.set({
-        timestamp: firebase.database.ServerValue.TIMESTAMP,
-        page: window.location.pathname
-      });
-      
-      // Remove user data when they disconnect
-      myConnectionRef.onDisconnect().remove();
-    } else {
-      // Disconnected
-      onlineDot.style.backgroundColor = '#ea4335'; // Red dot
+      document.body.appendChild(counterContainer);
+
+      if (typeof firebase !== 'undefined') {
+        const db = firebase.database();
+        const viewersRef = db.ref("site_visitors/btcKmr");
+        const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+        const connectedRef = db.ref(".info/connected");
+        
+        connectedRef.on("value", (snap) => {
+          if (snap.val() === true) {
+            onlineDot.style.backgroundColor = '#34a853';
+            const myConnectionRef = viewersRef.child(sessionId);
+            myConnectionRef.set({
+              timestamp: firebase.database.ServerValue.TIMESTAMP,
+              page: window.location.pathname
+            });
+            myConnectionRef.onDisconnect().remove();
+          } else {
+            onlineDot.style.backgroundColor = '#ea4335';
+          }
+        });
+
+        viewersRef.on("value", (snapshot) => {
+          const count = snapshot.numChildren();
+          counterDisplay.textContent = count;
+        });
+
+        viewersRef.on("error", (error) => {
+          console.error("Viewer counter database error:", error);
+          onlineDot.style.backgroundColor = '#ea4335';
+          counterDisplay.textContent = '!';
+        });
+      }
+
+      return counterContainer;
     }
-  });
-
-  // Listen for changes in viewer count
-  viewersRef.on("value", (snapshot) => {
-    const count = snapshot.numChildren();
-    counterDisplay.textContent = count;
-  });
-
-  // Error handling
-  viewersRef.on("error", (error) => {
-    console.error("Viewer counter database error:", error);
-    onlineDot.style.backgroundColor = '#ea4335'; // Red dot
-    counterDisplay.textContent = '!';
-  });
-
-  // Return the container element in case you want to customize it further
-  return counterContainer;
-}
-
-
-
-
-
 </script>
+
 <body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+    <!-- Fixed Header -->
+    <div class="fixed-header">
+        <div class="header-left">
+            <h1>Welcome <span id="userId"></span></h1>
+            <p>Budget Tourism Cell, KSRTC Kilimanoor</p>
+        </div>
+        <div class="header-right">
+            <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="header-icon" onclick="toggleSidebar()" title="Toggle sidebar (for Admins only)">
+                <i class="fas fa-expand-arrows-alt"></i>
+            </span>
+            <span class="header-icon" onclick="helpMenu()" title="Help Menu">
+                <i class="fas fa-question-circle"></i>
+            </span>
+        </div>
+    </div>
+
     <div class="container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+
         <div class="sidebar" id="sidebar1">
             <div class="sidebar-header">
                 <div class="profile-info">
-                    <p><img src="https://scontent.ftrv3-1.fna.fbcdn.net/v/t39.30808-1/313292268_488016430025731_6458956527776626455_n.png?_nc_cat=110&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=IukFqU7a-8QQ7kNvwFUxvV_&_nc_oc=AdkAohOrF8Vu67OzGlkjoEYHCrXpHtF4owhVQG2oPtdI2goTTDOxn-_dIhd6hrZSJhw&_nc_zt=24&_nc_ht=scontent.ftrv3-1.fna&_nc_gid=geF95S98QIdWd-JRlLjpaQ&oh=00_AfJS8pR5VYgvFvMj052wf8QqURiG_PKuYRJ111sI8UvwLw&oe=68223AC1" title="To toggle side bar click bell "></p>
+                    <img src="https://upload.wikimedia.org/wikipedia/en/7/71/Kerala_State_Road_Transport_Corporation_logo.png" alt="Profile Picture">
+                    <h3>Admin Panel</h3>
+                    <p>Dashboard Controls</p>
                 </div>
             </div>
 
             <nav class="nav-menu">
-                <a href="javascript:void(0);" onclick="alert('Feature coming soon')">  <i class="fas fa-tachometer-alt"></i><font size="2px"><span id="usertype2"></span></font></a>
-                <a href="#tour"><i class="fas fa-road"></i> Tour Management</a>
-                <a href="#place"><i class="fas fa-globe"></i> Place Management</a>
+                <a href="javascript:void(0);" onclick="alert('Feature coming soon')">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span id="usertype2"></span>
+                </a>
+                <a href="#tour"><i class="fas fa-route"></i> Tour Management</a>
+                <a href="#place"><i class="fas fa-map-marked-alt"></i> Place Management</a>
                 <a href="#bus"><i class="fas fa-bus"></i> Bus Management</a>
                 <a href="#user"><i class="fas fa-users"></i> User Management</a>
-                <a href="javascript:void(0);" onclick="showPopup()"><i class="fas fa-tools"></i> Admin Utilities </a>
- 		<a href="javascript:void(0);" onclick="window.location='staffupcomingTours.html';"><i class="fas fa-ticket-alt" ></i>Admin Tour Booking </a>	    
-                <a href="javascript:void(0);" onclick="window.location='adminViewTours.html';"><i class="fas fa-ticket" ></i>View Tour Booking </a>
+                <a href="javascript:void(0);" onclick="showPopup()">
+                    <i class="fas fa-tools"></i> Admin Utilities
+                </a>
+                <a href="javascript:void(0);" onclick="window.location='staffupcomingTours.html';">
+                    <i class="fas fa-ticket-alt"></i>Admin Tour Booking
+                </a>
+                <a href="javascript:void(0);" onclick="window.location='adminViewTours.html';">
+                    <i class="fas fa-ticket"></i>View Tour Booking
+                </a>
                 <a href="javascript:void(0);" onclick="alert('Total number of people who watched this web site');" id="counter"></a>
-		<!--<p id="counter">Loading page views...</p>-->
             </nav>
 
             <a href="index.html" class="nav-menu-bottom" style="color: rgba(255,255,255,0.8); text-decoration: none; padding: 15px;">
@@ -440,25 +620,6 @@ function initViewerCounter() {
         </div>
 
         <div class="main-content">
-            <div class="welcome-banner">
-                <div>
-                    <h1>Welcome <span id="userId"></span></h1>
-                    <p>Budget Tourism Cell, KSRTC Kilimanoor</p>
-                </div>
-                <div>
-
-<span id="bell" onclick="toggleSidebar()" title="Click to toggle sidebar(for Admins only)">
-                        <i class="fas fa-arrows-alt-h" style="font-size: 2rem;"></i>
-                    </span>
- </div>
-                <div>
-
-                    <span id="help" onclick="helpMenu()"  title="Help Menu">
-                        <i class="fas fa-question-circle" style="font-size: 2rem;"></i>
-                    </span>
-                </div>
-            </div>
-
             <div class="card">
                 <h2>Quick Actions</h2>
                 <div class="quick-actions">
@@ -467,7 +628,7 @@ function initViewerCounter() {
                         <h3>Upcoming Tours</h3>
                     </div>
                     <div class="action-card" onclick="window.location='addUser.html';">
-                        <i class="fas fa-user"></i>
+                        <i class="fas fa-user-plus"></i>
                         <h3>Register</h3>
                     </div>
                     <div class="action-card" onclick="window.location='viewPlaces.html';">
@@ -489,15 +650,15 @@ function initViewerCounter() {
                         <h3>Create A Tour</h3>
                     </div>
                     <div class="action-card" onclick="window.location='editTour.html';">
-                        <i class="fas fa-calendar-check"></i>
+                        <i class="fas fa-edit"></i>
                         <h3>Modify A Tour</h3>
                     </div>
                     <div class="action-card" onclick="const code = prompt('Enter admin code to proceed:');if (code === 'niranjana') {window.location.href = 'deleteOldTours.html';} else if (code !== null) { alert('Incorrect code. Access denied.');}">
-                        <i class="fas fa-calendar-day"></i>
+                        <i class="fas fa-trash"></i>
                         <h3>Delete Old Tours</h3>
                     </div>
                     <div class="action-card" onclick="window.location='upcomingTours.html';">
-                        <i class="fas fa-calendar-week"></i>
+                        <i class="fas fa-eye"></i>
                         <h3>View Tours</h3>
                     </div>
                 </div>
@@ -507,19 +668,19 @@ function initViewerCounter() {
                 <h2><i class="fas fa-globe"></i> Place Management</h2>
                 <div class="quick-actions">
                     <div class="action-card" onclick="window.location='addPlace.html';">
-                        <i class="fas fa-globe-asia"></i>
+                        <i class="fas fa-plus-circle"></i>
                         <h3>Add A Place</h3>
                     </div>
                     <div class="action-card" onclick="window.location='editPlace.html';">
-                        <i class="fas fa-globe-europe"></i>
+                        <i class="fas fa-edit"></i>
                         <h3>Modify A Place</h3>
                     </div>
                     <div class="action-card" onclick="window.location='deletePlace.html';">
-                        <i class="fas fa-globe-africa"></i>
+                        <i class="fas fa-minus-circle"></i>
                         <h3>Delete A Place</h3>
                     </div>
                     <div class="action-card" onclick="window.location='viewPlaces.html';">
-                        <i class="fas fa-globe"></i>
+                        <i class="fas fa-list"></i>
                         <h3>View Places</h3>
                     </div>
                 </div>
@@ -529,47 +690,48 @@ function initViewerCounter() {
                 <h2><i class="fas fa-bus"></i> Bus Management</h2>
                 <div class="quick-actions">
                     <div class="action-card" onclick="window.location='addBus.html';">
-                        <i class="fas fa-bus-alt"></i>
+                        <i class="fas fa-plus"></i>
                         <h3>Add A Bus</h3>
                     </div>
                     <div class="action-card" onclick="window.location='editBus.html';">
-                        <i class="fas fa-shuttle-van"></i>
+                        <i class="fas fa-wrench"></i>
                         <h3>Change A Bus</h3>
                     </div>
                     <div class="action-card" onclick="window.location='deleteBus.html';">
-                        <i class="fas fa-tram"></i>
+                        <i class="fas fa-times"></i>
                         <h3>Delete A Bus</h3>
                     </div>
                     <div class="action-card" onclick="window.location='viewBuses.html';">
-                        <i class="fas fa-road"></i>
+                        <i class="fas fa-list-ul"></i>
                         <h3>View Buses</h3>
                     </div>
                 </div>
             </div>
 
-
-	<div class="card" id="staff" style="display: none;">
-                <h2><i class="fas fa-bus"></i> Staff Module</h2>
+            <div class="card" id="staff" style="display: none;">
+                <h2><i class="fas fa-user-tie"></i> Staff Module</h2>
                 <div class="quick-actions">
-                    <div class="action-card" onclick="redirectToTours()">
-                        <i class="fas fa-bus-alt"></i>
-                        <h3>Upcoming Tours</h3>
-                    </div>
-                    <div class="action-card" onclick="window.location='addUser.html';">
-                        <i class="fas fa-user-plus"></i>
-                        <h3>Create A User</h3>
-                    </div>
                     <div class="action-card" onclick="window.location='addTour.html';">
                         <i class="fas fa-calendar-plus"></i>
                         <h3>Create A Tour</h3>
                     </div>
-                    <div class="action-card" onclick="">
-                        <i class="fas fa-road"></i>
+
+                    <div class="action-card" onclick="window.location='editTour.html';">
+                        <i class="fas fa-calendar"></i>
+                        <h3>Modify A Tour</h3>
+                    </div>
+                    <div class="action-card" onclick="window.location='viewBuses.html';">
+                        <i class="fas fa-bus-alt"></i>
+                        <h3>View Buses</h3>
+                    </div>
+
+
+                    <div class="action-card" onclick="window.location='TourBookings.html';">
+                        <i class="fas fa-clipboard-list"></i>
                         <h3>View Bookings</h3>
                     </div>
                 </div>
             </div>
-
 
             <div class="card" id="user">
                 <h2><i class="fas fa-user"></i> User Management</h2>
@@ -595,51 +757,48 @@ function initViewerCounter() {
         </div>
     </div>
 
+    <div class="popup-overlay" id="popupOverlay" style="display:'none';">
+        <div class="popup">
+            <button class="close-btn" onclick="hidePopup()">×</button>
+            <h2>Utilities</h2>
+            <button class="action-btn" onclick="window.location='imageUrlTest.html';"  
+                style="background-color: #008000;" 
+                onmouseover="this.style.backgroundColor=' #003300'" 
+                onmouseout="this.style.backgroundColor='#008000'">
+                <i class="fas fa-image"></i> Image Url Test
+            </button>
 
-<div class="popup-overlay" id="popupOverlay" style="display:'none';">
-    <div class="popup">
-      <button class="close-btn" onclick="hidePopup()">×</button>
-      <h2>Utilities</h2>
-      <button class="action-btn" onclick="window.location='imageUrlTest.html';"  
-style="background-color: #008000;" 
-onmouseover="this.style.backgroundColor=' #003300'" 
-onmouseout="this.style.backgroundColor='#008000'">
-<i class="fas fa-image"></i> Image Url Test</button>
+            <button class="action-btn" onclick="alert('To be added');"
+                style="background-color: #009900; "
+                onmouseover="this.style.backgroundColor=' #003300'"
+                onmouseout="this.style.backgroundColor='#009900'">
+                Utility #1
+            </button>
 
-      <button class="action-btn"  onclick="alert('To be added');"
-  style="background-color: #009900; "
-  onmouseover="this.style.backgroundColor=' #003300'"
-  onmouseout="this.style.backgroundColor='#009900'">
-    Utility #1
-</button>
+            <button class="action-btn" onclick="alert('To be added');"
+                style="background-color:#00b300; "
+                onmouseover="this.style.backgroundColor=' #003300'"
+                onmouseout="this.style.backgroundColor='#00b300'">
+                Utility #2
+            </button>
 
-<button class="action-btn"  onclick="alert('To be added');"
-  style="background-color:#00b300; "
-  onmouseover="this.style.backgroundColor=' #003300'"
-  onmouseout="this.style.backgroundColor='#00b300'">
-  Utility #2
-</button>
+            <button class="action-btn" onclick="const code = prompt('Enter admin code to proceed:');if (code === 'niranjana') {window.location.href = 'deleteOldBookings.html';} else if (code !== null) { alert('Incorrect code. Access denied.');}"
+                style="background-color:#00cc00; "
+                onmouseover="this.style.backgroundColor=' #003300'"
+                onmouseout="this.style.backgroundColor='#00cc00'">
+                Delete Old Bookings
+            </button>
 
-<button class="action-btn"  onclick="const code = prompt('Enter admin code to proceed:');if (code === 'niranjana') {window.location.href = 'deleteOldBookings.html';} else if (code !== null) { alert('Incorrect code. Access denied.');}"
-
-  style="background-color:#00cc00; "
-  onmouseover="this.style.backgroundColor=' #003300'"
-  onmouseout="this.style.backgroundColor='#00cc00'">
-  Delete Old Bookings
-</button>
-
-<button class="action-btn" onclick="alert('To be added');"
-  style="background-color:#00e600; "
-  onmouseover="this.style.backgroundColor=' #003300'"
-  onmouseout="this.style.backgroundColor='#00e600'">
-  <i class="fas fa-cog"></i> Settings
-</button>
-
-
+            <button class="action-btn" onclick="alert('To be added');"
+                style="background-color:#00e600; "
+                onmouseover="this.style.backgroundColor=' #003300'"
+                onmouseout="this.style.backgroundColor='#00e600'">
+                <i class="fas fa-cog"></i> Settings
+            </button>
+        </div>
     </div>
-  </div>
 
-
+    
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('userId');
@@ -829,7 +988,7 @@ function help(content, title = 'Help') {
       
       .help-header h2 {
         margin: 0;
-        font-size: 1.2rem;
+        font-size: 1.0rem;
         color: #333;
       }
       
@@ -950,13 +1109,32 @@ function help(content, title = 'Help') {
 function helpMenu() {
 	const userName = sessionStorage.getItem('userName');
     	if (userName === 'Guest') {
-	   help('Create an Account using <b><font color=red>Register</font></b> menu to <b><font color=orange>book a Tour</font></b>');
+	   help(`
+  <div style="font-family: Calibri, Arial, sans-serif; line-height: 1.6; font-size: 14px; color: #333;">
+    <p><i class="fas fa-bus-alt"></i> <b>Upcoming Tours: </b>
+      <span style="color: #003300; font-weight: bold;">
+      വരുന്ന  ടൂർ ട്രിപ്പുകൾ കാണാം.</p>
+      </span>
+    
+    <p><i class="fas fa-user-plus"></i> <b>Register: </b> 
+      <span style="color: #006600; font-weight: bold;">
+        സൈറ്റില്‍ രജിസ്റ്റര്‍ ചെയ്യാം.
+      </span>
+    </p>
+    
+    <p><i class="fas fa-map-marker-alt"></i> <b>Tour Places: </b> 
+      <span style="color: #009900; font-weight: bold;">
+           സ്ഥിരമായി പോകുന്ന സ്ഥലങ്ങള്‍.
+      </span>
+    </p>
+  </div>
+`);
 	}
         else if(userRole === "Admin") {
 	   	help('For <b><span style="color: violet;">Admins</span></b> to get detailed help, <b><a href="javascript:void(0);" style="color: purple;" onclick="window.location=\'adminUserManual.html\';">Click Here</a></b>');
 	     }
 	     else {
-	   	help('Click <b><font color=blue>Upcoming Tours</font></b> to <b><font color=green>book a Tour</font></b>');
+	   	help('<b><font color=blue>Upcoming Tours </font></b><b><font color=green>വഴി ലഭ്യമാകുന്ന പേജില്‍ നിന്നും തീയതിയും സ്ഥലവും മറ്റ് വിവരങ്ങളും നോക്കി ഉറപ്പാകിയ ശേഷം Book Now വഴി സീറ്റ് സെലക്ട്‌ ചെയ്ത് വിവരങ്ങള്‍ നല്‍കി ബുക്ക്‌ ചെയ്യുക </font></b>');
 	     }
 }
     </script>
