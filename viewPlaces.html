@@ -6,6 +6,7 @@
   <title>All Places</title>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="fbc.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     :root {
@@ -337,16 +338,7 @@
   </main>
 
   <script>
-    // Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
-      authDomain: "btckmr.firebaseapp.com",
-      projectId: "btckmr",
-      storageBucket: "btckmr.firebasestorage.app",
-      messagingSenderId: "1038756102997",
-      appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
-      measurementId: "G-E73FZRNCFM"
-    };
+   
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
@@ -432,7 +424,7 @@
             <h3 class="place-name">${place.placeName || 'Unnamed Place'}</h3>
             <p class="place-description">${place.placeDescription || 'No description available'}</p>
             <div class="place-actions">
-              <a href="playVideo.html?placeName=${place.placeName}" class="btn btn-primary"><i class="fas fa-video"></i> Videos</a>
+              <a href="playVideo.html?videoUrl=${place.placeVideoUrl}" class="btn btn-primary"><i class="fas fa-video"></i> Videos</a>
               <button onclick="viewPlaceDetails(${place.placeid})" class="btn btn-outline"><i class="fas fa-camera"></i> Photos</button>
             </div>
           </div>
@@ -446,7 +438,7 @@
 
 
 const placeImages = {
-  '1': [
+  1: [
     'https://encrypted-tbn2.gstatic.com/licensed-image?q=tbn:ANd9GcRmZigYsyGrYlTAoxhD9PkA9JNu3jJm28HFzKNs9wA-FCMdGVztdI5n_ybhz-LFJcadiv-ldogFMIn5E7IkXpZ4nfKKjbAAXnJ5hdnZtQ',
     'https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcQ_st8-RiM7WgI1glEgnbYFZGj6_J44xs9zeozlyq8EFs2NZ5x4B0PaAdsdhKbFUFLZh-8tviaaNXK9FHoC5QTJI3cSGvYSYXMHJizdCw',
     'https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcQnfGvVOjaK8jzhBiVZ_I0QiujnI9sLyH8MMo7sebscbJQGJxD8t4req7qewaD7mG3slDW8d-qvPAipsC3Aj1ytyACgv8XUR7k37MSsCQ'
@@ -460,7 +452,94 @@ const placeImages = {
     'https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/0a/70/45/a2.jpg',
     'https://media.assettype.com/newindianexpress%2F2025-01-20%2F1ppj2mgt%2FNefertiti%E2%80%99-rakeD-in.jpg?rect=0%2C0%2C1080%2C608&w=480&auto=format%2Ccompress&fit=max',
     'https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/0a/70/45/66.jpg'
+  ],
+  4: [
+    'https://travelsetu.com/apps/uploads/new_destinations_photos/destination/2024/01/24/5279591f2ba6f738cdce409260dbf924_1000x1000.jpg',
+    'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0c/19/6a/d4/vagamon.jpg',
+    'https://pix10.agoda.net/hotelImages/33062042/0/f1acc9f238595d5b2cd1360be98bafe4.jpg'
+  ],
+  5: [
+    'https://www.munnar.holiday/munnartourism/wp-content/uploads/2024/07/gap-road-munnar18.jpg',
+    'https://s7ap1.scene7.com/is/image/incredibleindia/top-station-munnar-kerala-1-attr-hero?qlt=82&ts=1726672844426',
+    'https://images.unsplash.com/photo-1591089101324-2280d9260000?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bXVubmFyfGVufDB8fDB8fHww'
+  ],
+  6: [
+    'https://kottiyoordevaswom.com/images/gallery/img-7.jpg',
+    'https://kottiyoordevaswom.com/images/gallery/img-9.jpg',
+    'https://kottiyoordevaswom.com/images/gallery/img-12.jpg',
+    'https://kottiyoordevaswom.com/images/gallery/img-22.jpg',
+    'https://kottiyoordevaswom.com/images/gallery/img-1.jpg',
+    'https://kottiyoordevaswom.com/images/gallery/img-3.jpg',
+    'https://kottiyoordevaswom.com/images/gallery/img-5.jpg',
+    'https://kottiyoordevaswom.com/images/gallery/img-14.jpg',
+    'https://kottiyoordevaswom.com/images/gallery/img-15.jpg'
+  ],
+  7: [
+    'https://b3681537.smushcdn.com/3681537/wp-content/uploads/2021/11/ponmudi-hills.jpg?lossy=2&strip=1&webp=1',
+    'https://i0.wp.com/singhruby.com/wp-content/uploads/2018/01/IMG_1041-01-e1516650242995.jpeg',
+    'https://www.ktexplorer.com/banner/post/1548309067-ponmudi-hill-station-(1).jpg'
+  ],
+  8: [
+    'https://img-mm.manoramaonline.com/content/dam/mm/mo/travel/travel-kerala/images/2022/7/5/adavi-image-01.jpg',
+    'https://img-mm.manoramaonline.com/content/dam/mm/mo/news/just-in/images/Adavi%20Kuttavanchi%20by%20Arvind%20Venugopal.jpg/photos/16x9/photo.jpg',
+    'https://img.onmanorama.com/content/dam/mm/en/travel/getting-about-kerala/pathanamthitta/images/2019/4/9/adavi.jpg?w=1120&h=583'
+  ],
+  9: [
+    'https://www.oyorooms.com/travel-guide/wp-content/uploads/2019/04/Thekkady-Lake-1-1280x720.webp',
+    'https://www.kerala.com/userfiles/1544171705_thekkady.jpg',
+    'https://www.keralatourism.org/images/microsites/periyar/thekkady-name.jpg'
+  ],
+  10: [
+    'https://content.jdmagicbox.com/v2/comp/kollam/t6/9999px474.x474.201129181601.j7t6/catalogue/jk-royal-cruise-chinnakada-kollam-tour-operators-for-boat-house-vjdzfw9xrt.jpg',
+    'https://r1imghtlak.mmtcdn.com/1e93c6981be211ea8ca00242ac110005.jpeg',
+    'https://r2imghtlak.mmtcdn.com/r2-mmt-htl-image/room-imgs/201912201939283969-8878-3ca7284236c111ea93930242ac110002.jpg'
+  ],
+  11: [
+    'https://www.poojn.in/wp-content/uploads/2025/03/Thirunelli-Temple-Visit-Your-Complete-Planning-Guide.jpeg.jpg',
+    'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1a/32/a0/a9/temple-courtyard.jpg?w=900&h=500&s=1',
+    'https://gops.org/wp-content/uploads/2015/10/cavetemple_1024.jpg'
+  ],
+  12: [
+    'https://www.holidify.com/images/cmsuploads/compressed/pampag_20190408143641_20190408143657.jpg',
+    'https://files.yappe.in/place/full/pampa-ganapathy-temple-7555848.webp',
+    'https://yensures.com/wp-content/uploads/2023/08/pxl_20230401_114527601.jpg?w=1024'
+  ],
+  13: [
+    'https://www.greenhaventours.com/wp-content/uploads/2014/05/4.jpg',
+    'https://spicetreemunnar.com/wp-content/uploads/2017/10/ramakkalmedu.jpg',
+    'https://travelsetu.com/apps/uploads/new_destinations_photos/destination/2023/12/14/d2b712b7e76e0ebefa7fbe45a92d50d1_1000x1000.jpg'
+  ],
+  14: [
+    'https://lovelysights.com/wp-content/uploads/2021/09/Mookambika-temple-1-1.jpg',
+    'https://mycameralog.com/wp-content/uploads/2022/12/IMG_0442.jpg',
+    'https://kalavadyfarmstay.com/wp-content/uploads/2022/01/Kollur-Sri-Mookambika-Temple.jpg'
+  ],
+  15: [
+    'https://poovarboatingnoah.com/wp-content/uploads/2022/04/Poovar-Boating-Noah-Pic.jpg',
+    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHuiTLVE16jsRIww9AEYtAgcGP4HEW4p2j1Q&s',
+    'https://gaviya.com/wp-content/uploads/2024/07/shikara-cruise-Poovar.jpg'
+  ],
+  16: [
+    'https://cdn.s3waas.gov.in/s39fc3d7152ba9336a670e36d0ed79bc43/uploads/bfi_thumb/2018031787-olwav55slk264yfnqhpdj7726cjrjfz40rm549bb7u.jpg',
+    'https://cdn.s3waas.gov.in/s39fc3d7152ba9336a670e36d0ed79bc43/uploads/bfi_thumb/2018031787-1-olwav55slk264yfnqhpdj7726cjrjfz40rm549bb7u.jpg',
+    'https://tripinic.com/wp-content/uploads/2023/02/Rosemala-View-Point.jpg'
+  ],
+  17: [
+    'https://images.deccanherald.com/deccanherald/2023-12/2d08af69-e309-4584-96c4-21c5e53e4755/Sabarimala_20PTI_1553521201_1.jpg?w=1200&h=675&auto=format%2Ccompress&fit=max&enlarge=true',
+    'https://www.abhibus.com/blog/wp-content/uploads/2023/12/Sabarimala-Temple-History-Timings-Location.jpg',
+    'https://www.keralaruchi.com/public/uploads/places/sabarimala-temple.jpg'
+  ],
+  18: [
+    '',
+    '',
+    ''
+  ],
+  19: [
+    '',
+    '',
+    ''
   ]
+
 };
 
 let currentSlideshowInterval = null;
@@ -497,13 +576,14 @@ function viewPlaceDetails(placeId) {
   container.style.padding = '10px';
   container.style.borderRadius = '8px';
   container.style.boxShadow = '0 0 15px rgba(0,0,0,0.5)';
-  container.style.maxWidth = '600px';
+  container.style.maxWidth = '620px';
   container.style.width = '90%';
   container.style.textAlign = 'center';
 
   // Close button
   const closeBtn = document.createElement('span');
-  closeBtn.innerHTML = '&times;';
+ // closeBtn.innerHTML = '&times;';
+closeBtn.innerHTML = '❌';
   closeBtn.style.position = 'absolute';
   closeBtn.style.top = '10px';
   closeBtn.style.right = '15px';
@@ -518,8 +598,11 @@ function viewPlaceDetails(placeId) {
   // Image element
   const img = document.createElement('img');
   img.id = 'slideshow-image';
-  img.style.width = '100%';
-  img.style.height = 'auto';
+//  img.style.width = '100%';
+ // img.style.height = 'auto';
+
+  img.style.width = '600px';
+  img.style.height = '400px';
   img.style.opacity = '0';
   img.style.transition = 'opacity 1s';
 
