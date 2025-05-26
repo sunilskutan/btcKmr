@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upcoming Tours</title>
+  <script src="fbc.js"></script>
+  <script type="module">
+    // Import Firebase modular SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const tourList = document.getElementById("tourList");
+    const now = new Date();
+
+    // Format date function
+    function formatDate(date) {
+      return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+    }
+
+    // Sanitize image URL
+    function sanitizeImageUrl(url) {
+      return url && typeof url === 'string' && url.startsWith('http') ? url : 'default.jpg';
+    }
+
+    // Placeholder viewDetails function
+    window.viewDetails = function(tour) {
+      alert(`Viewing details for tour: ${tour.tourid}`);
+      // Implement actual logic, e.g., redirect to a details page or show a modal
+    };
+
+    // Load place and bus data first
+    try {
+      const [placesSnap, busesSnap] = await Promise.all([
+        getDocs(collection(db, "places")),
+        getDocs(collection(db, "buses"))
+      ]);
+
+      const placesMap = {};
+      const busesMap = {};
+
+      placesSnap.forEach(doc => {
+        const data = doc.data();
+        placesMap[data.placeid] = {
+          name: data.placeName || 'Unknown Place',
+          imageUrl: sanitizeImageUrl(data.placeImageUrl)
+        };
+      });
+
+      busesSnap.forEach(doc => {
+        const data = doc.data();
+        busesMap[data.busid] = data.busType || 'Unknown Bus';
+      });
+
+      // Clear loading indicator
+      tourList.innerHTML = '';
+
+      // Get tours
+      const toursQuery = query(collection(db, "tours"), orderBy("tourDate"));
+      const toursSnap = await getDocs(toursQuery);
+      let foundUpcomingTours = false;
+
+      toursSnap.forEach(doc => {
+        const tour = doc.data();
+        let tourDate;
+        try {
+          tourDate = tour.tourDate?.toDate?.();
+        } catch (e) {
+          console.warn(`Invalid tourDate for tour ${tour.tourid}:`, e);
+          return; // Skip invalid tour
+        }
+
+        if (tourDate && tourDate > now) {
+          foundUpcomingTours = true;
+          const placeData = placesMap[tour.tourPlaceid] || {};
+          const placeName = placeData.name || `Place ID: ${tour.tourPlaceid}`;
+          const placeImageUrl = placeData.imageUrl || "default.jpg";
+          const busType = busesMap[tour.tourBusid] || `Bus ID: ${tour.tourBusid}`;
+
+          const div = document.createElement("div");
+          div.className = "tour-card";
+          div.innerHTML = `
+            <div class="tour-header">
+              <span class="tour-date">${formatDate(tourDate)}</span>
+              <span class="tour-id">[${tour.tourid}]</span>
+            </div>
+            <div class="tour-content">
+              <div class="tour-destination">
+                <div>
+                  <h2 class="destination-name">${placeName}</h2>
+                  <div class="tour-details">
+                   
+                  </div>
+                </div>
+                <img src="${placeImageUrl}" alt="${placeName}" class="destination-img">
+              </div>
+              <div class="tour-actions">
+                
+                <a href="TourBookings.html?tourId=${tour.tourid}" class="action-btn book-seats-btn">View Bookings </a>
+              </div>
+            </div>
+          `;
+          tourList.appendChild(div);
+        }
+      });
+
+      // Show message if no upcoming tours
+      if (!foundUpcomingTours) {
+        tourList.innerHTML = '<div class="error-message">No upcoming tours found.</div>';
+      }
+    } catch (error) {
+      console.error("Error loading data:", error);
+      tourList.innerHTML = '<div class="error-message">Failed to load tour data. Please try again later.</div>';
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f7c0;
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+      margin: 0;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #a3a047, #1b5e20);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    
+    .header h1 {
+      font-size: 2em;
+      margin: 0;
+      font-weight: 600;
+    }
+    
+    .home-link {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 24px;
+      transition: all 0.3s ease;
+    }
+    
+    .home-link:hover {
+      background-color: white;
+      color: #43a047;
+    }
+    
+    .tour-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+    
+    .tour-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+    }
+    
+    .tour-header {
+      background: #a3a047;
+      color: white;
+      padding: 12px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .tour-date {
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+    
+    .tour-id {
+      font-size: 0.8em;
+      opacity: 0.8;
+    }
+    
+    .tour-content {
+      padding: 15px;
+    }
+    
+    .tour-destination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .destination-name {
+      font-size: 1.3em;
+      font-weight: 600;
+      color: brown;
+      margin-bottom: 5px;
+    }
+    
+    .destination-img {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 5px;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .destination-img:hover {
+      transform: scale(2.5);
+    }
+    
+    .tour-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .tour-fare {
+      font-weight: bold;
+      color: #e53935;
+      font-size: 1.1em;
+    }
+    
+    .tour-bus {
+      color: #666;
+      font-size: 0.9em;
+    }
+    
+    .tour-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .action-btn {
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 600;
+      flex: 1;
+      display: block;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+  
+    
+    .book-seats-btn {
+      background-color: #ae7d32;
+      color: white;
+      border: none;
+    }
+    
+    .book-seats-btn:hover {
+      background-color: #fe7d32;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 0.7; }
+      50% { opacity: 1; }
+      100% { opacity: 0.7; }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite ease-in-out;
+    }
+    
+    #tourList {
+      min-height: 100px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: #666;
+    }
+    
+    .error-message {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 20px auto;
+    }
+    
+    @media (max-width: 600px) {
+      .tour-destination {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .destination-img {
+        margin-top: 10px;
+        width: 100%;
+        height: 150px;
+      }
+      
+      .tour-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Upcoming Tours</h1>
+      <a href="dashboard.html" class="home-link" title="Go Back To Dashboard" aria-label="Go Back To Dashboard">🏠</a>
+    </div>
+    <div id="tourList">
+      <div class="loading">Loading tours...</div>
+    </div>
+  </div>
+</body>
+</html>
