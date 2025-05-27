@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="fbc.js"></script>
+  <title>Import Excel to Firestore Collections</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .background-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 25% 25%, #1e40af20 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, #7c3aed20 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, #059669 0%, transparent 1px);
+      background-size: 100px 100px, 120px 120px, 50px 50px;
+      animation: drift 20s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(30px, -30px) rotate(1deg); }
+      66% { transform: translate(-20px, 20px) rotate(-1deg); }
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+      padding: 30px 0;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 2rem;
+      box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3);
+      animation: glow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3); }
+      to { box-shadow: 0 25px 50px rgba(139, 92, 246, 0.4); }
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .upload-section {
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 40px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .upload-area {
+      border: 2px dashed #475569;
+      border-radius: 16px;
+      padding: 60px 40px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-area:hover {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .upload-area.dragover {
+      border-color: #8b5cf6;
+      background: rgba(139, 92, 246, 0.1);
+      transform: scale(1.02);
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      display: block;
+      opacity: 0.7;
+    }
+
+    .upload-text {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #e2e8f0;
+    }
+
+    .upload-subtext {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .file-info {
+      display: none;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .file-name {
+      font-weight: 600;
+      color: #06b6d4;
+      margin-bottom: 5px;
+    }
+
+    .file-size {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    .progress-section {
+      display: none;
+      margin-top: 30px;
+    }
+
+    .progress-bar {
+      background: rgba(30, 41, 59, 0.8);
+      border-radius: 10px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 10px;
+    }
+
+    .progress-text {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      text-align: center;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: white;
+      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(71, 85, 105, 0.8);
+      color: #e2e8f0;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(71, 85, 105, 1);
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .collections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .collection-card {
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .collection-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(59, 130, 246, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .collection-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .collection-name {
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 5px;
+    }
+
+    .collection-status {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    .status-pending { color: #fbbf24; }
+    .status-success { color: #10b981; }
+    .status-error { color: #ef4444; }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 20px;
+      border-radius: 12px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      max-width: 350px;
+      backdrop-filter: blur(10px);
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.success {
+      background: rgba(16, 185, 129, 0.9);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .notification.error {
+      background: rgba(239, 68, 68, 0.9);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .notification.warning {
+      background: rgba(251, 191, 36, 0.9);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .notification.info {
+      background: rgba(59, 130, 246, 0.9);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 20px 15px; }
+      h1 { font-size: 2rem; }
+      .upload-section { padding: 30px 20px; }
+      .action-buttons { flex-direction: column; }
+    }
+  </style>
+  <script type="module">
+    import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    	const code = prompt('Enter second level admin code to proceed:');
+  	const exp = document.getElementById('imp');
+    	if (code === 'niranjana') {
+  	exp.style.display = 'block';
+	} else {
+  	alert('❌ Second level incorrect code. Access denied.');
+  	setTimeout(() => {
+    	window.history.back();
+  	}, 2000); 
+	}
+    
+    let selectedFile = null;
+    let worksheetsData = {};
+    
+    const collectionIcons = {
+      bookings: "📅",
+      buses: "🚌", 
+      places: "📍",
+      tours: "🗺️",
+      users: "👥",
+      views: "👁️"
+    };
+
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => notification.classList.add('show'), 100);
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+      }, 4000);
+    }
+
+    function updateProgress(percent, text) {
+      const progressSection = document.querySelector('.progress-section');
+      const progressFill = document.querySelector('.progress-fill');
+      const progressText = document.querySelector('.progress-text');
+      
+      progressSection.style.display = 'block';
+      progressFill.style.width = `${percent}%`;
+      progressText.textContent = text;
+    }
+
+    function updateCollectionStatus(collectionName, status, count = 0) {
+      const cards = document.querySelectorAll('.collection-card');
+      cards.forEach(card => {
+        if (card.dataset.collection === collectionName) {
+          const statusEl = card.querySelector('.collection-status');
+          statusEl.className = `collection-status status-${status}`;
+          
+          switch(status) {
+            case 'pending':
+              statusEl.textContent = 'Importing...';
+              break;
+            case 'success':
+              statusEl.textContent = `✅ ${count} records imported`;
+              break;
+            case 'error':
+              statusEl.textContent = '❌ Import failed';
+              break;
+            default:
+              statusEl.textContent = 'Ready to import';
+          }
+        }
+      });
+    }
+
+    function createCollectionCards() {
+      const container = document.querySelector('.collections-grid');
+      const collections = ['bookings', 'buses', 'places', 'tours', 'users', 'views'];
+      
+      container.innerHTML = collections.map(name => `
+        <div class="collection-card" data-collection="${name}">
+          <span class="collection-icon">${collectionIcons[name]}</span>
+          <div class="collection-name">${name.charAt(0).toUpperCase() + name.slice(1)}</div>
+          <div class="collection-status">Ready to import</div>
+        </div>
+      `).join('');
+    }
+
+    function handleFileSelect(file) {
+      selectedFile = file;
+      
+      const fileInfo = document.querySelector('.file-info');
+      const fileName = document.querySelector('.file-name');
+      const fileSize = document.querySelector('.file-size');
+      
+      fileName.textContent = file.name;
+      fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+      fileInfo.style.display = 'block';
+      
+      document.getElementById('importBtn').disabled = false;
+      
+      showNotification(`📁 File "${file.name}" selected successfully!`, 'success');
+    }
+
+    async function importToFirestore() {
+      if (!selectedFile) {
+        showNotification('Please select an Excel file first!', 'error');
+        return;
+      }
+
+      const importBtn = document.getElementById('importBtn');
+      importBtn.disabled = true;
+      importBtn.textContent = 'Importing...';
+
+      try {
+        showNotification('🚀 Starting import process...', 'info');
+        updateProgress(10, 'Reading Excel file...');
+
+        const data = await selectedFile.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        updateProgress(20, 'Processing worksheets...');
+        
+        const collections = ['bookings', 'buses', 'places', 'tours', 'users', 'views'];
+        let totalProgress = 20;
+        const progressPerCollection = 80 / collections.length;
+        
+        for (const collectionName of collections) {
+          try {
+            updateCollectionStatus(collectionName, 'pending');
+            
+            if (!workbook.SheetNames.includes(collectionName)) {
+              showNotification(`⚠️ Sheet "${collectionName}" not found in Excel file`, 'warning');
+              updateCollectionStatus(collectionName, 'error');
+              continue;
+            }
+
+            const worksheet = workbook.Sheets[collectionName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            if (jsonData.length === 0) {
+              showNotification(`⚠️ No data found in "${collectionName}" sheet`, 'warning');
+              updateCollectionStatus(collectionName, 'error');
+              continue;
+            }
+
+            updateProgress(totalProgress + progressPerCollection * 0.3, `Importing ${collectionName}...`);
+
+            let importedCount = 0;
+            const collectionRef = collection(db, collectionName);
+
+            for (const row of jsonData) {
+              try {
+                const { id, ...docData } = row;
+                
+                if (id) {
+                  await setDoc(doc(collectionRef, id), docData);
+                } else {
+                  await addDoc(collectionRef, docData);
+                }
+                importedCount++;
+              } catch (docError) {
+                console.error(`Error importing document in ${collectionName}:`, docError);
+              }
+            }
+
+            updateCollectionStatus(collectionName, 'success', importedCount);
+            showNotification(`✅ Imported ${importedCount} records to "${collectionName}"`, 'success');
+            
+          } catch (collectionError) {
+            console.error(`Error importing ${collectionName}:`, collectionError);
+            updateCollectionStatus(collectionName, 'error');
+            showNotification(`❌ Failed to import "${collectionName}": ${collectionError.message}`, 'error');
+          }
+          
+          totalProgress += progressPerCollection;
+          updateProgress(totalProgress, `Completed ${collectionName}`);
+        }
+
+        updateProgress(100, 'Import completed!');
+        showNotification('🎉 All collections imported successfully!', 'success');
+
+      } catch (error) {
+        console.error('Import Error:', error);
+        showNotification(`❌ Import failed: ${error.message}`, 'error');
+        updateProgress(0, 'Import failed');
+      } finally {
+        importBtn.disabled = false;
+        importBtn.textContent = '📥 Import to Firestore';
+      }
+    }
+
+    function resetForm() {
+      selectedFile = null;
+      document.querySelector('.file-info').style.display = 'none';
+      document.querySelector('.progress-section').style.display = 'none';
+      document.getElementById('importBtn').disabled = true;
+      document.getElementById('fileInput').value = '';
+      createCollectionCards();
+      showNotification('Form reset successfully!', 'info');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      createCollectionCards();
+      
+      const uploadArea = document.querySelector('.upload-area');
+      const fileInput = document.getElementById('fileInput');
+
+      uploadArea.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          handleFileSelect(e.target.files[0]);
+        }
+      });
+
+      // Drag and drop functionality
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+      });
+
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          handleFileSelect(files[0]);
+        }
+      });
+
+      document.getElementById('importBtn').addEventListener('click', importToFirestore);
+      document.getElementById('resetBtn').addEventListener('click', resetForm);
+    });
+
+    window.importToFirestore = importToFirestore;
+    window.resetForm = resetForm;
+  </script>
+</head>
+<body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+  <div class="background-pattern"></div>
+  
+  <div class="container" id="imp" style="display:none;">
+    <div class="header">
+      <div class="logo">📥</div>
+      <h1>Data Importer</h1>
+      <p class="subtitle">Import Excel data back to Firestore collections</p>
+    </div>
+
+    <div class="upload-section">
+      <div class="upload-area">
+        <span class="upload-icon">📊</span>
+        <div class="upload-text">Drop your Excel file here</div>
+        <div class="upload-subtext">or click to browse and select file</div>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" />
+      </div>
+      
+      <div class="file-info">
+        <div class="file-name"></div>
+        <div class="file-size"></div>
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+        <div class="progress-text">Ready to import</div>
+      </div>
+
+      <div class="action-buttons">
+        <button id="importBtn" class="btn btn-primary" disabled>
+          📥 Import to Firestore
+        </button>
+        <button id="resetBtn" class="btn btn-secondary">
+          🔄 Reset Form
+        </button>
+      </div>
+    </div>
+
+    <div class="collections-grid"></div>
+  </div>
+</body>
+</html>

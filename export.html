@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="fbc.js"></script>
+  <title>Export Firestore Collections to Excel</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header {
+      margin-bottom: 30px;
+    }
+
+    .icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      display: block;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-10px);
+      }
+      60% {
+        transform: translateY(-5px);
+      }
+    }
+
+    h1 {
+      color: #4a5568;
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #718096;
+      font-size: 1rem;
+      margin-bottom: 30px;
+    }
+
+    .collections-preview {
+      background: #f7fafc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-left: 4px solid #667eea;
+    }
+
+    .collections-title {
+      font-size: 0.9rem;
+      color: #4a5568;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .collections-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+
+    .collection-item {
+      background: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: #667eea;
+      font-weight: 500;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease;
+    }
+
+    .collection-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .export-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .export-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .export-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .export-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .export-btn:hover::before {
+      left: 100%;
+    }
+
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffffff;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 0.8rem;
+      color: #a0aec0;
+    }
+
+    /* Custom alert styles */
+    .custom-alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+      max-width: 300px;
+    }
+
+    .alert-success {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+      box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+    }
+
+    .alert-error {
+      background: linear-gradient(135deg, #f56565, #e53e3e);
+      box-shadow: 0 10px 20px rgba(245, 101, 101, 0.3);
+    }
+
+    .alert-warning {
+      background: linear-gradient(135deg, #ed8936, #dd6b20);
+      box-shadow: 0 10px 20px rgba(237, 137, 54, 0.3);
+    }
+
+    .alert-info {
+      background: linear-gradient(135deg, #4299e1, #3182ce);
+      box-shadow: 0 10px 20px rgba(66, 153, 225, 0.3);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+  <script type="module">
+    import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    	const code = prompt('Enter second level admin code to proceed:');
+  	const exp = document.getElementById('exp');
+    	if (code === 'niranjana') {
+  	exp.style.display = 'block';
+	} else {
+  	alert('❌ Second level incorrect code. Access denied.');
+  	setTimeout(() => {
+    	window.history.back();
+  	}, 2000); 
+	}
+
+    function showCustomAlert(message, type = 'info') {
+      const alert = document.createElement('div');
+      alert.className = `custom-alert alert-${type}`;
+      alert.textContent = message;
+      document.body.appendChild(alert);
+      
+      setTimeout(() => {
+        alert.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => alert.remove(), 300);
+      }, 3000);
+    }
+
+    async function exportCollections() {
+      const btn = document.querySelector('.export-btn');
+      btn.classList.add('loading');
+      btn.textContent = 'Exporting...';
+      
+      try {
+        showCustomAlert("🚀 Starting export of collections...", 'info');
+        
+        const collectionNames = ["bookings", "buses", "places", "tours", "users", "views"];
+        const workbook = XLSX.utils.book_new();
+        let exportedCount = 0;
+        
+        for (const name of collectionNames) {
+          try {
+            const snapshot = await getDocs(collection(db, name));
+            
+            if (snapshot.empty) {
+              showCustomAlert(`⚠️ No data found in "${name}" collection.`, 'warning');
+              continue;
+            }
+            
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            XLSX.utils.book_append_sheet(workbook, worksheet, name);
+            exportedCount++;
+            
+            showCustomAlert(`✅ Exported ${data.length} records from "${name}"`, 'success');
+          } catch (collectionError) {
+            showCustomAlert(`❌ Failed to export "${name}": ${collectionError.message}`, 'error');
+            console.error(`Error exporting ${name}:`, collectionError);
+          }
+        }
+        
+        if (exportedCount > 0) {
+          XLSX.writeFile(workbook, "BtcKmrDBToExcel.xlsx");
+          showCustomAlert(`🎉 Export completed! ${exportedCount} collections exported successfully!`, 'success');
+        } else {
+          showCustomAlert("⚠️ No collections were exported.", 'warning');
+        }
+        
+      } catch (error) {
+        showCustomAlert("❌ Export failed: " + error.message, 'error');
+        console.error("Export Error:", error);
+      } finally {
+        btn.classList.remove('loading');
+        btn.textContent = '📊 Export Collections';
+      }
+    }
+    
+    window.exportCollections = exportCollections;
+  </script>
+</head>
+<body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+  <div class="container" id="exp" style="display:none;">
+    <div class="header">
+      <span class="icon">🚀</span>
+      <h1>BTC Kmr Data Exporter</h1>
+      <p class="subtitle">Export full tour data to Excel </p>
+    </div>
+    
+    <div class="collections-preview">
+      <div class="collections-title">Collections to Export:</div>
+      <div class="collections-list">
+        <div class="collection-item">📅 Bookings</div>
+        <div class="collection-item">🚌 Buses</div>
+        <div class="collection-item">📍 Places</div>
+        <div class="collection-item">🗺️ Tours</div>
+        <div class="collection-item">👥 Users</div>
+        <div class="collection-item">👁️ Views</div>
+      </div>
+    </div>
+    
+    <button class="export-btn" onclick="exportCollections()">
+      📊 Export Collections
+    </button>
+    
+    <div class="footer">
+      Click the button above to export all collections to Excel
+    </div>
+  </div>
+</body>
+</html>
