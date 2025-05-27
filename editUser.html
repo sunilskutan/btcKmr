@@ -7,6 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
+    <script src="fbc.js"></script>
     <style>
         * {
             margin: 0;
@@ -292,17 +293,7 @@ text-align: center;
     </div>
 
     <script>
-        // Firebase Configuration
-       const firebaseConfig = {
-  apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
-  authDomain: "btckmr.firebaseapp.com",
-  projectId: "btckmr",
-  storageBucket: "btckmr.firebasestorage.app",
-  messagingSenderId: "1038756102997",
-  appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
-  measurementId: "G-E73FZRNCFM"
-};
-
+   
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
