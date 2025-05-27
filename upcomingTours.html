@@ -3,24 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="fbc.js"></script>
   <title>Upcoming Tours</title>
   <script type="module">
     // Import Firebase modular SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
-      authDomain: "btckmr.firebaseapp.com",
-      projectId: "btckmr",
-      storageBucket: "btckmr.appspot.com",
-      messagingSenderId: "1038756102997",
-      appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
-      measurementId: "G-E73FZRNCFM"
-    };
-
-    // Initialize Firebase
+      // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
