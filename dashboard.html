@@ -437,7 +437,8 @@
                 padding: 3px 6px !important;
             }
         }
-	  /* Assign this class to your footer element */
+
+/* Assign this class to your footer element */
 .custom-footer {
   /* Typography & color */
   color: purple;
@@ -464,6 +465,7 @@
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.4; }
 }
+
     </style>
 </head>
 
@@ -499,9 +501,9 @@
     }
 
     updatePageViews();
-    initViewerCounter();
+     initViewerCounter();
 
-   function initViewerCounter() {
+    function initViewerCounter() {
   const counterContainer = document.createElement('div');
   counterContainer.id = 'viewer-counter-container';
   counterContainer.style.cssText = `
@@ -881,18 +883,18 @@
                 <i class="fas fa-image"></i> Image Url Test
             </button>
 
-            <button class="action-btn" onclick="alert('To be added');"
+            <button class="action-btn" onclick="const code = prompt('Enter admin code to proceed:');if (code === 'niranjana') {window.location.href = 'export.html';} else if (code !== null) { alert('Incorrect code. Access denied.');}"
                 style="background-color: #009900; "
                 onmouseover="this.style.backgroundColor=' #003300'"
                 onmouseout="this.style.backgroundColor='#009900'">
-                Utility #1
+                DB Export
             </button>
 
-            <button class="action-btn" onclick="alert('To be added');"
+            <button class="action-btn" onclick="const code = prompt('Enter admin code to proceed:');if (code === 'niranjana') {window.location.href = 'import.html';} else if (code !== null) { alert('Incorrect code. Access denied.');}"
                 style="background-color:#00b300; "
                 onmouseover="this.style.backgroundColor=' #003300'"
                 onmouseout="this.style.backgroundColor='#00b300'">
-                Utility #2
+                DB Import
             </button>
 
             <button class="action-btn" onclick="const code = prompt('Enter admin code to proceed:');if (code === 'niranjana') {window.location.href = 'deleteOldBookings.html';} else if (code !== null) { alert('Incorrect code. Access denied.');}"
@@ -1251,7 +1253,7 @@ function helpMenu() {
 	     }
 }
     </script>
-	<footer style="color: purple; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 0.85rem; text-align: center; padding: 10px;" class="custom-footer">
+<footer style="color: purple; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 0.85rem; text-align: center; padding: 10px;" class="custom-footer">
   <p id="copyright">&copy; sunilskutan. All rights reserved.</p>
   <script>
     const year = new Date().getFullYear();
