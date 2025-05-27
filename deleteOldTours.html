@@ -6,6 +6,7 @@
   <title>Manage Tours</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="fbc.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -362,17 +363,7 @@
 
   <script>
 
-    // Firebase Configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
-      authDomain: "btckmr.firebaseapp.com",
-      projectId: "btckmr",
-      storageBucket: "btckmr.firebasestorage.app",
-      messagingSenderId: "1038756102997",
-      appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
-      measurementId: "G-E73FZRNCFM"
-    };
-    firebase.initializeApp(firebaseConfig);
+      firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     function formatDate(date) {
