@@ -78,7 +78,11 @@
     
     .info-card h6 {
       margin: 5px 0;
-      color: #3498db;
+      color: #3498db; 
+    }
+    .info-card h5 {
+      margin: 5px 0;
+      color: #000066; 
     }
     
     .status-indicator {
@@ -185,41 +189,193 @@
       font-size: 16px;
     }
     
-    .form-group {
-      margin-bottom: 12px;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 3px;
-      font-weight: 600;
-      color: #555;
-      font-size: 14px;
-    }
-    
-    .form-group input {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    
-    .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: none;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-      color: #777;
-    }
-    
-    .close-btn:hover {
-      color: #ff6b6b;
-    }
+  /* Form Container Styling */
+.booking-form {
+  background: linear-gradient(135deg,  #33ccff 0%, #0099cc 50%, #006080 100%);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(34, 197, 94, 0.2), 0 8px 16px rgba(22, 163, 74, 0.1);
+  position: relative;
+  max-width: 320px;
+  margin: 20px auto;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Form Title */
+.booking-form h4 {
+  color: white;
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 20px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+/* Form Group Styling */
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: white;
+  font-size: 14px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.3px;
+}
+
+/* Enhanced Input Styling */
+.form-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-size: 15px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.95);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #333;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #22c55e;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15), 0 4px 12px rgba(34, 197, 94, 0.2);
+  transform: translateY(-2px);
+}
+
+.form-group input:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: white;
+}
+
+/* Placeholder styling */
+.form-group input::placeholder {
+  color: #888;
+  font-style: italic;
+  transition: opacity 0.3s ease;
+}
+
+.form-group input:focus::placeholder {
+  opacity: 0.5;
+}
+
+/* Input validation states */
+.form-group input:valid {
+  border-color: #22c55e;
+}
+
+.form-group input:invalid:not(:placeholder-shown) {
+  border-color: #ef4444;
+}
+
+/* Close Button Styling */
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.close-btn:hover {
+  background: rgba(239, 68, 68, 0.9);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.close-btn:active {
+  transform: scale(0.95);
+}
+
+/* Floating Label Effect (Optional Enhancement) */
+.form-group.floating-label {
+  position: relative;
+}
+
+.form-group.floating-label input {
+  padding-top: 24px;
+  padding-bottom: 8px;
+}
+
+.form-group.floating-label label {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  font-size: 16px;
+  color: #888;
+  font-weight: 400;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  background: transparent;
+}
+
+.form-group.floating-label input:focus + label,
+.form-group.floating-label input:not(:placeholder-shown) + label {
+  top: 4px;
+  font-size: 12px;
+  color: white;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .booking-form {
+    margin: 10px;
+    padding: 24px 20px;
+    border-radius: 12px;
+  }
+  
+  .form-group input {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  
+  .booking-form h4 {
+    font-size: 18px;
+  }
+}
+
+/* Animation for form appearance */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.booking-form {
+  animation: slideInUp 0.4s ease-out;
+}
+
+/* Loading state for inputs */
+.form-group input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
     
     .status-message {
       text-align: center;
@@ -254,7 +410,7 @@
       background-color: #3498db;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 10px;
       font-size: 16px;
       cursor: pointer;
       transition: background-color 0.3s;
@@ -362,8 +518,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <script>
- 
-    // Initialize Firebase
+      // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     
@@ -432,7 +587,7 @@
     }
     
     // Display tour details on the page
-    function displayTourDetails(tour) {
+    async function displayTourDetails(tour) {
       const tourDetailsDiv = document.createElement('div');
       tourDetailsDiv.className = 'tour-details';
       
@@ -446,6 +601,50 @@
           day: 'numeric'
         });
       }
+
+
+  // Initialize variables for place name and bus type
+  let placeName = "Loading...";
+  let busType = "Loading...";
+
+
+
+try {
+    // Fetch place name from places collection
+    const placeid = parseInt(tour.tourPlaceid);
+    const placeSnapshot = await db.collection('places')
+      .where('placeid', '==', placeid)
+      .limit(1)
+      .get();
+      
+    if (!placeSnapshot.empty) {
+      const placeDoc = placeSnapshot.docs[0];
+      placeName = placeDoc.data().placeName;
+    } else {
+      console.warn("Place not found for ID:", tour.tourPlaceid);
+      placeName = "Unknown";
+    }
+    
+    // Fetch bus details from buses collection
+    const busid = parseInt(tour.tourBusid);
+    const busesSnapshot = await db.collection('buses')
+      .where('busid', '==', busid)
+      .limit(1)
+      .get();
+      
+    if (!busesSnapshot.empty) {
+      const busDoc = busesSnapshot.docs[0];
+      busType = busDoc.data().busType;
+
+    } else {
+      console.warn("Bus not found for ID:", busid);
+      busType = "Unknown";
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+
+
  
       // Get busid and show appropriate bus layout
       currentBusId = parseInt(tour.tourBusid);
@@ -456,14 +655,15 @@
         <div class="tour-info">
           <div class="info-card">
             <h6>Tour ID: ${tour.tourid}</h6>
-            <h6>Bus ID: ${tour.tourBusid}</h6>
+            <h5>Date: ${tourDate}</h5>
+
           </div>
           <div class="info-card">
-            <h6>Date: ${tourDate}</h6>
+           <h5>Place : ${placeName}</h5>
           </div>
           <div class="info-card">
-            <h6>Fare: ₹${tour.tourFare}</h6>
-            <h6>Place ID: ${tour.tourPlaceid}</h6>
+            <h5>Fare: ₹${tour.tourFare}</h5>
+            <h6>Bus :  ${busType}</h6>
           </div>
         </div>
       `;
