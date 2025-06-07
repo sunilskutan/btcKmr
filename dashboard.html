@@ -999,7 +999,7 @@
 
 function redirectToTours() {
     const userName = sessionStorage.getItem('userName');
-    if (userName === 'Guest') {
+    if (userName === 'Guest')||(userName === '') {
         window.location = 'guestupcomingTours.html';
     } else {
         window.location = 'upcomingTours.html';
