@@ -304,6 +304,9 @@ const db = firebase.firestore();
 const tourList = document.getElementById("tourList");
 const now = new Date();
 
+
+sessionStorage.setItem('userName', 'Guest');
+    
 // Format date function
 function formatDate(date) {
   return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
