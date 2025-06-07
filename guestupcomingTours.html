@@ -297,93 +297,120 @@
   </div>
 
   <script>
-  
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
 
-    const tourList = document.getElementById("tourList");
-    const now = new Date();
+  firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-    // Format date function
-    function formatDate(date) {
-      return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+const tourList = document.getElementById("tourList");
+const now = new Date();
+
+// Format date function
+function formatDate(date) {
+  return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+}
+
+// Function to handle scrolling to the target tour card
+function scrollToTourCard() {
+  const hash = window.location.hash;
+  if (hash && hash.startsWith('#tour-')) {
+    const targetElement = document.getElementById(hash.substring(1));
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      // Retry after a short delay if element is not found
+      setTimeout(scrollToTourCard, 100);
+    }
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// Load place and bus data first
+Promise.all([
+  db.collection("places").get(),
+  db.collection("buses").get()
+]).then(([placesSnap, busesSnap]) => {
+  const placesMap = {};
+  const busesMap = {};
+
+  placesSnap.forEach(doc => {
+    const data = doc.data();
+    placesMap[data.placeid] = {
+      name: data.placeName,
+      imageUrl: data.placeImageUrl || "" // fallback if image is missing
+    };
+  });
+
+  busesSnap.forEach(doc => {
+    const data = doc.data();
+    busesMap[data.busid] = data.busType;
+  });
+
+  // Clear loading message
+  tourList.innerHTML = '';
+
+  // Now get tours
+  db.collection("tours").orderBy("tourDate").get().then(snapshot => {
+    let hasUpcomingTours = false;
+    
+    snapshot.forEach(doc => {
+      const tour = doc.data();
+      const tourDate = tour.tourDate.toDate();
+
+      if (tourDate > now) {
+        hasUpcomingTours = true;
+        const placeData = placesMap[tour.tourPlaceid] || {};
+        const placeName = placeData.name || `Place ID: ${tour.tourPlaceid}`;
+        const placeImageUrl = placeData.imageUrl || "default.jpg"; // default image if not found
+
+        const busType = busesMap[tour.tourBusid] || `Bus ID: ${tour.tourBusid}`;
+
+        const div = document.createElement("div");
+        div.className = "tour-card";
+        div.id = `tour-${tour.tourid}`;
+
+        div.innerHTML = `
+          <div class="tour-header">
+            <span class="tour-date">${formatDate(tourDate)}</span>
+            <span class="tour-id">ID: ${tour.tourid}</span>
+          </div>
+          <div class="tour-content">
+            <div class="tour-info">
+              <div class="tour-place">${placeName}</div>
+              <div class="tour-fare">₹${tour.tourFare}</div>
+              <div class="tour-bus"><i class="fas fa-bus"></i> ${busType}</div>
+              <button class="tour-details-btn pulse" onclick='alert(${JSON.stringify(tour.tourDetails)})'>
+                <i class="fas fa-info-circle"></i> ടൂർ വിവരങ്ങള്‍
+              </button>
+              <button class="tour-bus" onclick='alert("Please Register to Book Seats")'>
+                <i class="fas fa-book"></i> Booking Status
+              </button>
+            </div>
+            <div class="tour-image">
+              <img src="${placeImageUrl}" alt="${placeName}" onerror="this.src='default.jpg'">
+            </div>
+          </div>
+        `;
+
+        tourList.appendChild(div);
+      }
+    });
+    
+    if (!hasUpcomingTours) {
+      tourList.innerHTML = '<div class="error-message">No upcoming tours found.</div>';
     }
 
-    // Load place and bus data first
-    Promise.all([
-      db.collection("places").get(),
-      db.collection("buses").get()
-    ]).then(([placesSnap, busesSnap]) => {
-      const placesMap = {};
-      const busesMap = {};
+    // Trigger scroll after tours are rendered
+    scrollToTourCard();
 
-      placesSnap.forEach(doc => {
-        const data = doc.data();
-        placesMap[data.placeid] = {
-          name: data.placeName,
-          imageUrl: data.placeImageUrl || "" // fallback if image is missing
-        };
-      });
+  });
+}).catch(error => {
+  console.error("Error loading data:", error);
+  tourList.innerHTML = '<div class="error-message">Failed to load tours. Please try again later.</div>';
+});
 
-      busesSnap.forEach(doc => {
-        const data = doc.data();
-        busesMap[data.busid] = data.busType;
-      });
-
-      // Clear loading message
-      tourList.innerHTML = '';
-
-      // Now get tours
-      db.collection("tours").orderBy("tourDate").get().then(snapshot => {
-        let hasUpcomingTours = false;
-        
-        snapshot.forEach(doc => {
-          const tour = doc.data();
-          const tourDate = tour.tourDate.toDate();
-
-          if (tourDate > now) {
-            hasUpcomingTours = true;
-            const placeData = placesMap[tour.tourPlaceid] || {};
-            const placeName = placeData.name || `Place ID: ${tour.tourPlaceid}`;
-            const placeImageUrl = placeData.imageUrl || "default.jpg"; // default image if not found
-
-            const busType = busesMap[tour.tourBusid] || `Bus ID: ${tour.tourBusid}`;
-
-            const div = document.createElement("div");
-            div.className = "tour-card";
-            div.id = `tour-${tour.tourid}`;
-            div.innerHTML = `
-              <div class="tour-header">
-                <span class="tour-date">${formatDate(tourDate)}</span>
-                <span class="tour-id">ID: ${tour.tourid}</span>
-              </div>
-              <div class="tour-content">
-                <div class="tour-info">
-                  <div class="tour-place">${placeName}</div>
-                  <div class="tour-fare">₹${tour.tourFare}</div>
-                  <div class="tour-bus"><i class="fas fa-bus"></i> ${busType}</div>
-                  <button class="tour-details-btn pulse" onclick='alert(${JSON.stringify(tour.tourDetails)})'>
-                    <i class="fas fa-info-circle"></i> ടൂർ വിവരങ്ങള്‍
-                  </button>
-                </div>
-                <div class="tour-image">
-                  <img src="${placeImageUrl}" alt="${placeName}" onerror="this.src='default.jpg'">
-                </div>
-              </div>
-            `;
-
-            tourList.appendChild(div);
-          }
-        });
-        
-        if (!hasUpcomingTours) {
-          tourList.innerHTML = '<div class="error-message">No upcoming tours found.</div>';
-        }
-      });
-    }).catch(error => {
-      console.error("Error loading data:", error);
-      tourList.innerHTML = '<div class="error-message">Failed to load tours. Please try again later.</div>';
-    });
+// Listen for page load or refresh to handle scrolling
+window.addEventListener('load', scrollToTourCard);
   </script>
 </body>
 </html>
