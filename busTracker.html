@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Bus Tracker</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: white;
+            overflow: hidden;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: linear-gradient(135deg, rgba(16, 20, 32, 0.95), rgba(30, 35, 50, 0.95));
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(102, 126, 234, 0.5); }
+            to { box-shadow: 0 0 20px rgba(102, 126, 234, 0.8); }
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .tour-selector {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 8px 15px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .tour-selector:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: rgba(46, 125, 50, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4caf50;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+            background: #1a1a1a;
+        }
+
+        .info-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, rgba(16, 20, 32, 0.95), rgba(30, 35, 50, 0.95));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            transform: translateY(100px);
+            opacity: 0;
+        }
+
+        .info-panel.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .speed-gauge {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .bus-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            transform-origin: center;
+            transition: transform 0.5s ease;
+        }
+
+        .accuracy-circle {
+            fill: rgba(102, 126, 234, 0.1);
+            stroke: rgba(102, 126, 234, 0.3);
+            stroke-width: 2;
+        }
+
+        .trail-line {
+            stroke: #667eea;
+            stroke-width: 3;
+            fill: none;
+            opacity: 0.6;
+            stroke-linecap: round;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+            }
+            
+            .logo-text {
+                font-size: 16px;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            .info-panel {
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+                padding: 15px;
+            }
+            
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+        }
+
+        .dark-theme .leaflet-control-container .leaflet-control {
+            background: rgba(30, 35, 50, 0.9);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Initializing Smart Bus Tracker</h3>
+            <p>Connecting to live GPS data...</p>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">🚌</div>
+            <div class="logo-text">Smart Bus Tracker</div>
+        </div>
+        
+        <div class="controls">
+            <select class="tour-selector" id="tourSelector">
+                <option value="">Select Tour</option>
+            </select>
+            
+            <div class="status-indicator" id="statusIndicator">
+                <div class="status-dot"></div>
+                <span>Live Tracking</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="info-panel" id="infoPanel">
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Speed</div>
+                <div class="info-value speed-gauge" id="speedDisplay">0 km/h</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Heading</div>
+                <div class="info-value" id="headingDisplay">N/A</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Accuracy</div>
+                <div class="info-value" id="accuracyDisplay">N/A</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Last Update</div>
+                <div class="info-value" id="lastUpdateDisplay">N/A</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-firestore-compat.min.js"></script>
+    
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+   <script src="fbc.js"></script>
+    <script>
+       
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Global variables
+        let map;
+        let busMarker;
+        let accuracyCircle;
+        let trailPolyline;
+        let currentTourId = null;
+        let unsubscribe = null;
+        let trailCoordinates = [];
+        let lastPosition = null;
+
+        // DOM elements
+        const tourSelector = document.getElementById('tourSelector');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const infoPanel = document.getElementById('infoPanel');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const speedDisplay = document.getElementById('speedDisplay');
+        const headingDisplay = document.getElementById('headingDisplay');
+        const accuracyDisplay = document.getElementById('accuracyDisplay');
+        const lastUpdateDisplay = document.getElementById('lastUpdateDisplay');
+
+        // Initialize the application
+        function init() {
+            initializeMap();
+            loadTours();
+            setupEventListeners();
+            
+            setTimeout(() => {
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 500);
+            }, 2000);
+        }
+
+        // Initialize the map
+        function initializeMap() {
+            map = L.map('map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([12.9716, 77.5946], 13); // Default to Bangalore
+
+            // Dark theme map
+            L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '© Stadia Maps'
+            }).addTo(map);
+
+            // Add zoom control to bottom right
+            L.control.zoom({
+                position: 'bottomright'
+            }).addTo(map);
+
+            // Create custom bus icon
+            const busIcon = L.divIcon({
+                html: '<div class="bus-icon">🚌</div>',
+                className: 'custom-marker',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+
+            // Initialize empty marker (hidden)
+            busMarker = L.marker([0, 0], { 
+                icon: busIcon,
+                opacity: 0
+            }).addTo(map);
+
+            // Initialize trail polyline
+            trailPolyline = L.polyline([], {
+                className: 'trail-line'
+            }).addTo(map);
+        }
+
+        // Load available tours
+        async function loadTours() {
+            try {
+                const doc = await db.collection('buslocations').doc('loc').get();
+                
+                if (doc.exists) {
+                    const data = doc.data();
+                    const tours = Object.keys(data);
+                    
+                    tourSelector.innerHTML = '<option value="">Select Tour</option>';
+                    
+                    tours.forEach(tourId => {
+                        const option = document.createElement('option');
+                        option.value = tourId;
+                        option.textContent = `Tour ${tourId}`;
+                        tourSelector.appendChild(option);
+                    });
+                    
+                    // Auto-select first active tour
+                    const activeTour = tours.find(tourId => data[tourId].isActive);
+                    if (activeTour) {
+                        tourSelector.value = activeTour;
+                        selectTour(activeTour);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading tours:', error);
+                updateStatus('error', 'Failed to load tours');
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            tourSelector.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    selectTour(e.target.value);
+                } else {
+                    stopTracking();
+                }
+            });
+
+            // Handle URL parameter for tour selection
+            const urlParams = new URLSearchParams(window.location.search);
+            const tourId = urlParams.get('tourid');
+            if (tourId) {
+                setTimeout(() => {
+                    tourSelector.value = tourId;
+                    selectTour(tourId);
+                }, 1000);
+            }
+        }
+
+        // Select and start tracking a tour
+        function selectTour(tourId) {
+            stopTracking();
+            currentTourId = tourId;
+            trailCoordinates = [];
+            trailPolyline.setLatLngs([]);
+            
+            // Listen for real-time updates
+            unsubscribe = db.collection('buslocations').doc('loc')
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        const tourData = data[currentTourId];
+                        
+                        if (tourData) {
+                            updateBusPosition(tourData);
+                        }
+                    }
+                }, (error) => {
+                    console.error('Error listening to location updates:', error);
+                    updateStatus('error', 'Connection lost');
+                });
+
+            updateStatus('success', `Tracking ${tourId}`);
+            infoPanel.classList.add('visible');
+        }
+
+        // Update bus position on map
+        function updateBusPosition(tourData) {
+            const { latitude, longitude, accuracy, speed, heading, timestamp, isActive } = tourData;
+            
+            if (!latitude || !longitude) return;
+
+            const newPosition = [latitude, longitude];
+            
+            // Update marker position with smooth animation
+            busMarker.setLatLng(newPosition);
+            busMarker.setOpacity(isActive ? 1 : 0.5);
+            
+            // Rotate bus icon based on heading
+            if (heading !== null) {
+                const markerElement = busMarker.getElement();
+                if (markerElement) {
+                    const busIcon = markerElement.querySelector('.bus-icon');
+                    if (busIcon) {
+                        busIcon.style.transform = `rotate(${heading}deg)`;
+                    }
+                }
+            }
+
+            // Update accuracy circle
+            if (accuracyCircle) {
+                map.removeLayer(accuracyCircle);
+            }
+            
+            accuracyCircle = L.circle(newPosition, {
+                radius: accuracy || 50,
+                className: 'accuracy-circle'
+            }).addTo(map);
+
+            // Add to trail if position changed significantly
+            if (!lastPosition || getDistance(lastPosition, newPosition) > 0.00001) {
+                trailCoordinates.push(newPosition);
+                
+                // Keep only last 50 points for performance
+                if (trailCoordinates.length > 50) {
+                    trailCoordinates.shift();
+                }
+                
+                trailPolyline.setLatLngs(trailCoordinates);
+                lastPosition = newPosition;
+            }
+
+            // Center map on first update
+            if (trailCoordinates.length === 1) {
+                map.setView(newPosition, 16);
+            }
+
+            // Update info panel
+            updateInfoPanel(tourData);
+            
+            // Update status
+            const statusText = isActive ? 'Live Tracking' : 'Inactive';
+            const statusClass = isActive ? 'success' : 'warning';
+            updateStatus(statusClass, statusText);
+        }
+
+        // Update information panel
+        function updateInfoPanel(tourData) {
+            const { speed, heading, accuracy, timestamp } = tourData;
+            
+            speedDisplay.textContent = speed ? `${(speed * 3.6).toFixed(1)} km/h` : '0 km/h';
+            headingDisplay.textContent = heading ? `${heading.toFixed(0)}°` : 'N/A';
+            accuracyDisplay.textContent = accuracy ? `${Math.round(accuracy)}m` : 'N/A';
+            
+            if (timestamp) {
+                const date = timestamp.toDate();
+                lastUpdateDisplay.textContent = date.toLocaleTimeString();
+            }
+        }
+
+        // Update status indicator
+        function updateStatus(type, message) {
+            const statusDot = statusIndicator.querySelector('.status-dot');
+            const statusText = statusIndicator.querySelector('span');
+            
+            statusText.textContent = message;
+            
+            // Update styling based on status type
+            statusIndicator.className = 'status-indicator';
+            if (type === 'error') {
+                statusDot.style.background = '#f44336';
+                statusIndicator.style.borderColor = 'rgba(244, 67, 54, 0.3)';
+                statusIndicator.style.background = 'rgba(244, 67, 54, 0.2)';
+            } else if (type === 'warning') {
+                statusDot.style.background = '#ff9800';
+                statusIndicator.style.borderColor = 'rgba(255, 152, 0, 0.3)';
+                statusIndicator.style.background = 'rgba(255, 152, 0, 0.2)';
+            } else {
+                statusDot.style.background = '#4caf50';
+                statusIndicator.style.borderColor = 'rgba(76, 175, 80, 0.3)';
+                statusIndicator.style.background = 'rgba(46, 125, 50, 0.2)';
+            }
+        }
+
+        // Stop tracking
+        function stopTracking() {
+            if (unsubscribe) {
+                unsubscribe();
+                unsubscribe = null;
+            }
+            
+            currentTourId = null;
+            busMarker.setOpacity(0);
+            
+            if (accuracyCircle) {
+                map.removeLayer(accuracyCircle);
+            }
+            
+            infoPanel.classList.remove('visible');
+            updateStatus('info', 'Select a tour to track');
+        }
+
+        // Calculate distance between two coordinates
+        function getDistance(pos1, pos2) {
+            const [lat1, lon1] = pos1;
+            const [lat2, lon2] = pos2;
+            return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lon2 - lon1, 2));
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', init);
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && currentTourId) {
+                // Refresh data when page becomes visible
+                console.log('Page visible - refreshing data');
+            }
+        });
+    </script>
+</body>
+</html>

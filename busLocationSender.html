@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Location Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 35px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 24px;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        h1 {
+            color: #333;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .tour-info {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+        }
+
+        .status.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        .status.warning {
+            background: #fff3e0;
+            color: #ef6c00;
+            border: 1px solid #ffcc02;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-stop {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        .btn-stop:hover {
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .location-info {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .location-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .location-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .location-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .btn {
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">📍</div>
+            <h1>Bus Location Tracker</h1>
+            <div class="subtitle">Real-time GPS tracking for tour management</div>
+        </div>
+
+        <div id="tourInfo" class="tour-info hidden">
+            Tour ID: <span id="tourId"></span>
+        </div>
+
+        <div id="status" class="status info">
+            Ready to start location tracking
+        </div>
+
+        <div id="locationInfo" class="location-info hidden">
+            <div class="location-row">
+                <span class="location-label">Latitude:</span>
+                <span class="location-value" id="latitude">-</span>
+            </div>
+            <div class="location-row">
+                <span class="location-label">Longitude:</span>
+                <span class="location-value" id="longitude">-</span>
+            </div>
+            <div class="location-row">
+                <span class="location-label">Accuracy:</span>
+                <span class="location-value" id="accuracy">-</span>
+            </div>
+            <div class="location-row">
+                <span class="location-label">Speed:</span>
+                <span class="location-value" id="speed">-</span>
+            </div>
+            <div class="location-row">
+                <span class="location-label">Heading:</span>
+                <span class="location-value" id="heading">-</span>
+            </div>
+            <div class="location-row">
+                <span class="location-label">Last Update:</span>
+                <span class="location-value" id="timestamp">-</span>
+            </div>
+        </div>
+
+        <button id="startBtn" class="btn" onclick="startTracking()">
+            <span id="startBtnText">Start Location Tracking</span>
+        </button>
+
+        <button id="stopBtn" class="btn btn-stop hidden" onclick="stopTracking()">
+            Stop Tracking
+        </button>
+
+        <div class="footer">
+            Secure location sharing powered by Firebase
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.2/firebase-firestore-compat.min.js"></script>
+   <script src="fbc.js"></script>
+
+    <script>
+      
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Global variables
+        let tourId = null;
+        let watchId = null;
+        let isTracking = false;
+        let hasPermission = false;
+        let updateInterval = null;
+
+        // DOM elements
+        const statusEl = document.getElementById('status');
+        const tourInfoEl = document.getElementById('tourInfo');
+        const tourIdEl = document.getElementById('tourId');
+        const locationInfoEl = document.getElementById('locationInfo');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const startBtnText = document.getElementById('startBtnText');
+
+        // Initialize page
+        function init() {
+            // Get tour ID from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            tourId = urlParams.get('tourid');
+
+            if (!tourId) {
+                updateStatus('error', 'Error: No tour ID provided in URL. Please add ?tourid=YOUR_TOUR_ID to the URL.');
+                startBtn.disabled = true;
+                return;
+            }
+
+            // Display tour info
+            tourIdEl.textContent = tourId;
+            tourInfoEl.classList.remove('hidden');
+            
+            // Check geolocation support
+            if (!navigator.geolocation) {
+                updateStatus('error', 'Geolocation is not supported by this browser.');
+                startBtn.disabled = true;
+                return;
+            }
+
+            // Check if we already have permission
+            checkLocationPermission();
+        }
+
+        // Check and request location permission
+        async function checkLocationPermission() {
+            if ('permissions' in navigator) {
+                try {
+                    const permission = await navigator.permissions.query({name: 'geolocation'});
+                    
+                    if (permission.state === 'granted') {
+                        hasPermission = true;
+                        updateStatus('success', 'Location permission granted. Ready to start tracking for Tour ' + tourId);
+                        startBtn.textContent = 'Start Tracking';
+                    } else if (permission.state === 'denied') {
+                        hasPermission = false;
+                        updateStatus('error', 'Location permission denied. Please enable location access in your browser settings.');
+                        startBtn.disabled = true;
+                    } else {
+                        hasPermission = false;
+                        updateStatus('info', 'Location permission required. Click start to grant access for Tour ' + tourId);
+                        startBtn.textContent = 'Grant Permission & Start';
+                    }
+                } catch (error) {
+                    // Fallback for browsers that don't support permissions API
+                    updateStatus('info', 'Ready to request location access for Tour ' + tourId);
+                    startBtn.textContent = 'Start Tracking';
+                }
+            } else {
+                updateStatus('info', 'Ready to start location tracking for Tour ' + tourId);
+                startBtn.textContent = 'Start Tracking';
+            }
+        }
+
+        // Update status display
+        function updateStatus(type, message) {
+            statusEl.className = `status ${type}`;
+            statusEl.innerHTML = message;
+        }
+
+        // Start location tracking
+        function startTracking() {
+            if (isTracking) return;
+
+            if (hasPermission) {
+                // Permission already granted, start tracking immediately
+                beginLocationTracking();
+            } else {
+                // Request permission first
+                updateStatus('info', '<div class="loading"></div>Requesting location permission...');
+                startBtnText.innerHTML = '<div class="loading"></div>Requesting Permission...';
+                startBtn.disabled = true;
+                
+                requestLocationPermission();
+            }
+        }
+
+        // Request location permission
+        function requestLocationPermission() {
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            };
+
+            // Try to get current position to trigger permission dialog
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    hasPermission = true;
+                    updateStatus('success', 'Location permission granted!');
+                    beginLocationTracking();
+                },
+                (error) => {
+                    onLocationError(error);
+                },
+                options
+            );
+        }
+
+        // Begin continuous location tracking
+        function beginLocationTracking() {
+            updateStatus('info', '<div class="loading"></div>Starting location tracking...');
+            startBtnText.innerHTML = '<div class="loading"></div>Starting...';
+            startBtn.disabled = true;
+
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 5000 // Allow cached position up to 5 seconds old
+            };
+
+            // Start watching position with continuous updates
+            watchId = navigator.geolocation.watchPosition(
+                onLocationSuccess,
+                onLocationError,
+                options
+            );
+
+            // Also set up regular database updates every 10 seconds
+            updateInterval = setInterval(() => {
+                if (isTracking) {
+                    navigator.geolocation.getCurrentPosition(
+                        onLocationSuccess,
+                        (error) => console.log('Background update failed:', error.message),
+                        options
+                    );
+                }
+            }, 10000);
+        }
+
+        // Handle successful location
+        function onLocationSuccess(position) {
+            if (!isTracking) {
+                isTracking = true;
+                hasPermission = true;
+                startBtn.classList.add('hidden');
+                stopBtn.classList.remove('hidden');
+                locationInfoEl.classList.remove('hidden');
+                updateStatus('success', '🟢 Live tracking active - Auto-updating database every 10 seconds');
+            }
+
+            const coords = position.coords;
+            const timestamp = new Date();
+
+            // Update UI with enhanced information
+            document.getElementById('latitude').textContent = coords.latitude.toFixed(6);
+            document.getElementById('longitude').textContent = coords.longitude.toFixed(6);
+            document.getElementById('accuracy').textContent = Math.round(coords.accuracy) + ' meters';
+            document.getElementById('speed').textContent = coords.speed ? (coords.speed * 3.6).toFixed(1) + ' km/h' : 'N/A';
+            document.getElementById('heading').textContent = coords.heading ? coords.heading.toFixed(0) + '°' : 'N/A';
+            document.getElementById('timestamp').textContent = timestamp.toLocaleTimeString();
+
+            // Send to Firebase with enhanced data
+            sendLocationToFirebase({
+                latitude: coords.latitude,
+                longitude: coords.longitude,
+                accuracy: coords.accuracy,
+                timestamp: firebase.firestore.Timestamp.fromDate(timestamp),
+                speed: coords.speed || null,
+                heading: coords.heading || null,
+                lastUpdated: firebase.firestore.Timestamp.now()
+            });
+        }
+
+        // Handle location error
+        function onLocationError(error) {
+            let message = 'Location error: ';
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    hasPermission = false;
+                    message += 'Location access denied. Please enable location permissions in your browser settings and refresh the page.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message += 'Location information unavailable. Please check your GPS settings and ensure you\'re not in an area with poor signal.';
+                    break;
+                case error.TIMEOUT:
+                    message += 'Location request timed out. Retrying...';
+                    // Don't reset UI for timeout, just retry
+                    if (hasPermission && isTracking) {
+                        setTimeout(() => {
+                            const options = {
+                                enableHighAccuracy: true,
+                                timeout: 15000,
+                                maximumAge: 10000
+                            };
+                            navigator.geolocation.getCurrentPosition(onLocationSuccess, onLocationError, options);
+                        }, 5000);
+                        return;
+                    }
+                    break;
+                default:
+                    message += 'An unknown error occurred.';
+                    break;
+            }
+
+            updateStatus('error', message);
+            if (error.code !== error.TIMEOUT) {
+                resetUI();
+            }
+        }
+
+        // Send location data to Firebase
+        async function sendLocationToFirebase(locationData) {
+            try {
+                // Use 'loc' as document name and update the same document with tour ID
+                const docRef = db.collection('buslocations').doc('loc');
+                
+                await docRef.set({
+                    [tourId]: {
+                        latitude: locationData.latitude,
+                        longitude: locationData.longitude,
+                        accuracy: locationData.accuracy,
+                        speed: locationData.speed,
+                        heading: locationData.heading,
+                        timestamp: locationData.timestamp,
+                        lastUpdated: locationData.lastUpdated,
+                        isActive: true
+                    }
+                }, { merge: true }); // Use merge to update only the specific tour ID field
+                
+                console.log('Location data updated successfully for tour:', tourId, 'at', new Date().toLocaleTimeString());
+            } catch (error) {
+                console.error('Error sending location data:', error);
+                updateStatus('warning', 'Warning: Could not send data to Firebase. Check your internet connection.');
+            }
+        }
+
+        // Stop location tracking
+        function stopTracking() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            if (updateInterval !== null) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+            
+            // Mark tour as inactive in Firebase
+            markTourInactive();
+            
+            isTracking = false;
+            updateStatus('info', 'Location tracking stopped. Permission retained for quick restart.');
+            resetUI();
+        }
+
+        // Mark tour as inactive in Firebase
+        async function markTourInactive() {
+            try {
+                const docRef = db.collection('buslocations').doc('loc');
+                await docRef.set({
+                    [tourId]: {
+                        isActive: false,
+                        stoppedAt: firebase.firestore.Timestamp.now()
+                    }
+                }, { merge: true });
+                console.log('Tour marked as inactive:', tourId);
+            } catch (error) {
+                console.error('Error marking tour inactive:', error);
+            }
+        }
+
+        // Reset UI to initial state
+        function resetUI() {
+            startBtn.classList.remove('hidden');
+            stopBtn.classList.add('hidden');
+            startBtn.disabled = false;
+            
+            // Update button text based on permission status
+            if (hasPermission) {
+                startBtnText.textContent = 'Start Tracking';
+                updateStatus('success', 'Permission granted. Ready to start tracking again for Tour ' + tourId);
+            } else {
+                startBtnText.textContent = 'Grant Permission & Start';
+            }
+            
+            locationInfoEl.classList.add('hidden');
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', init);
+
+        // Handle page visibility changes (pause tracking when page is hidden)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && isTracking) {
+                // Optionally pause tracking when page is not visible
+                console.log('Page hidden - tracking continues in background');
+            } else if (!document.hidden && isTracking) {
+                console.log('Page visible - tracking active');
+            }
+        });
+    </script>
+</body>
+</html>
