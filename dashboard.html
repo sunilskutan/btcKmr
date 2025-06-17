@@ -678,16 +678,19 @@
 <body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
     <!-- Fixed Header -->
     <div class="fixed-header">
+		<div class="header-left">
+		  <img src="https://upload.wikimedia.org/wikipedia/en/7/71/Kerala_State_Road_Transport_Corporation_logo.png" alt="Profile Picture" height="50px">
+        	</div>
+
+
+
         <div class="header-left">
             <h1>Welcome <span id="userId"></span></h1>
             <p>Budget Tourism Cell, KSRTC Kilimanoor</p>
         </div>
         <div class="header-right">
-            <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu">
-                <i class="fas fa-bars"></i>
-            </button>
             <span class="header-icon" onclick="toggleSidebar()" title="Toggle sidebar (for Admins only)">
-                <i class="fas fa-expand-arrows-alt"></i>
+                <i class="fas fa-bars"></i>
             </span>
             <span class="header-icon" onclick="helpMenu()" title="Help Menu">
                 <i class="fas fa-question-circle"></i>
@@ -743,7 +746,7 @@
                         <h3>Upcoming Tours</h3>
                     </div>
                     <div class="action-card" onclick="window.location='addUser.html';">
-                        <i class="fas fa-user-plus"></i>
+                        <i class="fas fa-user-plus" color="red"></i>
                         <h3>Register</h3>
                     </div>
                     <div class="action-card" onclick="window.location='viewPlaces.html';">
@@ -751,8 +754,8 @@
                         <h3>Tour Places</h3>
                     </div>
                     <div class="action-card" onclick="window.location='index.html';">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <h3>Logout</h3>
+                     <i class="fas fa-sign-out-alt"  style="color: red;"></i>
+                        <h3 style="color: red;">Logout</h3> 
                     </div>
                 </div>
             </div>
@@ -957,7 +960,7 @@
             userid.innerHTML = " " + userName;
         } else {
             userid.innerHTML = " Guest";
-            
+            showImage();
         }
 
         function updateDateTime() {
@@ -1246,12 +1249,66 @@ function helpMenu() {
 `);
 	}
         else if(userRole === "Admin") {
-	   	help('For <b><span style="color: violet;">Admins</span></b> to get detailed help, <b><a href="javascript:void(0);" style="color: purple;" onclick="window.location=\'adminUserManual.html\';">Click Here</a></b>');
+	   	
+			help('For <b><span style="color: violet;">Admins</span></b> to get detailed help, <b><a href="javascript:void(0);" style="color: purple;" onclick="window.location=\'adminUserManual.html\';">Click Here</a></b>');
 	     }
 	     else {
-	   	help('<b><font color=blue>Upcoming Tours </font></b><b><font color=green>വഴി ലഭ്യമാകുന്ന പേജില്‍ നിന്നും തീയതിയും സ്ഥലവും മറ്റ് വിവരങ്ങളും നോക്കി ഉറപ്പാകിയ ശേഷം Book Now വഴി സീറ്റ് സെലക്ട്‌ ചെയ്ത് വിവരങ്ങള്‍ നല്‍കി ബുക്ക്‌ ചെയ്യുക </font></b>');
+		
+		 help(`
+  <div style="font-family: Calibri, Arial, sans-serif; line-height: 1.6; font-size: 14px; color: #333;">
+    <p><i class="fas fa-bus-alt"></i> <b><font color=blue>Upcoming Tours </font></b><b><font color= #b300b3>വഴി ലഭ്യമാകുന്ന പേജില്‍ നിന്നും തീയതിയും സ്ഥലവും മറ്റ് വിവരങ്ങളും നോക്കി ഉറപ്പാകിയ ശേഷം Book Now വഴി സീറ്റ് സെലക്ട്‌ ചെയ്ത് വിവരങ്ങള്‍ നല്‍കി ബുക്ക്‌ ചെയ്യുക </font></b></p>
+      </span>
+    
+    <p><i class="fas fa-user-plus"></i> <b>Register: </b> 
+      <span style="color: #800080; font-weight: bold;">
+        മറ്റുള്ളവര്‍ക്ക് വേണ്ടി സൈറ്റില്‍ രജിസ്റ്റര്‍ ചെയ്യാം.
+      </span>
+    </p>
+    
+    <p><i class="fas fa-map-marker-alt"></i> <b>Tour Places: </b> 
+      <span style="color: #4d004d; font-weight: bold;">
+           KSRTC കിളിമാനൂര്‍ BTC യില്‍ നിന്നും സ്ഥിരമായി ടൂര്‍ പോകുന്ന സ്ഥലങ്ങള്‍.
+      </span>
+    </p>
+  </div>
+`);
 	     }
 }
+
+function showImage() {
+  // Remove existing image if already added
+  const existing = document.getElementById('dynamicImage');
+  if (existing) existing.remove();
+
+  // Create style element if not already added
+  if (!document.getElementById('dynamicImageStyle')) {
+    const style = document.createElement('style');
+    style.id = 'dynamicImageStyle';
+    style.textContent = `
+      #dynamicImage {
+        position: fixed;
+        top: 70%; /* just below vertical center */
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 80vw;
+        max-height: 40vh;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        z-index: 9999;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Create and insert the image
+  const img = document.createElement('img');
+  img.src = 'https://live.staticflickr.com/65535/54594991089_2bc7fcbfe4_z.jpg';
+  img.id = 'dynamicImage';
+  document.body.appendChild(img);
+}
+
+
+
     </script>
 <footer style="color: purple; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 0.85rem; text-align: center; padding: 10px;" class="custom-footer">
   <p id="copyright">&copy; sunilskutan. All rights reserved.</p>
