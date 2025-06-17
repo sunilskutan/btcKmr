@@ -1,3 +1,9 @@
-function _0x40a5(){const _0x168337=['1975304bqOEyu','5sVjopo','1422756ZHOjHr','G-E73FZRNCFM','2043796VidKRs','3501302vErkVN','6kvDVeP','btckmr.firebasestorage.app','225013pyeZdw','btckmr','1596768MdrZDP','AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI','1:1038756102997:web:e4a4924826c44bf432e5dc','1349936mxlwsh'];_0x40a5=function(){return _0x168337;};return _0x40a5();}function _0x2498(_0x384fb5,_0x5dbe83){const _0x40a51d=_0x40a5();return _0x2498=function(_0x2498d9,_0x197c2c){_0x2498d9=_0x2498d9-0x68;let _0x2aad0c=_0x40a51d[_0x2498d9];return _0x2aad0c;},_0x2498(_0x384fb5,_0x5dbe83);}const _0x30e253=_0x2498;(function(_0xe708fd,_0x475a60){const _0x311645=_0x2498,_0x5a4caa=_0xe708fd();while(!![]){try{const _0x10f7c2=parseInt(_0x311645(0x73))/0x1+parseInt(_0x311645(0x6a))/0x2+parseInt(_0x311645(0x75))/0x3+parseInt(_0x311645(0x6f))/0x4*(-parseInt(_0x311645(0x6c))/0x5)+parseInt(_0x311645(0x71))/0x6*(-parseInt(_0x311645(0x70))/0x7)+parseInt(_0x311645(0x6b))/0x8+-parseInt(_0x311645(0x6d))/0x9;if(_0x10f7c2===_0x475a60)break;else _0x5a4caa['push'](_0x5a4caa['shift']());}catch(_0x2b83c1){_0x5a4caa['push'](_0x5a4caa['shift']());}}}(_0x40a5,0x7c7eb));const firebaseConfig={'apiKey':_0x30e253(0x68),'authDomain':'btckmr.firebaseapp.com','projectId':_0x30e253(0x74),'storageBucket':_0x30e253(0x72),'messagingSenderId':'1038756102997','appId':_0x30e253(0x69),'measurementId':_0x30e253(0x6e)};
-
- 
+const firebaseConfig = {
+    apiKey: "AIzaSyDEVLQe8XTKsOyqGKBc7T8s41qbcIyxJTI",
+    authDomain: "btckmr.firebaseapp.com",
+    projectId: "btckmr",
+    storageBucket: "btckmr.firebasestorage.app",
+    messagingSenderId: "1038756102997",
+    appId: "1:1038756102997:web:e4a4924826c44bf432e5dc",
+    measurementId: "G-E73FZRNCFM"
+  };
