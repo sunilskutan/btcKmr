@@ -995,8 +995,10 @@
                     sidebar.style.display = "flex"; // show
                 } else {
                     sidebar.style.display = "none";  // hide
+		
                 }
             }
+	    else {showAdminOnlyMessage();}
         }
 
 
@@ -1305,6 +1307,226 @@ function showImage() {
   img.src = 'https://live.staticflickr.com/65535/54594991089_2bc7fcbfe4_z.jpg';
   img.id = 'dynamicImage';
   document.body.appendChild(img);
+}
+
+
+
+function showAdminOnlyMessage() {
+    // Create overlay container
+    const overlay = document.createElement('div');
+    overlay.id = 'adminOverlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(220,20,60,0.3), rgba(178,34,34,0.25));
+        backdrop-filter: blur(3px);
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease-in-out;
+    `;
+
+    // Create message container
+    const messageContainer = document.createElement('div');
+    messageContainer.style.cssText = `
+        background: linear-gradient(135deg, #dc143c 0%, #b22222 30%, #8b0000 100%);
+        color: white;
+        padding: 40px 60px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(220,20,60,0.4), 0 0 0 1px rgba(255,255,255,0.1);
+        text-align: center;
+        transform: scale(0.8);
+        animation: slideInScale 0.5s ease-out forwards;
+        border: 2px solid rgba(255,182,193,0.3);
+        backdrop-filter: blur(10px);
+        max-width: 90%;
+        position: relative;
+        overflow: hidden;
+    `;
+
+    // Create animated background elements
+    const bgElement1 = document.createElement('div');
+    bgElement1.style.cssText = `
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,182,193,0.15) 0%, transparent 70%);
+        animation: rotate 3s linear infinite;
+    `;
+
+    const bgElement2 = document.createElement('div');
+    bgElement2.style.cssText = `
+        position: absolute;
+        bottom: -50%;
+        left: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,105,180,0.1) 0%, transparent 70%);
+        animation: rotateReverse 4s linear infinite;
+    `;
+
+    // Create lock icon
+    const lockIcon = document.createElement('div');
+    lockIcon.innerHTML = '🚫';
+    lockIcon.style.cssText = `
+        font-size: 48px;
+        margin-bottom: 20px;
+        animation: bounce 1s ease-in-out;
+        filter: drop-shadow(0 4px 8px rgba(139,0,0,0.5));
+    `;
+
+    // Create main message
+    const mainMessage = document.createElement('h1');
+    mainMessage.textContent = 'For the use of Admins only';
+    mainMessage.style.cssText = `
+        font-size: 28px;
+        font-weight: 600;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(139,0,0,0.6);
+        letter-spacing: 1px;
+        position: relative;
+        z-index: 2;
+    `;
+
+    // Create subtitle
+    const subtitle = document.createElement('p');
+    subtitle.textContent = 'Restricted Access Area';
+    subtitle.style.cssText = `
+        font-size: 16px;
+        margin-top: 10px;
+        opacity: 0.9;
+        font-weight: 300;
+        position: relative;
+        z-index: 2;
+    `;
+
+    // Create progress bar
+    const progressBar = document.createElement('div');
+    progressBar.style.cssText = `
+        width: 100%;
+        height: 3px;
+        background: rgba(255,182,193,0.3);
+        border-radius: 2px;
+        margin-top: 30px;
+        overflow: hidden;
+        position: relative;
+        z-index: 2;
+    `;
+
+    const progressFill = document.createElement('div');
+    progressFill.style.cssText = `
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #fff, #ffb6c1, #ff69b4);
+        border-radius: 2px;
+        animation: progressFill 2s linear forwards;
+        box-shadow: 0 0 10px rgba(255,105,180,0.5);
+    `;
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideInScale {
+            from { 
+                transform: scale(0.8) translateY(50px); 
+                opacity: 0; 
+            }
+            to { 
+                transform: scale(1) translateY(0); 
+                opacity: 1; 
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes rotateReverse {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+        
+        @keyframes progressFill {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        @keyframes slideOutScale {
+            from { 
+                transform: scale(1) translateY(0); 
+                opacity: 1; 
+            }
+            to { 
+                transform: scale(0.9) translateY(-30px); 
+                opacity: 0; 
+            }
+        }
+    `;
+
+    // Assemble the overlay
+    document.head.appendChild(style);
+    progressBar.appendChild(progressFill);
+    messageContainer.appendChild(bgElement1);
+    messageContainer.appendChild(bgElement2);
+    messageContainer.appendChild(lockIcon);
+    messageContainer.appendChild(mainMessage);
+    messageContainer.appendChild(subtitle);
+    messageContainer.appendChild(progressBar);
+    overlay.appendChild(messageContainer);
+    document.body.appendChild(overlay);
+
+    // Remove overlay after 2 seconds with fade out animation
+    setTimeout(() => {
+        overlay.style.animation = 'fadeOut 0.3s ease-in-out forwards';
+        messageContainer.style.animation = 'slideOutScale 0.3s ease-in-out forwards';
+        
+        setTimeout(() => {
+            if (overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+            if (style.parentNode) {
+                style.parentNode.removeChild(style);
+            }
+        }, 300);
+    }, 2000);
+
+    // Optional: Click to dismiss
+    overlay.addEventListener('click', () => {
+        overlay.style.animation = 'fadeOut 0.2s ease-in-out forwards';
+        messageContainer.style.animation = 'slideOutScale 0.2s ease-in-out forwards';
+        
+        setTimeout(() => {
+            if (overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+            if (style.parentNode) {
+                style.parentNode.removeChild(style);
+            }
+        }, 200);
+    });
 }
 
 
