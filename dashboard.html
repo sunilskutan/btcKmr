@@ -958,6 +958,7 @@
 
         if (isLogin === 'true' && userId !== '0') {
             userid.innerHTML = " " + userName;
+		if (userRole === "Tourist"){showShareButton();}
         } else {
             userid.innerHTML = " Guest";
             showImage();
@@ -1308,6 +1309,59 @@ function showImage() {
   img.id = 'dynamicImage';
   document.body.appendChild(img);
 }
+
+
+function showShareButton() {
+  // Remove existing button if already added
+  const existingBtn = document.getElementById('shareExperienceBtn');
+  if (existingBtn) existingBtn.remove();
+
+  // Create style element if not already added
+  if (!document.getElementById('shareButtonStyle')) {
+    const style = document.createElement('style');
+    style.id = 'shareButtonStyle';
+    style.textContent = `
+      #shareExperienceBtn {
+        position: fixed;
+        top: 70%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 12px 24px;
+        font-size: 16px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+      }
+
+      #shareExperienceBtn:hover {
+        background-color: #0056b3;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Create and insert the button
+  const btn = document.createElement('button');
+  btn.id = 'shareExperienceBtn';
+  btn.textContent = 'Share Your Experience';
+  btn.onclick = () => {
+    const enteredPassword = prompt('Enter password to continue:');
+
+    const correctPassword = sessionStorage.getItem('userPassword');
+    if (enteredPassword === correctPassword) {
+      window.location.href = 'responsesPage.html';
+    } else if (enteredPassword !== null) {
+      alert('Incorrect password. Access denied.');
+    }
+  };
+
+  document.body.appendChild(btn);
+}
+
 
 
 
