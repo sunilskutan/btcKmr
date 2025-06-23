@@ -387,6 +387,7 @@
             sessionStorage.setItem('userName', 'Guest');
             sessionStorage.setItem('userRole', '');
             sessionStorage.setItem('userid', 0);
+	    sessionStorage.setItem('userPassword', '');
             // Hide loader after 1.5 seconds
             setTimeout(() => {
                 loader.style.opacity = '0';
@@ -447,14 +448,15 @@
                     let userName = userData.userName;  
                     let userRole = userData.userRole;
                     let userID = userData.userid;
+		    let userPassword = userData.userPassword;
                     
                     // Store login status and user ID in sessionStorage
                     sessionStorage.setItem('isLogin', 'true');
                     sessionStorage.setItem('userName', userName);
                     sessionStorage.setItem('userRole', userRole);
 		    sessionStorage.setItem('userid', userID);
+		    sessionStorage.setItem('userPassword', userPassword);
 
-                    
                     showNotification('Login successful! Welcome ' + userName, 'success');
                     
                     // Redirect after showing notification
