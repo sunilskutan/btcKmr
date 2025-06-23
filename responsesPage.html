@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PostFeed - Share Your Thoughts</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+
+ position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #ccc;
+}
+
+.header-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.back-button {
+  position: absolute;
+  left: 15px;
+  padding: 6px 12px;
+  font-size: 14px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #0056b3;
+}
+
+    .header h1 {
+      color: #2c3e50;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .username {
+      color: #3498db;
+      font-weight: 600;
+    }
+
+    .post-form-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.95rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 15px;
+      border: 2px solid #e1e8ed;
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      resize: vertical;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #3498db;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    input[type="url"] {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e1e8ed;
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    input[type="url"]:focus {
+      outline: none;
+      border-color: #3498db;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .post-btn {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .post-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+    }
+
+    .post-btn:active {
+      transform: translateY(0);
+    }
+
+    .post-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .posts-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .posts-header {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #ecf0f1;
+    }
+
+    .posts-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .post {
+      background: white;
+      border: 1px solid #e1e8ed;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .post:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .post-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .post-author {
+      font-weight: 700;
+      color: #2c3e50;
+      font-size: 1.1rem;
+    }
+
+    .post-time {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .post-content {
+      line-height: 1.6;
+      margin-bottom: 15px;
+      color: #2c3e50;
+      font-size: 1rem;
+    }
+
+    .link-preview {
+      background: #f8f9fa;
+      border: 1px solid #e1e8ed;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .link-preview:hover {
+      background: #e9ecef;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .link-preview-content {
+      display: flex;
+      gap: 15px;
+      align-items: flex-start;
+    }
+
+    .link-thumbnail {
+      width: 120px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+      background: #e9ecef;
+    }
+
+    .link-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .link-title {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+      font-size: 1rem;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .link-description {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .link-domain {
+      color: #3498db;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-top: 5px;
+    }
+
+    .link-loading {
+      text-align: center;
+      padding: 20px;
+      color: #7f8c8d;
+      font-style: italic;
+    }
+
+    .no-posts {
+      text-align: center;
+      color: #7f8c8d;
+      font-style: italic;
+      padding: 40px 20px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: #7f8c8d;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3498db;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .char-counter {
+      text-align: right;
+      font-size: 0.8rem;
+      color: #7f8c8d;
+      margin-top: 5px;
+    }
+
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-top: 15px;
+      border: 1px solid #c3e6cb;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+    }
+
+    .success-message.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .header, .post-form-container, .posts-container {
+        padding: 20px;
+        border-radius: 15px;
+      }
+
+      .post {
+        padding: 15px;
+        border-radius: 12px;
+      }
+
+      .post-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .link-preview-content {
+        flex-direction: column;
+      }
+
+      .link-thumbnail {
+        width: 100%;
+        height: 120px;
+      }
+
+      textarea {
+        min-height: 100px;
+        font-size: 16px;
+      }
+
+      input[type="url"] {
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .welcome-text {
+        font-size: 1rem;
+      }
+
+      .posts-title {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+   <div class="header">
+  <button class="back-button" onclick="history.back()">← Back</button>
+  <h1 class="header-title">യാത്രക്കാരുടെ കുറിപ്പുകള്‍</h1>
+</div>
+
+    <div class="post-form-container">
+      <form id="postForm">
+        <div class="form-group">
+          <label for="text" class="form-label"> Welcome, <span class="username" id="username">Loading...</span>. Share your thoughts</label>
+          <textarea id="text" placeholder="What's on your mind about the tour?" required maxlength="500"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="link" class="form-label">Add a link (optional)</label>
+          <input type="url" id="link" placeholder="https://example.com/pic.jpg (image/video link only)">
+        </div>
+        
+        <button type="submit" class="post-btn">Share Post</button>
+        <div id="successMessage" class="success-message"></div>
+      </form>
+    </div>
+
+    <div class="posts-container">
+      <div class="posts-header">
+        <h2 class="posts-title">Recent Posts</h2>
+      </div>
+      
+      <div id="posts">
+        <div class="loading">
+          <div class="spinner"></div>
+          Loading posts...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="fbc.js"></script>
+  
+  <script>
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    let currentUser;
+
+    // Get user from sessionStorage
+    function initializeUser() {
+      const userName = sessionStorage.getItem('userName');
+      if (userName) {
+        currentUser = { 
+          displayName: userName,
+          device: /Mobile|Android|iPhone|iPad/.test(navigator.userAgent) ? 'Mobile' : 'Desktop'
+        };
+        document.getElementById('username').textContent = currentUser.displayName;
+      } else {
+        // Fallback to anonymous login
+        auth.signInAnonymously().then(() => {
+          const randomId = Math.floor(Math.random() * 1000);
+          currentUser = { 
+            displayName: `User_${randomId}`,
+            device: /Mobile|Android|iPhone|iPad/.test(navigator.userAgent) ? 'Mobile' : 'Desktop'
+          };
+          document.getElementById('username').textContent = currentUser.displayName;
+        }).catch((error) => {
+          console.error('Authentication failed:', error);
+          currentUser = { displayName: 'Guest User' };
+          document.getElementById('username').textContent = 'Guest User';
+        });
+      }
+    }
+
+    // Enhanced link preview fetching function with multiple fallbacks
+    async function fetchLinkPreview(url) {
+      const domain = extractDomain(url);
+      
+      // Try multiple preview services
+      const previewServices = [
+        {
+          name: 'LinkPreview.net',
+          url: `https://api.linkpreview.net/?key=demo&q=${encodeURIComponent(url)}`,
+          parser: (data) => ({
+            title: data.title || `Visit ${domain}`,
+            description: data.description || '',
+            image: data.image || '',
+            domain: domain
+          })
+        },
+        {
+          name: 'Microlink',
+          url: `https://api.microlink.io?url=${encodeURIComponent(url)}&screenshot=false`,
+          parser: (response) => {
+            const data = response.data;
+            return {
+              title: data.title || `Visit ${domain}`,
+              description: data.description || '',
+              image: data.image?.url || '',
+              domain: domain
+            };
+          }
+        },
+        {
+          name: 'JSONLink',
+          url: `https://jsonlink.io/api/extract?url=${encodeURIComponent(url)}`,
+          parser: (data) => ({
+            title: data.title || `Visit ${domain}`,
+            description: data.description || '',
+            image: data.images?.[0] || '',
+            domain: domain
+          })
+        }
+      ];
+
+      // Try each service in order
+      for (const service of previewServices) {
+        try {
+          console.log(`Trying ${service.name} for ${url}`);
+          const response = await fetch(service.url, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data && (data.title || data.data?.title)) {
+              const preview = service.parser(data);
+              console.log(`Successfully fetched preview from ${service.name}:`, preview);
+              return preview;
+            }
+          }
+        } catch (error) {
+          console.warn(`${service.name} failed:`, error.message);
+          continue;
+        }
+      }
+      
+      // If all services fail, create a basic preview
+      console.log('All preview services failed, creating fallback preview');
+      return createFallbackPreview(url);
+    }
+
+    // Extract domain from URL
+    function extractDomain(url) {
+      try {
+        return new URL(url).hostname;
+      } catch {
+        return 'Unknown Domain';
+      }
+    }
+
+    // Show success message
+    function showSuccessMessage(message) {
+      const successDiv = document.getElementById('successMessage');
+      successDiv.textContent = message;
+      successDiv.classList.add('show');
+      
+      setTimeout(() => {
+        successDiv.classList.remove('show');
+      }, 3000);
+    }
+
+    // Enhanced form submission
+    document.getElementById('postForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const text = document.getElementById('text').value.trim();
+      const link = document.getElementById('link').value.trim();
+      const submitBtn = e.target.querySelector('.post-btn');
+      
+      if (!text) {
+        alert('Please enter some text before posting.');
+        return;
+      }
+
+      // Validate URL if provided
+      if (link && !isValidUrl(link)) {
+        alert('Please enter a valid URL (starting with http:// or https://)');
+        return;
+      }
+
+      // Disable button during submission
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Posting...';
+
+      try {
+        const postData = {
+          name: currentUser.displayName,
+          text: text,
+          link: link || null,
+          timestamp: new Date(),
+          device: currentUser.device || 'Unknown'
+        };
+
+        // Fetch link preview if link is provided
+        if (link) {
+          submitBtn.textContent = 'Fetching preview...';
+          postData.linkPreview = await fetchLinkPreview(link);
+        }
+
+        await db.collection('responses').add(postData);
+
+        // Clear form
+        document.getElementById('text').value = '';
+        document.getElementById('link').value = '';
+        
+        // Remove character counter if exists
+        const counter = document.querySelector('.char-counter');
+        if (counter) counter.remove();
+        
+        showSuccessMessage('Post shared successfully!');
+
+      } catch (error) {
+        console.error('Error posting:', error);
+        alert('Failed to post. Please try again.');
+      } finally {
+        submitBtn.textContent = 'Share Post';
+        submitBtn.disabled = false;
+      }
+    });
+
+    // URL validation function
+    function isValidUrl(string) {
+      try {
+        new URL(string);
+        return string.startsWith('http://') || string.startsWith('https://');
+      } catch (_) {
+        return false;
+      }
+    }
+
+    // Enhanced post display with link previews
+    function displayPosts() {
+      db.collection('responses')
+        .orderBy('timestamp', 'desc')
+        .limit(50)
+        .onSnapshot(async snapshot => {
+          const postDiv = document.getElementById('posts');
+          
+          if (snapshot.empty) {
+            postDiv.innerHTML = '<div class="no-posts">No posts yet. Be the first to share something!</div>';
+            return;
+          }
+
+          let postsHtml = '';
+          const postsToUpdate = [];
+          
+          // First pass: render posts and identify those needing previews
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            //const dateStr = data.timestamp?.toDate().toLocaleString() || 'Unknown time';
+const dateObj = data.timestamp?.toDate();
+const dateStr = dateObj
+  ? `${dateObj.getDate().toString().padStart(2, '0')}/${
+      (dateObj.getMonth() + 1).toString().padStart(2, '0')
+    }/${dateObj.getFullYear()}, ${
+      dateObj.getHours().toString().padStart(2, '0')
+    }:${dateObj.getMinutes().toString().padStart(2, '0')}`
+  : 'Unknown time';
+
+            
+            // Sanitize text to prevent XSS
+            const sanitizedText = escapeHtml(data.text);
+            const sanitizedName = escapeHtml(data.name || 'Anonymous');
+            
+            let linkPreviewHtml = '';
+            if (data.link) {
+              if (data.linkPreview) {
+                const preview = data.linkPreview;
+                linkPreviewHtml = `
+                  <a href="${escapeHtml(data.link)}" target="_blank" rel="noopener noreferrer" class="link-preview">
+                    <div class="link-preview-content">
+                      ${preview.image ? `<img src="${escapeHtml(preview.image)}" alt="Link thumbnail" class="link-thumbnail" onerror="this.style.display='none'">` : ''}
+                      <div class="link-info">
+                        <div class="link-title">${escapeHtml(preview.title)}</div>
+                        ${preview.description ? `<div class="link-description">${escapeHtml(preview.description)}</div>` : ''}
+                        <div class="link-domain">${escapeHtml(preview.domain)}</div>
+                      </div>
+                    </div>
+                  </a>`;
+              } else {
+                // Mark this post for preview fetching
+                postsToUpdate.push({ id: doc.id, link: data.link });
+                linkPreviewHtml = `
+                  <a href="${escapeHtml(data.link)}" target="_blank" rel="noopener noreferrer" class="link-preview" id="preview-${doc.id}">
+                    <div class="link-loading">🔗 Loading preview...</div>
+                  </a>`;
+              }
+            }
+            
+            postsHtml += `
+              <div class="post" data-post-id="${doc.id}">
+                <div class="post-header">
+                  <div class="post-author">${sanitizedName}</div>
+                  <div class="post-time">${dateStr}</div>
+                </div>
+                <div class="post-content">${sanitizedText}</div>
+                ${linkPreviewHtml}
+              </div>`;
+          });
+          
+          postDiv.innerHTML = postsHtml;
+          
+          // Second pass: fetch and update missing previews
+          postsToUpdate.forEach(async postInfo => {
+            try {
+              const preview = await fetchLinkPreview(postInfo.link);
+              
+              // Update the database with the fetched preview
+              await db.collection('responses').doc(postInfo.id).update({
+                linkPreview: preview
+              });
+              
+              // Update the UI immediately
+              const previewElement = document.getElementById(`preview-${postInfo.id}`);
+              if (previewElement) {
+                previewElement.innerHTML = `
+                  <div class="link-preview-content">
+                    ${preview.image ? `<img src="${escapeHtml(preview.image)}" alt="Link thumbnail" class="link-thumbnail" onerror="this.style.display='none'">` : ''}
+                    <div class="link-info">
+                      <div class="link-title">${escapeHtml(preview.title)}</div>
+                      ${preview.description ? `<div class="link-description">${escapeHtml(preview.description)}</div>` : ''}
+                      <div class="link-domain">${escapeHtml(preview.domain)}</div>
+                    </div>
+                  </div>`;
+              }
+            } catch (error) {
+              console.error('Error fetching preview for post:', postInfo.id, error);
+              
+              // Show fallback preview
+              const previewElement = document.getElementById(`preview-${postInfo.id}`);
+              if (previewElement) {
+                const fallbackPreview = await createFallbackPreview(postInfo.link);
+                previewElement.innerHTML = `
+                  <div class="link-preview-content">
+                    <div class="link-info">
+                      <div class="link-title">${escapeHtml(fallbackPreview.title)}</div>
+                      <div class="link-description">${escapeHtml(fallbackPreview.description)}</div>
+                      <div class="link-domain">${escapeHtml(fallbackPreview.domain)}</div>
+                    </div>
+                  </div>`;
+                
+                // Update database with fallback
+                try {
+                  await db.collection('responses').doc(postInfo.id).update({
+                    linkPreview: fallbackPreview
+                  });
+                } catch (dbError) {
+                  console.error('Error updating database with fallback preview:', dbError);
+                }
+              }
+            }
+          });
+        }, (error) => {
+          console.error('Error loading posts:', error);
+          document.getElementById('posts').innerHTML = '<div class="no-posts">Error loading posts. Please refresh the page.</div>';
+        });
+    }
+
+    // Create fallback preview when main preview fails
+    async function createFallbackPreview(url) {
+      try {
+        const domain = new URL(url).hostname;
+        return {
+          title: `Visit ${domain}`,
+          description: url,
+          image: '',
+          domain: domain
+        };
+      } catch {
+        return {
+          title: 'External Link',
+          description: url,
+          image: '',
+          domain: 'Unknown'
+        };
+      }
+    }
+
+    // HTML escape function for security
+    function escapeHtml(text) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // Enhanced cleanup function for old posts
+    async function deleteOldPosts() {
+      try {
+        const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const oldPosts = await db.collection('responses')
+          .where('timestamp', '<', cutoff)
+          .limit(10)
+          .get();
+        
+        if (!oldPosts.empty) {
+          const batch = db.batch();
+          oldPosts.forEach(doc => batch.delete(doc.ref));
+          await batch.commit();
+          console.log(`Deleted ${oldPosts.size} old posts`);
+        }
+      } catch (error) {
+        console.error('Error deleting old posts:', error);
+      }
+    }
+
+    // Character counter for textarea
+    const textarea = document.getElementById('text');
+    textarea.addEventListener('input', function() {
+      const remaining = 500 - this.value.length;
+      let counter = document.querySelector('.char-counter');
+      
+      if (remaining < 50) {
+        if (!counter) {
+          counter = document.createElement('div');
+          counter.className = 'char-counter';
+          this.parentNode.appendChild(counter);
+        }
+        counter.textContent = `${remaining} characters remaining`;
+        
+        if (remaining < 0) {
+          this.style.borderColor = '#e74c3c';
+          counter.style.color = '#e74c3c';
+        } else {
+          this.style.borderColor = '#e1e8ed';
+          counter.style.color = '#7f8c8d';
+        }
+      } else {
+        if (counter) counter.remove();
+        this.style.borderColor = '#e1e8ed';
+      }
+    });
+
+    // Initialize the app
+    initializeUser();
+    setTimeout(() => {
+      displayPosts();
+      deleteOldPosts();
+    }, 1000);
+
+    // Run cleanup periodically (every hour)
+    setInterval(deleteOldPosts, 60 * 60 * 1000);
+  </script>
+</body>
+</html>
