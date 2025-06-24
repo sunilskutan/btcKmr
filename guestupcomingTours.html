@@ -7,6 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="fbc.js"></script>
+
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
     :root {
@@ -304,9 +305,8 @@ const db = firebase.firestore();
 const tourList = document.getElementById("tourList");
 const now = new Date();
 
-
 sessionStorage.setItem('userName', 'Guest');
-    
+
 // Format date function
 function formatDate(date) {
   return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
@@ -382,7 +382,7 @@ Promise.all([
               <div class="tour-place">${placeName}</div>
               <div class="tour-fare">₹${tour.tourFare}</div>
               <div class="tour-bus"><i class="fas fa-bus"></i> ${busType}</div>
-              <button class="tour-details-btn pulse" onclick='alert(${JSON.stringify(tour.tourDetails)})'>
+              <button class="tour-details-btn pulse" onclick='showTourDetails(${JSON.stringify(tour.tourDetails)})'>
                 <i class="fas fa-info-circle"></i> ടൂർ വിവരങ്ങള്‍
               </button>
             </div>
@@ -411,6 +411,550 @@ Promise.all([
 
 // Listen for page load or refresh to handle scrolling
 window.addEventListener('load', scrollToTourCard);
+
+
+function showTourDetails(tourDetails) {
+    // Create overlay container
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(30,30,60,0.95) 100%);
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
+        backdrop-filter: blur(10px);
+        animation: fadeIn 0.3s ease-out;
+    `;
+
+    // Create content container
+    const container = document.createElement('div');
+    container.style.cssText = `
+        width: 100%;
+        max-width: 90vw;
+        height: 85vh;
+        max-height: 700px;
+        background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255,255,255,0.1);
+        display: flex;
+        flex-direction: column;
+        transform: scale(0.9);
+        animation: slideUp 0.4s ease-out forwards;
+        
+        @media (max-width: 768px) {
+            max-width: 95vw;
+            height: 90vh;
+            border-radius: 15px;
+        }
+        
+        @media (max-width: 480px) {
+            max-width: 98vw;
+            height: 95vh;
+            border-radius: 12px;
+        }
+    `;
+
+    // Create header
+    const header = document.createElement('div');
+    header.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px 25px;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        
+        @media (max-width: 480px) {
+            padding: 15px 20px;
+        }
+    `;
+
+    const headerTitle = document.createElement('h2');
+    headerTitle.textContent = 'Tour Details';
+    headerTitle.style.cssText = `
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        
+        @media (max-width: 480px) {
+            font-size: 20px;
+        }
+    `;
+
+    // Create close button (X)
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '×';
+    closeBtn.style.cssText = `
+        position: absolute;
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: none;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        
+        @media (max-width: 480px) {
+            width: 32px;
+            height: 32px;
+            font-size: 20px;
+            right: 15px;
+        }
+    `;
+
+    closeBtn.addEventListener('mouseenter', () => {
+        closeBtn.style.background = 'rgba(255,255,255,0.3)';
+        closeBtn.style.transform = 'translateY(-50%) scale(1.1)';
+    });
+
+    closeBtn.addEventListener('mouseleave', () => {
+        closeBtn.style.background = 'rgba(255,255,255,0.2)';
+        closeBtn.style.transform = 'translateY(-50%) scale(1)';
+    });
+
+    // Create scrolling text area
+    const textArea = document.createElement('div');
+    textArea.style.cssText = `
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        margin: 0;
+    `;
+
+    // Create scrolling content
+    const scrollingContent = document.createElement('div');
+    scrollingContent.style.cssText = `
+        position: absolute;
+        width: 100%;
+        padding: 30px;
+        animation: scrollUp 30s linear infinite;//20
+        white-space: pre-wrap;
+        color: #2d3748;
+        font-family: 'Noto Sans Malayalam', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 18px;
+        line-height: 1.8;
+        text-align: justify;
+        box-sizing: border-box;
+        
+        @media (max-width: 768px) {
+            padding: 25px;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+        
+        @media (max-width: 480px) {
+            padding: 20px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+    `;
+    scrollingContent.textContent = tourDetails;
+
+    // Create control panel
+    const controlPanel = document.createElement('div');
+    controlPanel.style.cssText = `
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        padding: 20px 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        
+        @media (max-width: 768px) {
+            padding: 18px 20px;
+            gap: 12px;
+        }
+        
+        @media (max-width: 480px) {
+            padding: 15px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+    `;
+
+    // Create voice control buttons
+    const voiceBtn = document.createElement('button');
+    voiceBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+            <path d="M12 2C13.1 2 14 2.9 14 4V12C14 13.1 13.1 14 12 14C10.9 14 10 13.1 10 12V4C10 2.9 10.9 2 12 2ZM19 10V12C19 15.3 16.3 18 13 18V20H11V18C7.7 18 5 15.3 5 12V10H7V12C7 14.2 8.8 16 11 16H13C15.2 16 17 14.2 17 12V10H19Z"/>
+        </svg>
+        Play Voice
+    `;
+    voiceBtn.style.cssText = `
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+        min-width: 120px;
+        
+        @media (max-width: 480px) {
+            padding: 10px 16px;
+            font-size: 13px;
+            min-width: 100px;
+        }
+    `;
+
+    const stopBtn = document.createElement('button');
+    stopBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+            <path d="M6 6H18V18H6V6Z"/>
+        </svg>
+        Stop
+    `;
+    stopBtn.style.cssText = `
+        background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(237, 137, 54, 0.4);
+        min-width: 100px;
+        
+        @media (max-width: 480px) {
+            padding: 10px 16px;
+            font-size: 13px;
+            min-width: 80px;
+        }
+    `;
+
+    // Add CSS animations and responsive styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                transform: scale(0.9) translateY(20px);
+                opacity: 0;
+            }
+            to { 
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes scrollUp {
+            0% { transform: translateY(100%); }
+            100% { transform: translateY(-100%); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .speaking-animation {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @media (max-width: 768px) and (orientation: landscape) {
+            .modal-container {
+                height: 95vh;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Speech synthesis setup
+    let utterance = null;
+    let isPlaying = false;
+
+    // Store original body styles
+    const originalBodyStyle = {
+        overflow: document.body.style.overflow,
+        position: document.body.style.position,
+        top: document.body.style.top,
+        width: document.body.style.width
+    };
+
+    // Add hover effects for buttons
+    [voiceBtn, stopBtn].forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+            btn.style.transform = 'translateY(-2px)';
+            btn.style.boxShadow = btn.style.boxShadow.replace('15px', '20px');
+        });
+        
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = 'translateY(0)';
+            btn.style.boxShadow = btn.style.boxShadow.replace('20px', '15px');
+        });
+    });
+
+    function playVoice() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            
+            const initSpeech = () => {
+                utterance = new SpeechSynthesisUtterance(tourDetails);
+                
+                const voices = window.speechSynthesis.getVoices();
+                let malayalamVoice = voices.find(voice => 
+                    voice.lang === 'ml-IN' || 
+                    voice.lang === 'ml' ||
+                    voice.lang.startsWith('ml-') ||
+                    voice.name.toLowerCase().includes('malayalam')
+                );
+                
+                if (!malayalamVoice) {
+                    malayalamVoice = voices.find(voice => 
+                        voice.lang === 'hi-IN' || 
+                        voice.lang === 'en-IN' ||
+                        voice.name.toLowerCase().includes('india')
+                    );
+                }
+                
+                if (malayalamVoice) {
+                    utterance.voice = malayalamVoice;
+                }
+                
+                utterance.lang = malayalamVoice ? malayalamVoice.lang : 'ml-IN';
+                utterance.rate = 0.7;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                
+                utterance.onstart = () => {
+                    isPlaying = true;
+                    voiceBtn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;" class="speaking-animation">
+                            <path d="M3 9V15H7L12 20V4L7 9H3ZM16.5 12C16.5 10.23 15.48 8.71 14 7.97V16.02C15.48 15.29 16.5 13.77 16.5 12ZM14 3.23V5.29C16.89 6.15 19 8.83 19 12C19 15.17 16.89 17.85 14 18.71V20.77C18.01 19.86 21 16.28 21 Анастасия 12C21 7.72 18.01 4.14 14 3.23Z"/>
+                        </svg>
+                        Speaking...
+                    `;
+                    voiceBtn.style.background = 'linear-gradient(135deg, #718096 0%, #4a5568 100%)';
+                    voiceBtn.classList.add('speaking-animation');
+                };
+                
+                utterance.onend = () => {
+                    isPlaying = false;
+                    voiceBtn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path d="M12 2C13.1 2 14 2.9 14 4V12C14 13.1 13.1 14 12 14C10.9 14 10 13.1 10 12V4C10 2.9 10.9 2 12 2ZM19 10V12C19 15.3 16.3 18 13 18V20H11V18C7.7 18 5 15.3 5 12V10H7V12C7 14.2 8.8 16 11 16H13C15.2  bono 16 17 14.2 17 12V10H19Z"/>
+                        </svg>
+                        Play Voice
+                    `;
+                    voiceBtn.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+                    voiceBtn.classList.remove('speaking-animation');
+                    // Auto-close modal when speech ends
+                    closeModal();
+                };
+                
+                utterance.onerror = (event) => {
+                    isPlaying = false;
+                    voiceBtn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path d="M12 2C13.1 2 14 2.9 14 4V12C14 13.1 13.1 14 12 14C10.9 14 10 13.1 10 12V4C10 2.9 10.9 2 12 2ZM19 10V12C19 15.3 16.3 18 13 18V20H11V18C7.7 18 5 15.3 5 12V10H7V12C7 14.2 8.8 16 11 16H13C15.2 16 17 14.2 17 12V10H19Z"/>
+                        </svg>
+                        Play Voice
+                    `;
+                    voiceBtn.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+                    voiceBtn.classList.remove('speaking-animation');
+                    showNotification('Speech not completed', 'error');
+                };
+                
+                window.speechSynthesis.speak(utterance);
+            };
+            
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                initSpeech();
+            } else {
+                window.speechSynthesis.onvoiceschanged = () => {
+                    initSpeech();
+                    window.speechSynthesis.onvoiceschanged = null;
+                };
+                
+                setTimeout(() => {
+                    if (!isPlaying) {
+                        initSpeech();
+                    }
+                }, 2000);
+            }
+        } else {
+            showNotification('Text-to-speech not supported in this browser', 'error');
+        }
+    }
+
+    function stopVoice() {
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+            isPlaying = false;
+            voiceBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                    <path d="M12 2C13.1 2 14 2.9 14 4V12C14 13.1 13.1 14 12 14C10.9 14 10 13.1 10 12V4C10 2.9 10.9 2 12 2ZM19 10V12C19 15.3 16.3 18 13 18V20H11V18C7.7 18 5 15.3 5 12V10H7V12C7 14.2 8.8 16 11 16H13C15.2 16 17 14.2 17 12V10H19Z"/>
+                </svg>
+                Play Voice
+            `;
+            voiceBtn.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+            voiceBtn.classList.remove('speaking-animation');
+        }
+    }
+
+    function closeModal() {
+        stopVoice();
+        overlay.style.animation = 'fadeIn 0.3s ease-out reverse';
+        container.style.animation = 'slideUp 0.3s ease-out reverse';
+        
+        // Restore original body styles
+        document.body.style.overflow = originalBodyStyle.overflow;
+        document.body.style.position = originalBodyStyle.position;
+        document.body.style.top = originalBodyStyle.top;
+        document.body.style.width = originalBodyStyle.width;
+        
+        // Remove event listeners
+        document.removeEventListener('keydown', escapeHandler);
+        overlay.removeEventListener('click', overlayClickHandler);
+        overlay.removeEventListener('touchstart', touchStartHandler);
+        overlay.removeEventListener('touchmove', touchMoveHandler);
+        
+        setTimeout(() => {
+            if (document.body.contains(overlay)) {
+                document.body.removeChild(overlay);
+            }
+            if (document.head.contains(style)) {
+                document.head.removeChild(style);
+            }
+        }, 300);
+    }
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'error' ? '#e53e3e' : '#48bb78'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 10001;
+            font-size: 14px;
+            animation: slideInRight 0.3s ease-out;
+        `;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideInRight 0.3s ease-out reverse';
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Event listeners
+    const overlayClickHandler = (e) => {
+        if (e.target === overlay) closeModal();
+    };
+    overlay.addEventListener('click', overlayClickHandler);
+
+    closeBtn.addEventListener('click', closeModal);
+    voiceBtn.addEventListener('click', playVoice);
+    stopBtn.addEventListener('click', stopVoice);
+
+    // Touch event handling for mobile
+    let touchStartY = 0;
+    const touchStartHandler = (e) => {
+        touchStartY = e.touches[0].clientY;
+    };
+    const touchMoveHandler = (e) => {
+        const touchY = e.touches[0].clientY;
+        const diff = touchStartY - touchY;
+        
+        if (diff > 50 && e.target === overlay) {
+            closeModal();
+        }
+    };
+    overlay.addEventListener('touchstart', touchStartHandler);
+    overlay.addEventListener('touchmove', touchMoveHandler);
+
+    // Keyboard navigation
+    const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+        } else if (e.key === ' ' || e.key === 'Enter') {
+            if (e.target === voiceBtn || e.target === stopBtn) {
+                return;
+            }
+            e.preventDefault();
+            if (isPlaying) {
+                stopVoice();
+            } else {
+                playVoice();
+            }
+        }
+    };
+    document.addEventListener('keydown', escapeHandler);
+
+    // Assemble the modal
+    header.appendChild(headerTitle);
+    header.appendChild(closeBtn);
+    textArea.appendChild(scrollingContent);
+    controlPanel.appendChild(voiceBtn);
+    controlPanel.appendChild(stopBtn);
+    container.appendChild(header);
+    container.appendChild(textArea);
+    container.appendChild(controlPanel);
+    overlay.appendChild(container);
+    
+    // Add to page
+    document.body.appendChild(overlay);
+    
+    // Prevent body scroll when modal is open
+    const scrollY = window.scrollY;
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    
+    // Auto-start voice after a short delay
+    setTimeout(() => {
+        playVoice();
+    }, 1000);
+}
   </script>
 </body>
 </html>
