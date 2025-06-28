@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure UPI Payment</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .payment-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      max-width: 450px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .payment-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #00d4aa, #00a8ff, #667eea);
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #00d4aa, #00a8ff);
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      font-weight: bold;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      color: #7f8c8d;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+
+    .amount-display {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .amount-label {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 5px;
+    }
+
+    .amount-value {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .merchant-info {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      border-left: 4px solid #00d4aa;
+    }
+
+    .merchant-name {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+
+    .merchant-upi {
+      color: #7f8c8d;
+      font-size: 14px;
+      font-family: monospace;
+    }
+
+    .important-notice {
+      background: #fff3cd;
+      color: #856404;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      border-left: 4px solid #ffc107;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .qr-container {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 25px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    #qrcode canvas {
+      border-radius: 10px;
+    }
+
+    .payment-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 15px 25px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00d4aa, #00a8ff);
+      color: white;
+      box-shadow: 0 5px 15px rgba(0, 212, 170, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 212, 170, 0.6);
+    }
+
+    .btn-secondary {
+      background: #f8f9fa;
+      color: #495057;
+      border: 2px solid #dee2e6;
+    }
+
+    .btn-secondary:hover {
+      background: #e9ecef;
+      transform: translateY(-1px);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
+    }
+
+    .transaction-verification {
+      background: #e3f2fd;
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 25px;
+      display: none;
+    }
+
+    .transaction-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 16px;
+      margin: 15px 0;
+      text-align: center;
+      font-family: monospace;
+      text-transform: uppercase;
+    }
+
+    .transaction-input:focus {
+      outline: none;
+      border-color: #00a8ff;
+      box-shadow: 0 0 0 3px rgba(0, 168, 255, 0.1);
+    }
+
+    .status-message {
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .status-success {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+
+    .status-error {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+      border-left: 4px solid #ffc107;
+    }
+
+    .instructions {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #1565c0;
+    }
+
+    .loading {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error-container {
+      text-align: center;
+      color: #dc3545;
+    }
+
+    .payment-completed {
+      display: none;
+      text-align: center;
+      color: #28a745;
+    }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: #28a745;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: white;
+    }
+
+    @media (max-width: 480px) {
+      .payment-container {
+        padding: 30px 20px;
+        margin: 10px;
+      }
+      
+      .amount-value {
+        font-size: 28px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="payment-container">
+    <div class="logo">₹</div>
+    <h1>Secure Payment</h1>
+    <p class="subtitle">Complete your payment using UPI</p>
+
+    <div id="errorContainer" class="error-container" style="display: none;">
+      <h2>Payment Error</h2>
+      <p id="errorMessage"></p>
+      <button class="btn btn-secondary" onclick="window.history.back()">Go Back</button>
+    </div>
+
+    <div id="paymentContainer">
+      <div class="amount-display">
+        <div class="amount-label">Amount to Pay</div>
+        <div class="amount-value" id="amountDisplay">₹0.00</div>
+        <div style="font-size: 14px; opacity: 0.9;">Indian Rupees</div>
+      </div>
+
+      <div class="merchant-info">
+        <div class="merchant-name">Sunil.S</div>
+        <div class="merchant-upi">sunilskutan@oksbi</div>
+      </div>
+
+      <div class="important-notice">
+        <strong>⚠️ IMPORTANT:</strong><br>
+        Please note the <strong>Transaction ID</strong> from your UPI app after completing the payment. You will need to enter it below to verify your payment.
+      </div>
+
+      <div class="qr-container">
+        <div id="qrcode"></div>
+        <p style="margin-top: 15px; color: #6c757d; font-size: 14px;">
+          Scan QR code with any UPI app
+        </p>
+      </div>
+
+      <div class="payment-buttons">
+        <a id="payLink" class="btn btn-primary" target="_blank">
+          📱 Pay with UPI App
+        </a>
+        
+        <button class="btn btn-secondary" onclick="showTransactionVerification()">
+          ✅ I have completed the payment
+        </button>
+      </div>
+
+      <div class="transaction-verification" id="transactionVerification">
+        <h3 style="color: #2c3e50; margin-bottom: 15px;">Verify Your Payment</h3>
+        <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px;">
+          Please enter the Transaction ID from your UPI payment
+        </p>
+        <input 
+          type="text" 
+          id="transactionId" 
+          class="transaction-input" 
+          placeholder="Enter Transaction ID (e.g., 123456789012)"
+          maxlength="20"
+        >
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <button class="btn btn-success" onclick="verifyTransaction()" style="flex: 1;">
+            Verify Payment
+          </button>
+          <button class="btn btn-secondary" onclick="hideTransactionVerification()" style="flex: 1;">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <div class="loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 10px; color: #667eea;">Verifying payment...</p>
+      </div>
+
+      <div id="statusMessage" class="status-message"></div>
+
+      <div class="instructions">
+        <strong>Instructions:</strong><br>
+        1. Scan the QR code with your UPI app<br>
+        2. Or click "Pay with UPI App" button<br>
+        3. Complete the payment in your UPI app<br>
+        4. Note down the Transaction ID<br>
+        5. Click "I have completed the payment" and enter the Transaction ID
+      </div>
+    </div>
+
+    <div id="paymentCompleted" class="payment-completed">
+      <div class="success-icon">✓</div>
+      <h2>Payment Successful!</h2>
+      <p style="margin: 15px 0; color: #6c757d;">Your payment has been verified successfully.</p>
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 20px 0;">
+        <p><strong>Transaction ID:</strong> <span id="confirmedTransactionId"></span></p>
+        <p><strong>Amount:</strong> <span id="confirmedAmount"></span></p>
+        <p><strong>Date:</strong> <span id="paymentDate"></span></p>
+      </div>
+      <button class="btn btn-primary" onclick="downloadReceipt()">
+        📄 Download Receipt
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let paymentAmount = 0;
+    let tourid = 0;
+    let upiseats = '';
+    let upiLink = '';
+    let verifiedTransactionId = '';
+
+    // Get amount from URL parameter
+    function getAmountFromURL() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const amount = urlParams.get('totalAmount');
+        const tourId = urlParams.get('tourId');  //modified
+        tourid = parseInt(tourId); //modified
+        upiseats = urlParams.get('upiSeats');  //modified
+
+        console.log('URL Amount parameter:', amount);
+
+sessionStorage.removeItem('paymentAmount');
+sessionStorage.removeItem('verifiedTransactionId');  
+      
+        if (!amount) {
+          showError('No payment amount specified. Please check the payment link.');
+          return false;
+        }
+        
+        const numAmount = parseFloat(amount);
+        if (isNaN(numAmount) || numAmount <= 0) {
+          showError('Invalid payment amount. Please check the payment link.');
+          return false;
+        }
+        
+        if (numAmount > 100000) {
+          showError('Payment amount exceeds maximum limit of ₹1,00,000.');
+          return false;
+        }
+        
+        paymentAmount = numAmount;
+        console.log('Valid payment amount:', paymentAmount);
+        return true;
+      } catch (error) {
+        console.error('Error parsing URL parameters:', error);
+        showError('Error reading payment information. Please try again.');
+        return false;
+      }
+    }
+
+    // Show error message
+    function showError(message) {
+      document.getElementById('errorMessage').textContent = message;
+      document.getElementById('errorContainer').style.display = 'block';
+      document.getElementById('paymentContainer').style.display = 'none';
+    }
+
+    // Generate QR code and payment link
+    function generatePayment() {
+      const upiID = "sunilskutan@oksbi";
+      const merchantName = "Sunil.S";
+      
+      // Update amount display
+      document.getElementById('amountDisplay').textContent = `₹${paymentAmount.toFixed(2)}`;
+      
+      // Create UPI payment link
+ //     upiLink = `upi://pay?pa=${upiID}&pn=${encodeURIComponent(merchantName)}&am=${paymentAmount}&cu=INR&tn=${encodeURIComponent('btcKmr.')}`;
+        upiLink = `upi://pay?pa=${upiID}&pn=${encodeURIComponent(merchantName)}&am=${paymentAmount}&cu=INR&tn=${encodeURIComponent('btcKmr.' + tourid+'-'+upiseats)}`;
+
+      
+	//Payment via Web replace by btcKmr.tourid.seatNO.
+      // Generate QR code using qrcode-generator library
+      const qrDiv = document.getElementById('qrcode');
+      qrDiv.innerHTML = '';
+      
+      try {
+        // Create QR code
+        const qr = qrcode(0, 'M');
+        qr.addData(upiLink);
+        qr.make();
+        
+        // Create canvas element
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const cellSize = 4;
+        const margin = 20;
+        const size = qr.getModuleCount();
+        
+        canvas.width = canvas.height = size * cellSize + margin * 2;
+        
+        // Fill background
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw QR code
+        ctx.fillStyle = '#000000';
+        for (let row = 0; row < size; row++) {
+          for (let col = 0; col < size; col++) {
+            if (qr.isDark(row, col)) {
+              ctx.fillRect(col * cellSize + margin, row * cellSize + margin, cellSize, cellSize);
+            }
+          }
+        }
+        
+        qrDiv.appendChild(canvas);
+        console.log('QR Code generated successfully');
+      } catch (error) {
+        console.error('QR Code generation error:', error);
+        // Fallback: create a simple text display
+        qrDiv.innerHTML = `
+          <div style="padding: 20px; background: #f8f9fa; border-radius: 10px; border: 2px dashed #dee2e6;">
+            <p style="margin: 0; color: #6c757d;">QR Code generation failed</p>
+            <p style="margin: 10px 0 0 0; font-size: 12px; word-break: break-all;">${upiLink}</p>
+          </div>
+        `;
+      }
+      
+      // Set payment link with proper event handling
+      const payLink = document.getElementById('payLink');
+      payLink.href = upiLink;
+      
+      // Add click event listener for better reliability
+      payLink.onclick = function(e) {
+        console.log('Payment link clicked:', upiLink);
+        
+        // For mobile devices, try to open UPI apps directly
+        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+          // Try to open UPI link
+          window.location.href = upiLink;
+        } else {
+          // For desktop, show QR code instructions
+          alert('Please scan the QR code with your mobile UPI app to make the payment.');
+          e.preventDefault();
+        }
+      };
+    }
+
+    // Show transaction verification section
+    function showTransactionVerification() {
+      document.getElementById('transactionVerification').style.display = 'block';
+      document.getElementById('transactionId').focus();
+    }
+
+    // Hide transaction verification section
+    function hideTransactionVerification() {
+      document.getElementById('transactionVerification').style.display = 'none';
+      document.getElementById('transactionId').value = '';
+    }
+
+    // Verify transaction ID
+    function verifyTransaction() {
+      const transactionId = document.getElementById('transactionId').value.trim();
+      
+      if (!transactionId) {
+        showStatusMessage('❌ Please enter a Transaction ID', 'error');
+        return;
+      }
+      
+      if (transactionId.length != 12) {
+        showStatusMessage('❌ Invalid Transaction ID. Please check and try again.', 'error');
+        return;
+      }
+      
+      const loading = document.querySelector('.loading');
+      loading.style.display = 'block';
+      
+      // Simulate verification process
+      setTimeout(() => {
+        loading.style.display = 'none';
+        
+
+        if (transactionId.length === 12) {
+          verifiedTransactionId = transactionId;
+
+
+sessionStorage.setItem('paymentAmount', paymentAmount);
+sessionStorage.setItem('verifiedTransactionId', verifiedTransactionId);
+
+
+
+          showPaymentSuccess();
+        } else {
+          showStatusMessage('❌ Transaction ID not found. Please check and try again.', 'error');
+        }
+      }, 2000);
+    }
+
+    // Show payment success
+    function showPaymentSuccess() {
+      document.getElementById('paymentContainer').style.display = 'none';
+      document.getElementById('paymentCompleted').style.display = 'block';
+      
+      document.getElementById('confirmedTransactionId').textContent = verifiedTransactionId;
+      document.getElementById('confirmedAmount').textContent = `₹${paymentAmount.toFixed(2)}`;
+      document.getElementById('paymentDate').textContent = new Date().toLocaleString();
+
+
+
+// ✅ Notify parent window about successful payment
+  window.opener.postMessage("success", "*");
+
+
+setTimeout(() => {
+  window.close();
+}, 2000); // closes the window after 2 seconds
+
+    }
+
+    // Show status message
+    function showStatusMessage(message, type) {
+      const statusDiv = document.getElementById('statusMessage');
+      statusDiv.textContent = message;
+      statusDiv.className = `status-message status-${type}`;
+      statusDiv.style.display = 'block';
+      
+      // Hide after 5 seconds
+      setTimeout(() => {
+        statusDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    // Download receipt
+    function downloadReceipt() {
+      const receiptData = `
+PAYMENT RECEIPT
+================
+Merchant: Sunil.S
+UPI ID: sunilskutan@oksbi
+Amount: ₹${paymentAmount.toFixed(2)}
+Date: ${new Date().toLocaleString()}
+Transaction ID: ${verifiedTransactionId}
+Status: SUCCESS
+================
+Thank you for your payment!
+      `;
+      
+      const blob = new Blob([receiptData], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `receipt_${verifiedTransactionId}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }
+
+    // Initialize payment page
+    window.onload = function() {
+      console.log('Payment page loading...');
+      try {
+        if (getAmountFromURL()) {
+          generatePayment();
+          console.log('Payment initialization completed');
+        }
+      } catch (error) {
+        console.error('Initialization error:', error);
+        showError('Failed to initialize payment page. Please refresh and try again.');
+      }
+    };
+
+    // Handle Enter key in transaction input
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && document.getElementById('transactionVerification').style.display === 'block') {
+        verifyTransaction();
+      }
+    });
+
+    // Handle back button
+    window.addEventListener('beforeunload', function(e) {
+      if (paymentAmount > 0 && !verifiedTransactionId) {
+        e.preventDefault();
+        e.returnValue = 'Payment is in progress. Are you sure you want to leave?';
+      }
+    });
+  </script>
+</body>
+</html>

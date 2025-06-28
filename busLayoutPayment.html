@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="fbc.js"></script>
+  <title>Tour Bus Seat Booking</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+    
+    .header {
+      background-color: #3498db;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center; 
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 60px;
+    }
+    
+    .header h3 {
+      margin: 0;
+      margin-bottom: 5px;
+    }
+    
+    .header a {
+      color: white;
+      text-decoration: none;
+    }
+    
+    .header a:hover {
+      text-decoration: underline;
+    }
+    
+    .tour-details {
+      background-color: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tour-details h4 {
+      margin-top: 0;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    
+    .tour-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    
+    .info-card {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 5px;
+      border-left: 4px solid #3498db;
+    }
+    
+    .info-card h6 {
+      margin: 5px 0;
+      color: #3498db; 
+    }
+    .info-card h5 {
+      margin: 5px 0;
+      color: #000066; 
+    }
+    
+    .status-indicator {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 15px 0;
+      gap: 15px;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .status-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+    
+    .bus-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+      overflow-x: auto;
+      width: 100%;
+    }
+    
+    table {
+      border-collapse: collapse;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: white;
+      margin: 0 auto;
+    }
+    
+    td {
+      padding: 5px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    
+    .spanx {
+      display: inline-block;
+      width: 35px;
+      height: 35px;
+      line-height: 35px;
+      text-align: center;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+    
+    .spanx:hover {
+      transform: scale(1.05);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .spanx.selected {
+      background-color: green;
+      color: white;
+    }
+    
+    .spanx.booked {
+      background-color: #ff6b6b;
+      color: white;
+      cursor: not-allowed;
+    }
+    
+    .driver {
+      background-color: #b8c6db;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    
+    .form-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .booking-form {
+      background-color: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 300px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+    
+    .booking-form h4 {
+      margin-top: 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #3498db;
+      color: #2c3e50;
+
+    }
+    
+  /* Form Container Styling */
+.booking-form {
+  background: linear-gradient(135deg,  #33ccff 0%, #0099cc 50%, #006080 100%);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(34, 197, 94, 0.2), 0 8px 16px rgba(22, 163, 74, 0.1);
+  position: relative;
+  max-width: 320px;
+  margin: 20px auto;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Form Title */
+.booking-form h4 {
+  color: white;
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 16px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+/* Form Group Styling */
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: white;
+  font-size: 14px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.3px;
+}
+
+/* Enhanced Input Styling */
+.form-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-size: 15px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.95);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #333;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #22c55e;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15), 0 4px 12px rgba(34, 197, 94, 0.2);
+  transform: translateY(-2px);
+}
+
+.form-group input:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: white;
+}
+
+/* Placeholder styling */
+.form-group input::placeholder {
+  color: #888;
+  font-style: italic;
+  transition: opacity 0.3s ease;
+}
+
+.form-group input:focus::placeholder {
+  opacity: 0.5;
+}
+
+/* Input validation states */
+.form-group input:valid {
+  border-color: #22c55e;
+}
+
+.form-group input:invalid:not(:placeholder-shown) {
+  border-color: #ef4444;
+}
+
+/* Close Button Styling */
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.close-btn:hover {
+  background: rgba(239, 68, 68, 0.9);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.close-btn:active {
+  transform: scale(0.95);
+}
+
+/* Floating Label Effect (Optional Enhancement) */
+.form-group.floating-label {
+  position: relative;
+}
+
+.form-group.floating-label input {
+  padding-top: 24px;
+  padding-bottom: 8px;
+}
+
+.form-group.floating-label label {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  font-size: 16px;
+  color: #888;
+  font-weight: 400;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  background: transparent;
+}
+
+.form-group.floating-label input:focus + label,
+.form-group.floating-label input:not(:placeholder-shown) + label {
+  top: 4px;
+  font-size: 12px;
+  color: white;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .booking-form {
+    margin: 10px;
+    padding: 24px 20px;
+    border-radius: 12px;
+  }
+  
+  .form-group input {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  
+  .booking-form h4 {
+    font-size: 18px;
+  }
+}
+
+/* Animation for form appearance */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.booking-form {
+  animation: slideInUp 0.4s ease-out;
+}
+
+/* Loading state for inputs */
+.form-group input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
+    
+    .status-message {
+      text-align: center;
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .loading {
+      background-color: #e2f3f5;
+      color: #0c7b93;
+    }
+    
+    .hide {
+      display: none;
+    }
+    
+    #bookSeats {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 25px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      width: 100%;
+      max-width: 300px;
+    }
+    
+    #bookSeats:hover {
+      background-color: #2980b9;
+    }
+    
+    #bookSeats:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+    
+    #selectedSeats {
+      color: #2c3e50;
+      text-align: center;
+      margin: 15px 0;
+      font-weight: bold;
+    }
+
+    .bus-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .bus-tab {
+      padding: 8px 15px;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .bus-tab.active {
+      background-color: #3498db;
+      color: white;
+    }
+
+    /* Mobile Specific Styles */
+    @media (max-width: 768px) {
+      .container {
+        width: 95%;
+        padding: 5px;
+      }
+      
+      .tour-info {
+        grid-template-columns: 1fr;
+      }
+      
+      .spanx {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 12px;
+      }
+      
+      td {
+        padding: 3px;
+        font-size: 12px;
+      }
+      
+      .header {
+        margin-bottom: 15px;
+      }
+      
+      .header h3 {
+        font-size: 18px;
+      }
+      
+      .status-indicator {
+        flex-direction: row;
+        justify-content: space-around;
+      }
+      
+      .status-item {
+        font-size: 12px;
+      }
+      
+      .form-container {
+        justify-content: center;
+      }
+      
+      .booking-form {
+        width: 100%;
+      }
+      
+      .bus-layout {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      table {
+        min-width: 320px;
+      }
+    }
+  </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <script>
+      // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    // Global variables
+    let tourData = null;
+    let selectedSeats = {};
+    let bookedSeats = [];
+    let currentBusId = null;
+    let totalFare = 0;
+    let upiSeats = '';  //modified
+
+    // Parse URL parameters
+    function getUrlParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', async function() {
+      const tourId = getUrlParameter('tourId');
+      
+      if (!tourId) {
+        showStatusMessage('Tour ID is missing from URL. Please provide a valid tour ID.', 'error');
+        document.getElementById('sf').style.display = 'none';
+        document.getElementById('bookSeats').style.display = 'none';
+        return;
+      }
+      
+      document.getElementById('loader').classList.remove('hide');
+      
+      try {
+        // Fetch tour details
+        await fetchTourDetails(parseInt(tourId));
+        
+        // Fetch existing bookings
+        await fetchBookings(parseInt(tourId));
+        
+        document.getElementById('loader').classList.add('hide');
+      } catch (error) {
+        console.error("Error initializing page:", error);
+        showStatusMessage('Error loading tour data. Please try again later.', 'error');
+        document.getElementById('loader').classList.add('hide');
+      }
+    });
+    
+    // Fetch tour details from Firestore
+    async function fetchTourDetails(tourId) {
+      try {
+        const toursSnapshot = await db.collection('tours')
+          .where('tourid', '==', tourId)
+          .limit(1)
+          .get();
+        
+        if (toursSnapshot.empty) {
+          showStatusMessage('Tour not found. Please check the tour ID.', 'error');
+          document.getElementById('sf').style.display = 'none';
+          document.getElementById('bookSeats').style.display = 'none';
+          return;
+        }
+        
+        tourData = toursSnapshot.docs[0].data();
+        displayTourDetails(tourData);
+      } catch (error) {
+        console.error("Error fetching tour details:", error);
+        showStatusMessage('Error loading tour details. Please try again later.', 'error');
+        throw error;
+      }
+    }
+    
+    // Display tour details on the page
+    async function displayTourDetails(tour) {
+      const tourDetailsDiv = document.createElement('div');
+      tourDetailsDiv.className = 'tour-details';
+      
+      // Convert timestamp to date
+      let tourDate = tour.tourDate;
+      if (tourDate && tourDate.toDate) {
+        tourDate = tourDate.toDate().toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
+
+
+  // Initialize variables for place name and bus type
+  let placeName = "Loading...";
+  let busType = "Loading...";
+
+
+
+try {
+    // Fetch place name from places collection
+    const placeid = parseInt(tour.tourPlaceid);
+    const placeSnapshot = await db.collection('places')
+      .where('placeid', '==', placeid)
+      .limit(1)
+      .get();
+      
+    if (!placeSnapshot.empty) {
+      const placeDoc = placeSnapshot.docs[0];
+      placeName = placeDoc.data().placeName;
+    } else {
+      console.warn("Place not found for ID:", tour.tourPlaceid);
+      placeName = "Unknown";
+    }
+    
+    // Fetch bus details from buses collection
+    const busid = parseInt(tour.tourBusid);
+    const busesSnapshot = await db.collection('buses')
+      .where('busid', '==', busid)
+      .limit(1)
+      .get();
+      
+    if (!busesSnapshot.empty) {
+      const busDoc = busesSnapshot.docs[0];
+      busType = busDoc.data().busType;
+
+    } else {
+      console.warn("Bus not found for ID:", busid);
+      busType = "Unknown";
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+
+
+ 
+      // Get busid and show appropriate bus layout
+      currentBusId = parseInt(tour.tourBusid);
+      showBusLayout(currentBusId);
+
+      tourDetailsDiv.innerHTML = `
+        <h4>Tour Information</h4>
+        <div class="tour-info">
+          <div class="info-card">
+            <h6>Tour ID: ${tour.tourid}</h6>
+            <h5>Date: ${tourDate}</h5>
+
+          </div>
+          <div class="info-card">
+           <h5>Place : ${placeName}</h5>
+          </div>
+          <div class="info-card">
+            <h5>Fare: ₹${tour.tourFare}</h5>
+            <h6>Bus :  ${busType}</h6>
+          </div>
+        </div>
+      `;
+      
+      // Insert tour details at the top of the container
+      const container = document.querySelector('.container');
+      container.insertBefore(tourDetailsDiv, container.firstChild.nextSibling);
+    }
+    
+    // Show appropriate bus layout based on bus ID
+    function showBusLayout(busid) {
+      // Hide all bus layouts first
+      document.getElementById("aclowfloorbus").style.display = "none";
+      document.getElementById("superfastbus").style.display = "none";
+      document.getElementById("superdeluxebus").style.display = "none";
+      document.getElementById("shortwheelbus").style.display = "none";
+      
+      // Show appropriate bus layout
+      switch (busid) {
+        case 1: document.getElementById("aclowfloorbus").style.display = "table"; break;
+        case 2: document.getElementById("superfastbus").style.display = "table"; break;
+        case 4: document.getElementById("superdeluxebus").style.display = "table"; break;
+        case 9: document.getElementById("shortwheelbus").style.display = "table"; break;
+        default: document.getElementById("superfastbus").style.display = "table"; break;
+      }
+    }
+    
+    // Fetch existing bookings for this tour
+    async function fetchBookings(tourId) {
+      try {
+        const bookingsSnapshot = await db.collection('bookings')
+          .where('bookingTourid', '==', tourId)
+          .get();
+        
+        if (!bookingsSnapshot.empty) {
+          bookingsSnapshot.forEach(doc => {
+            const booking = doc.data();
+            const seatNo = booking.bookingCustomerSeatNo;
+            bookedSeats.push(seatNo);
+            
+            // Mark all seat elements with this number as booked across all bus layouts
+            markSeatAsBooked(seatNo);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+        showStatusMessage('Error loading booked seats. Some seats might appear available even though they are booked.', 'error');
+      }
+    }
+    
+    // Mark a seat as booked in all bus layouts
+    function markSeatAsBooked(seatNo) {
+      // Find all elements with id "spanX" across all bus layouts
+      const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus","shortwheelbus"];
+      
+      busTypes.forEach(busType => {
+        const seatElement = document.querySelector(`#${busType} #span${seatNo}`);
+        if (seatElement) {
+          seatElement.classList.add('booked');
+        }
+      });
+    }
+    
+    // Handle seat selection
+    function book(element) {
+      const seatNumber = parseInt(element.innerText);
+      
+      // Check if the seat is already booked
+      if (bookedSeats.includes(seatNumber)) {
+        showStatusMessage(`Seat ${seatNumber} is already booked.`, 'error');
+        return;
+      }
+      
+      // Toggle selection
+      if (selectedSeats[seatNumber]) {
+        // Deselect the seat
+        delete selectedSeats[seatNumber];
+        element.classList.remove('selected');
+        
+        // Remove the booking form
+        const formElement = document.getElementById(`form-seat-${seatNumber}`);
+        if (formElement) {
+          formElement.remove();
+        }
+      } else {
+        // Select the seat
+        selectedSeats[seatNumber] = {
+          seatNumber: seatNumber
+        };
+        element.classList.add('selected');
+        
+        // Create booking form for this seat
+        createBookingForm(seatNumber);
+      }
+      
+      updateSelectedSeatsDisplay();
+    }
+    
+    // Create a booking form for a selected seat
+    function createBookingForm(seatNumber) {
+      const formsContainer = document.getElementById('bookingFormsContainer');
+      
+      const formElement = document.createElement('div');
+      formElement.id = `form-seat-${seatNumber}`;
+      formElement.className = 'booking-form';
+      
+      formElement.innerHTML = `
+        <button class="close-btn" onclick="removeBookingForm(${seatNumber})">&times;</button>
+        <h4>Booking Details for Seat ${seatNumber}</h4>
+        <div class="form-group">
+          <label for="name-${seatNumber}">Full Name</label>
+          <input type="text" id="name-${seatNumber}" required placeholder="Enter full name">
+        </div>
+        <div class="form-group">
+          <label for="email-${seatNumber}">Email</label>
+          <input type="email" id="email-${seatNumber}" required placeholder="Enter email address">
+        </div>
+        <div class="form-group">
+          <label for="phone-${seatNumber}">Phone Number</label>
+          <input type="tel" id="phone-${seatNumber}" required placeholder="Enter 10-digit phone number">
+        </div>
+        <div class="form-group">
+          <label for="aadhaar-${seatNumber}">Aadhaar Number</label>
+          <input type="text" id="aadhaar-${seatNumber}" required placeholder="Enter 12-digit Aadhaar number">
+        </div>
+      `;
+      
+      formsContainer.appendChild(formElement);
+      
+      // Scroll to the form
+      formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // Remove booking form when deselected
+    function removeBookingForm(seatNumber) {
+      const formElement = document.getElementById(`form-seat-${seatNumber}`);
+      if (formElement) {
+        formElement.remove();
+      }
+      
+      // Deselect the seat in all bus layouts
+      const busTypes = ["aclowfloorbus", "superfastbus", "superdeluxebus","shortwheelbus"];
+      
+      busTypes.forEach(busType => {
+        const seatElement = document.querySelector(`#${busType} #span${seatNumber}`);
+        if (seatElement) {
+          seatElement.classList.remove('selected');
+        }
+      });
+      
+      delete selectedSeats[seatNumber];
+      updateSelectedSeatsDisplay();
+    }
+    
+    // Update the selected seats display
+    function updateSelectedSeatsDisplay() {
+      const selectedSeatsElement = document.getElementById('selectedSeats');
+      const seatCount = Object.keys(selectedSeats).length;
+      
+      if (seatCount > 0) {
+        const seatNumbers = Object.keys(selectedSeats).join(', ');
+        selectedSeatsElement.innerText = `Selected Seats: ${seatNumbers} (${seatCount} seats)`;
+        upiSeats = seatNumbers; //modofied
+        if (tourData) {
+          totalFare = seatCount * tourData.tourFare;
+          selectedSeatsElement.innerText += ` | Total: ₹${totalFare}`;
+        }
+      } else {
+        selectedSeatsElement.innerText = 'No seats selected';
+      }
+      
+      // Enable/disable book button based on selections
+      document.getElementById('bookSeats').disabled = seatCount === 0;
+    }
+    
+
+
+function openUPIPaymentPage(totalAmount) {
+  return new Promise((resolve) => {
+
+    const tourId = parseInt(tourData.tourid); //modified
+    const paymentWindow = window.open(`upiPay.html?totalAmount=${totalAmount}&tourId=${tourId}&upiSeats=${upiSeats}`, "_blank", "width=500,height=700"); //modified
+
+    window.addEventListener("message", function handler(event) {
+      if (event.source === paymentWindow) {
+        window.removeEventListener("message", handler);
+        paymentWindow.close();
+        resolve(event.data === "success");
+      }
+    });
+  });
+}
+
+
+
+
+
+  async function submitAllBookings(event) {
+  event.preventDefault();
+
+  const seatNumbers = Object.keys(selectedSeats);
+  if (seatNumbers.length === 0) {
+    showStatusMessage('Please select at least one seat to book.', 'error');
+    return;
+  }
+
+  // Validate all forms
+  for (const seatNumber of seatNumbers) {
+    const nameInput = document.getElementById(`name-${seatNumber}`);
+    const emailInput = document.getElementById(`email-${seatNumber}`);
+    const phoneInput = document.getElementById(`phone-${seatNumber}`);
+    const aadhaarInput = document.getElementById(`aadhaar-${seatNumber}`);
+
+    if (!nameInput.value) {
+      showStatusMessage(`Please enter name for seat ${seatNumber}.`, 'error');
+      nameInput.focus();
+      return;
+    }
+
+    if (!emailInput.value || !isValidEmail(emailInput.value)) {
+      showStatusMessage(`Please enter a valid email for seat ${seatNumber}.`, 'error');
+      emailInput.focus();
+      return;
+    }
+
+    if (!phoneInput.value || !isValidPhone(phoneInput.value)) {
+      showStatusMessage(`Please enter a valid 10-digit phone number for seat ${seatNumber}.`, 'error');
+      phoneInput.focus();
+      return;
+    }
+
+    if (!aadhaarInput.value || !isValidAadhaar(aadhaarInput.value)) {
+      showStatusMessage(`Please enter a valid 12-digit Aadhaar number for seat ${seatNumber}.`, 'error');
+      aadhaarInput.focus();
+      return;
+    }
+
+    selectedSeats[seatNumber] = {
+      seatNumber: parseInt(seatNumber),
+      name: nameInput.value,
+      email: emailInput.value,
+      phone: phoneInput.value,
+      aadhaar: aadhaarInput.value
+    };
+  }
+
+
+
+const paymentConfirmed = await openUPIPaymentPage(totalFare);
+
+
+
+
+
+  if (!paymentConfirmed) {
+    showStatusMessage("Payment not completed. Booking cancelled.", "error");
+    return;
+  }
+
+
+
+
+
+
+  let tourWhatsAppLink='';
+
+  const submitButton = document.getElementById('bookSeats');
+  submitButton.disabled = true;
+  document.getElementById('loader').classList.remove('hide');
+
+
+  try {
+    const tourId = parseInt(tourData.tourid); // Ensure it's a number
+
+    // Count existing bookings for this tourid
+    const snapshot = await db.collection('bookings')
+      .where('bookingTourid', '==', tourId)
+      .get();
+    let currentCount = snapshot.size;
+
+    const promises = [];
+    const bookingIds = [];
+
+
+ try {
+    // Fetch whatsapp link from tours collection
+    const tourSnapshot = await db.collection('tours')
+      .where('tourid', '==', tourId)
+      .limit(1)
+      .get();
+      
+    if (!tourSnapshot.empty) {
+      const tourDoc = tourSnapshot.docs[0];
+      tourWhatsAppLink = tourDoc.data().tourWhatsAppLink;
+    } else {
+      console.warn("WhatsAppLink not found for this Tour:", tourDoc.data().tourid);
+      tourWhatsAppLink = "Unknown";
+    }
+    
+   
+   
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+
+
+    for (const seatNumber of seatNumbers) {
+      const seatData = selectedSeats[seatNumber];
+
+      const nextId = currentCount + 1;
+      currentCount++;
+
+      // Format: tourid + '000' + nextId (e.g., 1230006)
+      const bookingId = `${tourId}000${nextId}`;
+      const useridentity = sessionStorage.getItem("userid");
+      const userID = parseInt(useridentity);
+
+
+let bookingPaymentAmount = Number(sessionStorage.getItem('paymentAmount'));
+let bookingPaymentTransactionId = Number(sessionStorage.getItem('verifiedTransactionId'));
+
+
+      const bookingData = {
+        bookingCustomerAadhaarNo: parseInt(seatData.aadhaar),
+        bookingCustomerEmail: seatData.email,
+        bookingCustomerName: seatData.name,
+        bookingCustomerPhoneNo: seatData.phone,
+        bookingCustomerSeatNo: parseInt(seatNumber),
+        bookingCustomerStatus: 'confirmed',
+        bookingDate: firebase.firestore.Timestamp.now(),
+        bookingTourid: tourId,
+	bookingUserid: userID,
+	bookingPaymentAmount: bookingPaymentAmount,
+	bookingPaymentTransactionId: bookingPaymentTransactionId,
+        bookingid: bookingId
+      };
+
+      bookingIds.push(bookingId);
+      promises.push(db.collection('bookings').add(bookingData));
+    }
+
+    await Promise.all(promises);
+
+    const idsText = bookingIds.join(', ');
+    showWhatsAppStatusMessage(`Booking successful! Your seats have been reserved. Booking ID(s): ${idsText}`, tourWhatsAppLink);
+
+    for (const seatNumber of seatNumbers) {
+      bookedSeats.push(parseInt(seatNumber));
+      markSeatAsBooked(parseInt(seatNumber));
+
+      const formElement = document.getElementById(`form-seat-${seatNumber}`);
+      if (formElement) {
+        formElement.remove();
+      }
+    }
+
+    selectedSeats = {};
+    updateSelectedSeatsDisplay();
+
+  } catch (error) {
+    console.error("Error submitting bookings:", error);
+    showStatusMessage('Error processing your booking. Please try again later.', 'error');
+  } finally {
+    submitButton.disabled = false;
+    document.getElementById('loader').classList.add('hide');
+  }
+}
+
+
+
+    // Show status message
+    function showStatusMessage(message, type) {
+      const statusElement = document.getElementById('statusMessage');
+      statusElement.innerText = message;
+      statusElement.className = 'status-message';
+      
+      if (type) {
+        statusElement.classList.add(type);
+      }
+      
+      // Auto-hide success messages after 5 seconds
+      if (type !== '') {
+        setTimeout(() => {
+          statusElement.innerText = '';
+          statusElement.className = 'status-message hide';
+        }, 5000);
+      }
+      
+      // Scroll to status message
+      statusElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+
+
+// Show WhatsApp status message at top of screen
+function showWhatsAppStatusMessage(message, whatsappGroupLink, type = 'info') {
+  // Remove existing status message if any
+  const existingStatus = document.getElementById('whatsappStatusMessage');
+  if (existingStatus) {
+    existingStatus.remove();
+  }
+
+  // Create status message container
+  const statusContainer = document.createElement('div');
+  statusContainer.id = 'whatsappStatusMessage';
+  statusContainer.className = `whatsapp-status-message ${type}`;
+  
+  // Create the message content with WhatsApp icon and link
+  statusContainer.innerHTML = `
+    <div class="status-content">
+      <div class="message-text">
+        
+        <span>${message}</span>
+      </div>
+      <a href="${whatsappGroupLink}" class="join-button" >
+
+<svg class="whatsapp-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.669.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.382"/>
+        </svg>
+
+
+        Join WhatsApp Group
+      </a>
+      <button class="close-button" onclick="closeWhatsAppStatus()">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+    </div>
+  `;
+
+  // Add CSS styles if not already present
+  if (!document.getElementById('whatsappStatusStyles')) {
+    const styles = document.createElement('style');
+    styles.id = 'whatsappStatusStyles';
+    styles.textContent = `
+      .whatsapp-status-message {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #25d366, #128c7e);
+        color: white;
+        padding: 12px 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        z-index: 10000;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        animation: slideDown 0.3s ease-out;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+      }
+      
+      .whatsapp-status-message.success {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+      }
+      
+      .whatsapp-status-message.error {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+      }
+      
+      .whatsapp-status-message.warning {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+      }
+      
+      .status-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+        gap: 15px;
+      }
+      
+      .message-text {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      
+      .whatsapp-icon {
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+      }
+      
+      .join-button {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 2px solid rgba(255,255,255,0.3);
+        padding: 8px 16px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(10px);
+        white-space: nowrap;
+      }
+      
+      .join-button:hover {
+        background: rgba(255,255,255,0.3);
+        border-color: rgba(255,255,255,0.5);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      }
+      
+      .close-button {
+        background: none;
+        border: none;
+        color: rgba(255,255,255,0.8);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .close-button:hover {
+        background: rgba(255,255,255,0.2);
+        color: white;
+      }
+      
+      .close-button svg {
+        width: 18px;
+        height: 18px;
+      }
+      
+      @keyframes slideDown {
+        from {
+          transform: translateY(-100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      
+      .whatsapp-status-message.hide {
+        animation: slideUp 0.3s ease-in forwards;
+      }
+      
+      @keyframes slideUp {
+        from {
+          transform: translateY(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateY(-100%);
+          opacity: 0;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .whatsapp-status-message {
+          padding: 10px 15px;
+        }
+        
+        .status-content {
+          gap: 10px;
+        }
+        
+        .message-text {
+          font-size: 13px;
+        }
+        
+        .join-button {
+          padding: 6px 12px;
+          font-size: 12px;
+        }
+        
+        .whatsapp-icon {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    `;
+    document.head.appendChild(styles);
+  }
+
+  // Insert at the beginning of body
+  document.body.insertBefore(statusContainer, document.body.firstChild);
+
+  // Auto-hide success messages after specified time
+  if (type === 'success') {
+    setTimeout(() => {
+      closeWhatsAppStatus();
+    }, 8000);
+  }
+
+  // Add body padding to prevent content overlap
+  document.body.style.paddingTop = statusContainer.offsetHeight + 'px';
+}
+
+// Function to close the WhatsApp status message
+function closeWhatsAppStatus() {
+  const statusElement = document.getElementById('whatsappStatusMessage');
+  if (statusElement) {
+    statusElement.classList.add('hide');
+    setTimeout(() => {
+      statusElement.remove();
+      document.body.style.paddingTop = '0';
+    }, 300);
+  }
+}
+
+
+
+
+
+    // Validation helpers
+    function isValidEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    
+    function isValidPhone(phone) {
+      const re = /^\d{10}$/;
+      return re.test(phone);
+    }
+    
+    function isValidAadhaar(aadhaar) {
+      const re = /^\d{12}$/;
+      return re.test(aadhaar);
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h3>Tour Bus Seat Booking</h3>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+    
+    <div id="statusMessage" class="status-message hide"></div>
+    <div id="loader" class="loading">Loading tour information...</div>
+    
+    <div class="status-indicator">
+      <div class="status-item">
+        <div class="status-color" style="background-color: #e0e0e0;"></div>
+        <span>Available</span>
+      </div>
+      <div class="status-item">
+        <div class="status-color" style="background-color: green;"></div>
+        <span>Selected</span>
+      </div>
+      <div class="status-item">
+        <div class="status-color" style="background-color: #ff6b6b;"></div>
+        <span>Booked</span>
+      </div>
+    </div>
+
+    <h4 style="text-align: center;">Select Your Seat(s)</h4>
+    
+    <div id="selectedSeats">No seats selected</div>
+
+    <div id="sf" class="bus-layout">
+      <table id="superfastbus" style="display:none;">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span3" onclick="book(this)" class="spanx">3</span></td>
+          <td><span id="span8" onclick="book(this)" class="spanx">8</span></td>
+          <td><span id="span13" onclick="book(this)" class="spanx">13</span></td>
+          <td><span id="span18" onclick="book(this)" class="spanx">18</span></td>
+          <td><span id="span23" onclick="book(this)" class="spanx">23</span></td>
+          <td><span id="span28" onclick="book(this)" class="spanx">28</span></td>
+          <td><span id="span32" onclick="book(this)" class="spanx">32</span></td>
+          <td><span id="span35" onclick="book(this)" class="spanx">35</span></td>
+          <td><span id="span38" onclick="book(this)" class="spanx">38</span></td>
+          <td><span id="span41" onclick="book(this)" class="spanx">41</span></td>
+          <td><span id="span44" onclick="book(this)" class="spanx">44</span></td>
+        </tr>
+        <tr>
+          <td><span id="span4" onclick="book(this)" class="spanx">4</span></td>
+          <td><span id="span9" onclick="book(this)" class="spanx">9</span></td>
+          <td><span id="span14" onclick="book(this)" class="spanx">14</span></td>
+          <td><span id="span19" onclick="book(this)" class="spanx">19</span></td>
+          <td><span id="span24" onclick="book(this)" class="spanx">24</span></td>
+          <td><span id="span29" onclick="book(this)" class="spanx">29</span></td>
+          <td><span id="span33" onclick="book(this)" class="spanx">33</span></td>
+          <td><span id="span36" onclick="book(this)" class="spanx">36</span></td>
+          <td><span id="span39" onclick="book(this)" class="spanx">39</span></td>
+          <td><span id="span42" onclick="book(this)" class="spanx">42</span></td>
+          <td><span id="span45" onclick="book(this)" class="spanx">45</span></td>
+        </tr>
+       
+        <tr>
+          <td><span id="span5" onclick="book(this)" class="spanx">5</span></td>
+          <td><span id="span10" onclick="book(this)" class="spanx">10</span></td>
+          <td><span id="span15" onclick="book(this)" class="spanx">15</span></td>
+          <td><span id="span20" onclick="book(this)" class="spanx">20</span></td>
+          <td><span id="span25" onclick="book(this)" class="spanx">25</span></td>
+          <td><span id="span30" onclick="book(this)" class="spanx">30</span></td>
+          <td><span id="span34" onclick="book(this)" class="spanx">34</span></td>
+          <td><span id="span37" onclick="book(this)" class="spanx">37</span></td>
+          <td><span id="span40" onclick="book(this)" class="spanx">40</span></td>
+          <td><span id="span43" onclick="book(this)" class="spanx">43</span></td>
+          <td><span id="span46" onclick="book(this)" class="spanx">46</span></td>
+        </tr>
+        <tr>
+          <td colspan="12" style="text-align: center; background-color: #f0f0f0;">
+            Walking Path
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><span id="span2" onclick="book(this)" class="spanx">2</span></td>
+          <td rowspan="2" class="driver">Front Door</td>
+          <td><span id="span7" onclick="book(this)" class="spanx">7</span></td>
+          <td><span id="span12" onclick="book(this)" class="spanx">12</span></td>
+          <td><span id="span17" onclick="book(this)" class="spanx">17</span></td>
+          <td><span id="span22" onclick="book(this)" class="spanx">22</span></td>
+          <td><span id="span27" onclick="book(this)" class="spanx">27</span></td>
+          <td><span id="span48" onclick="book(this)" class="spanx">48</span></td>
+          <td rowspan="2" class="driver">Back Door</td>
+          <td><span id="span51" onclick="book(this)" class="spanx">51</span></td>
+          <td><span id="span50" onclick="book(this)" class="spanx">50</span></td>
+        </tr>
+        <tr>
+          <td>cond</td>
+          <td><span id="span1" onclick="book(this)" class="spanx">1</span></td>
+          <td><span id="span6" onclick="book(this)" class="spanx">6</span></td>
+          <td><span id="span11" onclick="book(this)" class="spanx">11</span></td>
+          <td><span id="span16" onclick="book(this)" class="spanx">16</span></td>
+          <td><span id="span21" onclick="book(this)" class="spanx">21</span></td>
+          <td><span id="span26" onclick="book(this)" class="spanx">26</span></td>
+          <td><span id="span31" onclick="book(this)" class="spanx">31</span></td>
+          <td><span id="span47" onclick="book(this)" class="spanx">47</span></td>
+          <td><span id="span49" onclick="book(this)" class="spanx">49</span></td>
+        </tr>
+      </table>
+
+
+
+      <table id="superdeluxebus" style="display:none;">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span3" onclick="book(this)" class="spanx">3</span></td>
+          <td><span id="span7" onclick="book(this)" class="spanx">7</span></td>
+          <td><span id="span11" onclick="book(this)" class="spanx">11</span></td>
+          <td><span id="span15" onclick="book(this)" class="spanx">15</span></td>
+          <td><span id="span19" onclick="book(this)" class="spanx">19</span></td>
+          <td><span id="span23" onclick="book(this)" class="spanx">23</span></td>
+          <td><span id="span27" onclick="book(this)" class="spanx">27</span></td>
+          <td><span id="span31" onclick="book(this)" class="spanx">31</span></td>
+          <td><span id="span35" onclick="book(this)" class="spanx">35</span></td>
+	  <td><span id="span39" onclick="book(this)" class="spanx">39</span></td>
+        </tr>
+        <tr>
+          <td><span id="span4" onclick="book(this)" class="spanx">4</span></td>
+          <td><span id="span8" onclick="book(this)" class="spanx">8</span></td>
+          <td><span id="span12" onclick="book(this)" class="spanx">12</span></td>
+          <td><span id="span16" onclick="book(this)" class="spanx">16</span></td>
+          <td><span id="span20" onclick="book(this)" class="spanx">20</span></td>
+          <td><span id="span24" onclick="book(this)" class="spanx">24</span></td>
+          <td><span id="span28" onclick="book(this)" class="spanx">28</span></td>
+          <td><span id="span32" onclick="book(this)" class="spanx">32</span></td>
+          <td><span id="span36" onclick="book(this)" class="spanx">36</span></td>
+          <td><span id="span40" onclick="book(this)" class="spanx">40</span></td>
+        </tr>
+        <tr>
+          <td colspan="10" style="text-align: center; background-color: #f0f0f0;"> Walking Path </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><span id="span2" onclick="book(this)" class="spanx">2</span></td>
+	  <td><span id="span6" onclick="book(this)" class="spanx">6</span></td>
+          <td><span id="span10" onclick="book(this)" class="spanx">10</span></td>
+          <td><span id="span14" onclick="book(this)" class="spanx">14</span></td>
+          <td><span id="span18" onclick="book(this)" class="spanx">18</span></td>
+          <td><span id="span22" onclick="book(this)" class="spanx">22</span></td>
+          <td><span id="span26" onclick="book(this)" class="spanx">26</span></td>
+          <td><span id="span30" onclick="book(this)" class="spanx">30</span></td>
+          <td><span id="span34" onclick="book(this)" class="spanx">34</span></td>
+          <td><span id="span38" onclick="book(this)" class="spanx">38</span></td>
+        </tr>
+        <tr>
+          <td class="driver">Door</td>
+          <td>con</td>
+          <td><span id="span5" onclick="book(this)" class="spanx">5</span></td>
+          <td><span id="span9" onclick="book(this)" class="spanx">9</span></td>
+          <td><span id="span13" onclick="book(this)" class="spanx">13</span></td>
+          <td><span id="span17" onclick="book(this)" class="spanx">17</span></td>
+          <td><span id="span21" onclick="book(this)" class="spanx">21</span></td>
+          <td><span id="span25" onclick="book(this)" class="spanx">25</span></td>
+          <td><span id="span29" onclick="book(this)" class="spanx">29</span></td>
+          <td><span id="span33" onclick="book(this)" class="spanx">33</span></td>
+          <td><span id="span37" onclick="book(this)" class="spanx">37</span></td>
+        </tr>
+      </table>
+
+
+      <table id="aclowfloorbus" style="display:none;">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span3" onclick="book(this)" class="spanx">3</span></td>
+          <td><span id="span7" onclick="book(this)" class="spanx">7</span></td>
+          <td><span id="span9" onclick="book(this)" class="spanx">9</span></td>
+          <td></td>
+          <td><span id="span13" onclick="book(this)" class="spanx">13</span></td>
+          <td><span id="span17" onclick="book(this)" class="spanx">17</span></td>
+          <td><span id="span21" onclick="book(this)" class="spanx">21</span></td>
+          <td><span id="span25" onclick="book(this)" class="spanx">25</span></td>
+          <td><span id="span31" onclick="book(this)" class="spanx">31</span></td>
+        </tr>
+        <tr>
+          <td><span id="span4" onclick="book(this)" class="spanx">4</span></td>
+          <td><span id="span8" onclick="book(this)" class="spanx">8</span></td>
+          <td><span id="span10" onclick="book(this)" class="spanx">10</span></td>
+          <td></td>
+          <td><span id="span14" onclick="book(this)" class="spanx">14</span></td>
+          <td><span id="span18" onclick="book(this)" class="spanx">18</span></td>
+          <td><span id="span22" onclick="book(this)" class="spanx">22</span></td>
+          <td><span id="span26" onclick="book(this)" class="spanx">26</span></td>
+ 
+          <td><span id="span30" onclick="book(this)" class="spanx">30</span></td>
+        </tr>
+        <tr>
+          <td  colspan="8"></td>
+        
+          <td><span id="span29" onclick="book(this)" class="spanx">29</span></td>
+        </tr>
+       <!-- <tr> <td colspan="12" style="text-align: center; background-color: #f0f0f0;"> Walking Path </td> </tr> -->
+        <tr>
+          <td></td>
+          <td></td>
+	  <td><span id="span2" onclick="book(this)" class="spanx">2</span></td>
+          <td><span id="span6" onclick="book(this)" class="spanx">6</span></td>
+          <td rowspan="2" class="driver">Door</td>
+          
+          <td><span id="span12" onclick="book(this)" class="spanx">12</span></td>
+          <td><span id="span16" onclick="book(this)" class="spanx">16</span></td>
+          <td><span id="span20" onclick="book(this)" class="spanx">20</span></td>
+          <td><span id="span24" onclick="book(this)" class="spanx">24</span></td>
+
+          <td><span id="span28" onclick="book(this)" class="spanx">28</span></td>
+        </tr>
+        <tr>
+          <td class="driver">Door</td>
+          <td>con</td>
+          <td><span id="span1" onclick="book(this)" class="spanx">1</span></td>
+          <td><span id="span5" onclick="book(this)" class="spanx">5</span></td>
+          <td><span id="span11" onclick="book(this)" class="spanx">11</span></td>
+          <td><span id="span15" onclick="book(this)" class="spanx">15</span></td>
+          <td><span id="span19" onclick="book(this)" class="spanx">19</span></td>
+          <td><span id="span23" onclick="book(this)" class="spanx">23</span></td>
+
+          <td><span id="span27" onclick="book(this)" class="spanx">27</span></td>
+        </tr>
+      </table>
+
+
+      <table id="shortwheelbus" style="display:none;">
+        <tr>
+          <td rowspan="3" class="driver">Driver</td>
+          <td><span id="span4" onclick="book(this)" class="spanx">4</span></td>
+          <td><span id="span8" onclick="book(this)" class="spanx">8</span></td>
+          <td><span id="span12" onclick="book(this)" class="spanx">12</span></td>
+          <td><span id="span16" onclick="book(this)" class="spanx">16</span></td>
+          <td><span id="span20" onclick="book(this)" class="spanx">20</span></td>
+          <td><span id="span24" onclick="book(this)" class="spanx">24</span></td>
+          <td><span id="span28" onclick="book(this)" class="spanx">28</span></td>
+          <td><span id="span32" onclick="book(this)" class="spanx">32</span></td>
+          <td><span id="span34" onclick="book(this)" class="spanx">34</span></td>
+        </tr>
+        <tr>
+          <td><span id="span5" onclick="book(this)" class="spanx">5</span></td>
+          <td><span id="span9" onclick="book(this)" class="spanx">9</span></td>
+          <td><span id="span13" onclick="book(this)" class="spanx">13</span></td>
+          <td><span id="span17" onclick="book(this)" class="spanx">17</span></td>
+          <td><span id="span21" onclick="book(this)" class="spanx">21</span></td>
+          <td><span id="span25" onclick="book(this)" class="spanx">25</span></td>
+          <td><span id="span29" onclick="book(this)" class="spanx">29</span></td>
+          <td><span id="span33" onclick="book(this)" class="spanx">33</span></td>
+          <td><span id="span35" onclick="book(this)" class="spanx">35</span></td>
+        </tr>
+        <tr>
+          <td colspan="10" style="text-align: center; background-color: #f0f0f0;"> Walking Path </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td><span id="span3" onclick="book(this)" class="spanx">3</span></td>
+          <td><span id="span7" onclick="book(this)" class="spanx">7</span></td>
+          <td><span id="span11" onclick="book(this)" class="spanx">11</span></td>
+          <td><span id="span15" onclick="book(this)" class="spanx">15</span></td>
+          <td><span id="span19" onclick="book(this)" class="spanx">19</span></td>
+          <td><span id="span23" onclick="book(this)" class="spanx">23</span></td>
+          <td><span id="span27" onclick="book(this)" class="spanx">27</span></td>
+          <td><span id="span31" onclick="book(this)" class="spanx">31</span></td>
+        </tr>
+        <tr>
+          <td class="driver">Door</td>
+          <td>Con</td>
+          <td><span id="span2" onclick="book(this)" class="spanx">2</span></td>
+          <td><span id="span6" onclick="book(this)" class="spanx">6</span></td>
+          <td><span id="span10" onclick="book(this)" class="spanx">10</span></td>
+          <td><span id="span14" onclick="book(this)" class="spanx">14</span></td>
+          <td><span id="span18" onclick="book(this)" class="spanx">18</span></td>
+          <td><span id="span22" onclick="book(this)" class="spanx">22</span></td>
+          <td><span id="span26" onclick="book(this)" class="spanx">26</span></td>
+          <td><span id="span30" onclick="book(this)" class="spanx">30</span></td>
+        </tr>
+      </table>
+
+    </div>
+
+    <!-- Booking Forms Container -->
+    <div id="bookingFormsContainer" class="form-container"></div>
+    
+    <!-- Submit Button -->
+    <button onclick="submitAllBookings(event)" id="bookSeats" disabled>Submit Bookings</button>
+  </div>
+</body>
+</html>

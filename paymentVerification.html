@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Payment Verification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e74c3c;
+            display: block;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .table-container {
+            position: relative;
+            max-height: 70vh;
+            overflow: auto;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #6c757d;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #5a6fd8;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: middle;
+            background: white;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9ff;
+            transform: translateY(-1px);
+        }
+
+        .unverified-row {
+            background-color: #fff5f5 !important;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .unverified-row td {
+            background-color: #fff5f5;
+        }
+
+        .verified-row {
+            background-color: #f0fff4 !important;
+            border-left: 4px solid #27ae60;
+            opacity: 0.8;
+        }
+
+        .verified-row td {
+            background-color: #f0fff4;
+        }
+
+        .verified-row:hover {
+            background-color: #e8f8ed !important;
+        }
+
+        .verified-row:hover td {
+            background-color: #e8f8ed;
+        }
+
+        .verify-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 3px 10px rgba(39, 174, 96, 0.3);
+        }
+
+        .verify-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .verify-btn:active {
+            transform: translateY(0);
+        }
+
+        .verify-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-unverified {
+            background: #fee;
+            color: #c53030;
+        }
+
+        .status-verified {
+            background: #f0fff4;
+            color: #2d7738;
+        }
+
+        .customer-status {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-remitted {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .amount {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px;
+            border: 1px solid #fed7d7;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            table {
+                font-size: 0.8rem;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+            }
+            
+            .table-container {
+                margin: 10px;
+                max-height: 60vh;
+            }
+        }
+
+        /* Ensure sticky header works on all browsers */
+        @supports (position: sticky) {
+            thead {
+                position: sticky;
+                top: 0;
+            }
+        }
+
+        /* Fallback for older browsers */
+        @supports not (position: sticky) {
+            .table-container {
+                position: relative;
+            }
+            
+            thead {
+                position: fixed;
+                top: 0;
+                width: 100%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                z-index: 50;
+            }
+            
+            tbody {
+                margin-top: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Payment Verification Dashboard</h1>
+            <p>Manage and verify booking payments</p>
+        </div>
+
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-item">
+                <span class="stat-number" id="totalBookings">0</span>
+                <span class="stat-label">Total Bookings</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="unverifiedCount">0</span>
+                <span class="stat-label">Unverified Payments</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="verifiedCount">0</span>
+                <span class="stat-label">Verified Payments</span>
+            </div>
+        </div>
+
+        <div id="error-container"></div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            Loading bookings from Firebase...
+        </div>
+
+        <div class="table-container" id="tableContainer" style="display: none;">
+            <table id="bookingsTable">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Customer Name</th>
+                        <th>Phone</th>
+                        <th>Seat No</th>
+                        <th>Tour ID</th>
+                        <th>Booking Date</th>
+                        <th>Amount</th>
+                        <th>Transaction ID</th>
+                        <th>Payment Status</th>
+                        <th>Customer Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-compat.js"></script>
+    <script src="fbc.js"></script>
+
+    <script>
+        let db;
+        let bookingsData = [];
+
+        // Auto-initialize Firebase on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof firebaseConfig !== 'undefined') {
+                try {
+                    firebase.initializeApp(firebaseConfig);
+                    db = firebase.firestore();
+                    loadBookings();
+                } catch (error) {
+                    showError('Failed to initialize Firebase: ' + error.message);
+                }
+            } else {
+                showError('Firebase configuration not found. Please check fbc.js file.');
+            }
+        });
+
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
+            setTimeout(() => {
+                errorContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        async function loadBookings() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('tableContainer').style.display = 'none';
+
+                const snapshot = await db.collection('bookings').get();
+                bookingsData = [];
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    bookingsData.push({
+                        id: doc.id,
+                        ...data
+                    });
+                });
+
+                // Filter unverified bookings
+                const unverifiedBookings = bookingsData.filter(booking => 
+                    !booking.bookingPaymentStatus || booking.bookingPaymentStatus !== 'verified'
+                );
+
+                displayBookings(unverifiedBookings);
+                updateStats();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('tableContainer').style.display = 'block';
+                document.getElementById('stats').style.display = 'flex';
+
+            } catch (error) {
+                showError('Failed to load bookings: ' + error.message);
+                document.getElementById('loading').innerHTML = 'Failed to load data. Please check your Firebase configuration.';
+            }
+        }
+
+        function displayBookings(bookings) {
+            const tbody = document.getElementById('bookingsBody');
+            tbody.innerHTML = '';
+
+            if (bookings.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="11" style="text-align: center; padding: 40px; color: #6c757d;">
+                            🎉 All payments are verified! No pending verifications.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            bookings.forEach((booking) => {
+                const row = document.createElement('tr');
+                const isVerified = booking.bookingPaymentStatus === 'verified';
+                
+                row.className = isVerified ? 'verified-row' : 'unverified-row';
+                row.id = `row-${booking.id}`;
+
+                const formatDate = (date) => {
+                    if (!date) return 'N/A';
+                    if (date.toDate) return date.toDate().toLocaleDateString();
+                    return new Date(date).toLocaleDateString();
+                };
+
+                row.innerHTML = `
+                    <td><strong>${booking.bookingid || booking.id}</strong></td>
+                    <td>${booking.bookingCustomerName || 'N/A'}</td>
+                    <td>${booking.bookingCustomerPhoneNo || 'N/A'}</td>
+                    <td>${booking.bookingCustomerSeatNo || 'N/A'}</td>
+                    <td>${booking.bookingTourid || 'N/A'}</td>
+                    <td>${formatDate(booking.bookingDate)}</td>
+                    <td class="amount">₹${booking.bookingPaymentAmount || 0}</td>
+                    <td>${booking.bookingPaymentTransactionId || 'N/A'}</td>
+                    <td>
+                        <span class="status-badge ${isVerified ? 'status-verified' : 'status-unverified'}">
+                            ${booking.bookingPaymentStatus || 'Unverified'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="customer-status ${booking.bookingCustomerStatus === 'remitted' ? 'status-remitted' : 'status-pending'}">
+                            ${booking.bookingCustomerStatus || 'Pending'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="verify-btn" 
+                                onclick="verifyBooking('${booking.id}')" 
+                                ${isVerified ? 'disabled' : ''}>
+                            ${isVerified ? 'Verified ✓' : 'Verify Payment'}
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        async function verifyBooking(bookingId) {
+            const button = event.target;
+            const row = document.getElementById(`row-${bookingId}`);
+            
+            // Disable button and show loading
+            button.disabled = true;
+            button.textContent = 'Verifying...';
+
+            try {
+                await db.collection('bookings').doc(bookingId).update({
+                    bookingPaymentStatus: 'verified',
+                    bookingCustomerStatus: 'remitted'
+                });
+
+                // Update the row visually
+                row.className = 'verified-row';
+                
+                // Update all cells in the row
+                const cells = row.querySelectorAll('td');
+                cells.forEach(cell => {
+                    cell.style.backgroundColor = '#f0fff4';
+                });
+                
+                // Update status badges
+                const paymentStatusBadge = row.querySelector('.status-badge');
+                paymentStatusBadge.textContent = 'Verified';
+                paymentStatusBadge.className = 'status-badge status-verified';
+                
+                const customerStatusSpan = row.querySelector('.customer-status');
+                customerStatusSpan.textContent = 'Remitted';
+                customerStatusSpan.className = 'customer-status status-remitted';
+
+                // Update button
+                button.textContent = 'Verified ✓';
+                button.style.background = '#95a5a6';
+
+                // Add success animation
+                row.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    row.style.transform = 'scale(1)';
+                }, 300);
+
+                // Update stats
+                updateStats();
+
+                // Show success message briefly
+                const successMsg = document.createElement('div');
+                successMsg.innerHTML = '✅ Payment verified successfully!';
+                successMsg.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #d4edda;
+                    color: #155724;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    border: 1px solid #c3e6cb;
+                    z-index: 1000;
+                    font-weight: 600;
+                `;
+                document.body.appendChild(successMsg);
+                
+                setTimeout(() => {
+                    document.body.removeChild(successMsg);
+                }, 3000);
+
+            } catch (error) {
+                // Re-enable button on error
+                button.disabled = false;
+                button.textContent = 'Verify Payment';
+                showError('Failed to verify booking: ' + error.message);
+            }
+        }
+
+        function updateStats() {
+            const total = bookingsData.length;
+            const verified = bookingsData.filter(b => b.bookingPaymentStatus === 'verified').length;
+            const unverified = total - verified;
+
+            document.getElementById('totalBookings').textContent = total;
+            document.getElementById('verifiedCount').textContent = verified;
+            document.getElementById('unverifiedCount').textContent = unverified;
+        }
+
+        // Auto-refresh every 30 seconds if connected
+        setInterval(() => {
+            if (db) {
+                loadBookings();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
