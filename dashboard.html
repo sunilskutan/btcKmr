@@ -907,7 +907,7 @@
                 Delete Old Bookings
             </button>
 
-            <button class="action-btn" onclick="const code = prompt('Enter admin code to proceed:');if (code === '12345') {window.location.href = 'busLayoutPayment.html?tourId=29';} else if (code !== null) { alert('Incorrect code. Access denied.');}"
+            <button class="action-btn" onclick="const code = prompt('Enter admin code to proceed:');if (code === '12345') {window.location.href = 'busLayoutPayment.html?tourId=29';}if (code === '123456') {window.location.href = 'paymentVerification.html';} else if (code !== null) { alert('Incorrect code. Access denied.');}"
                 style="background-color:#00e600; "
                 onmouseover="this.style.backgroundColor=' #003300'"
                 onmouseout="this.style.backgroundColor='#00e600'">
