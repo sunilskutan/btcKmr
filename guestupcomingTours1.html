@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tours Management</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="fbc.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #2d6a4f;
+      --secondary-color: #40916c;
+      --accent-color: #52b788;
+      --light-color: #d8f3dc;
+      --dark-color: #1b4332;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --card-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      color: #2d3748;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 15px;
+    }
+    
+    .header-section {
+      background: var(--gradient-bg);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .header-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+    }
+    
+    .header-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .home-link {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      text-decoration: none;
+      padding: 10px;
+      border-radius: 50%;
+      font-size: 18px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .home-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .header-title {
+      flex: 1;
+      text-align: center;
+    }
+    
+    .header-title h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+  
+    .filter-section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .filter-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      gap: 8px;
+    }
+    
+    .filter-header h3 {
+      color: var(--dark-color);
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    .filter-header i {
+      color: var(--accent-color);
+      font-size: 1.1rem;
+    }
+    
+    .date-filter-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      align-items: end;
+    }
+    
+    .date-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .date-input-group label {
+      font-weight: 600;
+      color: var(--dark-color);
+      font-size: 0.9rem;
+    }
+    
+    .date-input-group input {
+      padding: 10px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background: #f8fafc;
+    }
+    
+    .date-input-group input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.1);
+    }
+    
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+      background: var(--gradient-bg);
+      color: white;
+      box-shadow: 0 3px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
+    }
+    
+    .btn-secondary {
+      background: #f7fafc;
+      color: var(--dark-color);
+      border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+      background: #edf2f7;
+      border-color: var(--accent-color);
+    }
+    
+    .stats-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: var(--card-shadow);
+      border-left: 3px solid var(--accent-color);
+      transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-3px);
+    }
+    
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      color: #64748b;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    .tours-section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--dark-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .view-toggle {
+      display: flex;
+      background: #f8fafc;
+      border-radius: 6px;
+      padding: 3px;
+      gap: 3px;
+    }
+    
+    .view-btn {
+      padding: 6px 14px;
+      border: none;
+      background: transparent;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+    
+    .view-btn.active {
+      background: white;
+      color: var(--primary-color);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tours-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .tours-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .tour-card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      position: relative;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .tour-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .tour-header {
+      background: var(--gradient-bg);
+      color: white;
+      padding: 12px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .tour-date {
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .tour-id {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 3px 10px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      backdrop-filter: blur(8px);
+    }
+    
+    .tour-content {
+      padding: 15px;
+      display: flex;
+      gap: 15px;
+    }
+    
+    .tour-info {
+      flex: 1;
+    }
+    
+    .tour-place {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--dark-color);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .tour-details-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+    
+    .tour-detail-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f8fafc;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .tour-fare {
+      color: #d63031;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    
+    .tour-bus {
+      color: #6366f1;
+      font-weight: 600;
+    }
+    
+    .tour-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .tour-details-btn {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+    }
+    
+    .tour-details-btn:hover {
+      background: var(--primary-color);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(82, 183, 136, 0.3);
+    }
+    
+    .tour-image {
+      width: 100px;
+      height: 100px;
+      border-radius: 6px;
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tour-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    .tour-image:hover img {
+      transform: scale(1.1);
+    }
+    
+    .loading-state {
+      text-align: center;
+      padding: 40px 15px;
+      color: #64748b;
+    }
+    
+    .loading-spinner {
+      width: 30px;
+      height: 30px;
+      border: 3px solid #e2e8f0;
+      border-top: 3px solid var(--accent-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px 15px;
+      color: #64748b;
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      color: #cbd5e0;
+      margin-bottom: 15px;
+    }
+    
+    .empty-state h3 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: var(--dark-color);
+    }
+    
+    .error-message {
+      background: #fed7d7;
+      color: #c53030;
+      padding: 12px 15px;
+      border-radius: 6px;
+      border-left: 4px solid #fc8181;
+      margin: 15px 0;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .tours-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 10px;
+      }
+      
+      .header-content {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .header-title h1 {
+        font-size: 1.8rem;
+      }
+      
+      .date-filter-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .filter-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .stats-section {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+      
+      .tours-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .tour-content {
+        flex-direction: column;
+      }
+      
+      .tour-image {
+        width: 100%;
+        height: 140px;
+      }
+      
+      .view-toggle {
+        display: none;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .tour-details-row {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .tour-actions {
+        flex-direction: column;
+      }
+      
+      .section-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
+  <div class="main-container">
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-content">
+        <a href="dashboard.html" class="home-link" title="Go Back To Dashboard">
+          <i class="fas fa-home"></i>
+        </a>
+        <div class="header-title">
+          <h1> Upcoming Tours </h1>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="filter-header">
+        <i class="fas fa-filter"></i>
+        <h3>Filter Tours by Date Range</h3>
+      </div>
+      <div class="date-filter-container">
+        <div class="date-input-group">
+          <label for="fromDate"><i class="fas fa-calendar-day"></i> From Date</label>
+          <input type="date" id="fromDate" />
+        </div>
+        <div class="date-input-group">
+          <label for="toDate"><i class="fas fa-calendar-check"></i> To Date</label>
+          <input type="date" id="toDate" />
+        </div>
+        <div class="filter-actions">
+          <button class="btn btn-primary" id="filterBtn">
+            <i class="fas fa-search"></i> Filter Tours
+          </button>
+          <button class="btn btn-secondary" id="resetBtn">
+            <i class="fas fa-refresh"></i> Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-section" id="statsSection">
+      <div class="stat-card">
+        <div class="stat-value" id="totalTours">0</div>
+        <div class="stat-label">Total Tours</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="uniquePlaces">0</div>
+        <div class="stat-label">Unique Places</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="avgFare">₹0</div>
+        <div class="stat-label">Average Fare</div>
+      </div>
+    </div>
+
+    <!-- Tours Section -->
+    <div class="tours-section">
+      <div class="section-header">
+        <div class="section-title">
+          <i class="fas fa-route"></i>
+          <span id="sectionTitle">Available Tours</span>
+        </div>
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="grid">
+            <i class="fas fa-th"></i> Grid
+          </button>
+          <button class="view-btn" data-view="list">
+            <i class="fas fa-list"></i> List
+          </button>
+        </div>
+      </div>
+      
+      <div id="tourList" class="tours-grid">
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>Loading tours...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Global variables
+    let placesMap = {};
+    let busesMap = {};
+    let allTours = [];
+    let filteredTours = [];
+    let currentView = 'grid';
+
+    // DOM elements
+    const tourList = document.getElementById("tourList");
+    const fromDateInput = document.getElementById("fromDate");
+    const toDateInput = document.getElementById("toDate");
+    const filterBtn = document.getElementById("filterBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const totalToursEl = document.getElementById("totalTours");
+    const uniquePlacesEl = document.getElementById("uniquePlaces");
+    const avgFareEl = document.getElementById("avgFare");
+    const sectionTitleEl = document.getElementById("sectionTitle");
+
+    // Initialize date inputs with default values
+    function initializeDateInputs() {
+      const today = new Date();
+      const currentMonthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+      fromDateInput.value = formatDateForInput(today);
+      toDateInput.value = formatDateForInput(currentMonthEnd);
+    }
+
+    // Format date for input field (YYYY-MM-DD)
+    function formatDateForInput(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    // Format date for display (DD-MM-YYYY)
+    function formatDateForDisplay(date) {
+      return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+    }
+
+  
+
+    // Filter tours based on date range
+    function filterTours() {
+      const fromDate = new Date(fromDateInput.value + 'T00:00:00');
+      const toDate = new Date(toDateInput.value + 'T23:59:59');
+
+      filteredTours = allTours.filter(tour => {
+        const tourDate = tour.tourDateObj;
+        return tourDate >= fromDate && tourDate <= toDate;
+      });
+
+      updateStats();
+      renderTours();
+      updateSectionTitle();
+    }
+
+
+
+  // Load initial data
+    async function loadInitialData() {
+      try {
+        const [placesSnap, busesSnap, toursSnap] = await Promise.all([
+          db.collection("places").get(),
+          db.collection("buses").get(),
+          db.collection("tours").orderBy("tourDate").get()
+        ]);
+
+        // Build places map
+        placesSnap.forEach(doc => {
+          const data = doc.data();
+          placesMap[data.placeid] = {
+            name: data.placeName,
+            imageUrl: data.placeImageUrl || "default.jpg"
+          };
+        });
+
+        // Build buses map
+        busesSnap.forEach(doc => {
+          const data = doc.data();
+          busesMap[data.busid] = data.busType;
+        });
+
+        // Build tours array
+        allTours = [];
+        toursSnap.forEach(doc => {
+          const tour = doc.data();
+          tour.tourDateObj = tour.tourDate.toDate();
+          allTours.push(tour);
+        });
+        // Initial filter
+        filterTours();
+
+
+      } catch (error) {
+        console.error("Error loading data:", error);
+        showError("Click Filter Tours / Reset to view Tours.");
+      }
+    }
+
+
+
+
+
+    // Update statistics
+    function updateStats() {
+      const uniquePlacesSet = new Set(filteredTours.map(tour => tour.tourPlaceid));
+      const totalFare = filteredTours.reduce((sum, tour) => sum + (parseFloat(tour.tourFare) || 0), 0);
+      const avgFare = filteredTours.length > 0 ? totalFare / filteredTours.length : 0;
+
+      totalToursEl.textContent = filteredTours.length;
+      uniquePlacesEl.textContent = uniquePlacesSet.size;
+      avgFareEl.textContent = `₹${Math.round(avgFare)}`;
+    }
+
+    // Update section title
+    function updateSectionTitle() {
+      const fromDate = new Date(fromDateInput.value);
+      const toDate = new Date(toDateInput.value);
+      sectionTitleEl.textContent = `Tours (${formatDateForDisplay(fromDate)} - ${formatDateForDisplay(toDate)})`;
+    }
+
+    // Render tours
+    function renderTours() {
+      if (filteredTours.length === 0) {
+        tourList.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-calendar-times"></i>
+            <h3>No Tours Found</h3>
+            <p>No tours available for the selected date range.</p>
+          </div>
+        `;
+        return;
+      }
+
+      tourList.className = currentView === 'grid' ? 'tours-grid' : 'tours-list';
+      tourList.innerHTML = '';
+
+      filteredTours.forEach(tour => {
+        const placeData = placesMap[tour.tourPlaceid] || {};
+        const placeName = placeData.name || `Place ID: ${tour.tourPlaceid}`;
+        const placeImageUrl = placeData.imageUrl || "default.jpg";
+        const busType = busesMap[tour.tourBusid] || `Bus ID: ${tour.tourBusid}`;
+
+        const div = document.createElement("div");
+        div.className = "tour-card";
+        div.id = `tour-${tour.tourid}`;
+
+        div.innerHTML = `
+          <div class="tour-header">
+            <div class="tour-date">
+              <i class="fas fa-calendar-day"></i>
+              ${formatDateForDisplay(tour.tourDateObj)}
+            </div>
+            <div class="tour-id">ID: ${tour.tourid}</div>
+          </div>
+          <div class="tour-content">
+            <div class="tour-info">
+              <div class="tour-place">
+                <i class="fas fa-map-marker-alt"></i>
+                ${placeName}
+              </div>
+              <div class="tour-details-row">
+                <div class="tour-detail-item tour-fare">
+                  <i class="fas fa-rupee-sign"></i>
+                  ₹${tour.tourFare}
+                </div>
+                <div class="tour-detail-item tour-bus">
+                  <i class="fas fa-bus"></i>
+                  ${busType}
+                </div>
+              </div>
+              <div class="tour-actions">
+                <button class="tour-details-btn" onclick='showTourDetails(${JSON.stringify(tour.tourDetails)})'>
+                  <i class="fas fa-info-circle"></i>
+                  ടൂർ വിവരങ്ങള്‍
+                </button>
+              </div>
+            </div>
+            <div class="tour-image">
+              <img src="${placeImageUrl}" alt="${placeName}" onerror="this.src='default.jpg'">
+            </div>
+          </div>
+        `;
+
+        tourList.appendChild(div);
+      });
+
+      // Handle scrolling to specific tour
+      handleScrollToTour();
+    }
+
+    // Handle scrolling to specific tour
+    function handleScrollToTour() {
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#tour-')) {
+        setTimeout(() => {
+          const targetElement = document.getElementById(hash.substring(1));
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            targetElement.style.animation = 'highlight 2s ease-in-out';
+          }
+        }, 100);
+      }
+    }
+
+    // Show error message
+    function showError(message) {
+      tourList.innerHTML = `
+        <div class="error-message">
+          <i class="fas fa-exclamation-triangle"></i>
+          ${message}
+        </div>
+      `;
+    }
+
+    // Event listeners
+    filterBtn.addEventListener('click', filterTours);
+    
+    resetBtn.addEventListener('click', () => {
+      initializeDateInputs();
+      filterTours();
+    });
+
+    // View toggle
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentView = btn.dataset.view;
+        renderTours();
+      });
+    });
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeDateInputs();
+      loadInitialData();
+    });
+
+ 
+//  test start
+
+
+
+
+
+
+function showTourDetails(tourDetails) {
+    // Create overlay container
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(30,30,60,0.95) 100%);
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
+        backdrop-filter: blur(10px);
+        animation: fadeIn 0.3s ease-out;
+    `;
+
+    // Create content container
+    const container = document.createElement('div');
+    container.style.cssText = `
+        width: 100%;
+        max-width: 90vw;
+        height: 85vh;
+        max-height: 700px;
+        background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255,255,255,0.1);
+        display: flex;
+        flex-direction: column;
+        transform: scale(0.9);
+        animation: slideUp 0.4s ease-out forwards;
+        
+        @media (max-width: 768px) {
+            max-width: 95vw;
+            height: 90vh;
+            border-radius: 15px;
+        }
+        
+        @media (max-width: 480px) {
+            max-width: 98vw;
+            height: 95vh;
+            border-radius: 12px;
+        }
+    `;
+
+    // Create header
+    const header = document.createElement('div');
+    header.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px 25px;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        
+        @media (max-width: 480px) {
+            padding: 15px 20px;
+        }
+    `;
+
+    const headerTitle = document.createElement('h2');
+    headerTitle.textContent = 'Tour Details';
+    headerTitle.style.cssText = `
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        
+        @media (max-width: 480px) {
+            font-size: 20px;
+        }
+    `;
+
+    // Create close button (X)
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '×';
+    closeBtn.style.cssText = `
+        position: absolute;
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: none;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        
+        @media (max-width: 480px) {
+            width: 32px;
+            height: 32px;
+            font-size: 20px;
+            right: 15px;
+        }
+    `;
+
+    closeBtn.addEventListener('mouseenter', () => {
+        closeBtn.style.background = 'rgba(255,255,255,0.3)';
+        closeBtn.style.transform = 'translateY(-50%) scale(1.1)';
+    });
+
+    closeBtn.addEventListener('mouseleave', () => {
+        closeBtn.style.background = 'rgba(255,255,255,0.2)';
+        closeBtn.style.transform = 'translateY(-50%) scale(1)';
+    });
+
+    // Create scrolling text area
+    const textArea = document.createElement('div');
+    textArea.style.cssText = `
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        margin: 0;
+    `;
+
+    // Create scrolling content
+    const scrollingContent = document.createElement('div');
+    scrollingContent.style.cssText = `
+        position: absolute;
+        width: 100%;
+        padding: 30px;
+        animation: scrollUp 30s linear infinite;//20
+        white-space: pre-wrap;
+        color: #2d3748;
+        font-family: 'Noto Sans Malayalam', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 18px;
+        line-height: 1.8;
+        text-align: justify;
+        box-sizing: border-box;
+        
+        @media (max-width: 768px) {
+            padding: 25px;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+        
+        @media (max-width: 480px) {
+            padding: 20px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+    `;
+    scrollingContent.textContent = tourDetails;
+
+    // Create control panel
+    const controlPanel = document.createElement('div');
+    controlPanel.style.cssText = `
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        padding: 20px 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        
+        @media (max-width: 768px) {
+            padding: 18px 20px;
+            gap: 12px;
+        }
+        
+        @media (max-width: 480px) {
+            padding: 15px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+    `;
+
+    // Create voice control buttons
+    const voiceBtn = document.createElement('button');
+    voiceBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+            <path d="M12 2C13.1 2 14 2.9 14 4V12C14 13.1 13.1 14 12 14C10.9 14 10 13.1 10 12V4C10 2.9 10.9 2 12 2ZM19 10V12C19 15.3 16.3 18 13 18V20H11V18C7.7 18 5 15.3 5 12V10H7V12C7 14.2 8.8 16 11 16H13C15.2 16 17 14.2 17 12V10H19Z"/>
+        </svg>
+        Play Voice
+    `;
+    voiceBtn.style.cssText = `
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+        min-width: 120px;
+        
+        @media (max-width: 480px) {
+            padding: 10px 16px;
+            font-size: 13px;
+            min-width: 100px;
+        }
+    `;
+
+    const stopBtn = document.createElement('button');
+    stopBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+            <path d="M6 6H18V18H6V6Z"/>
+        </svg>
+        Stop
+    `;
+    stopBtn.style.cssText = `
+        background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(237, 137, 54, 0.4);
+        min-width: 100px;
+        
+        @media (max-width: 480px) {
+            padding: 10px 16px;
+            font-size: 13px;
+            min-width: 80px;
+        }
+    `;
+
+    // Add CSS animations and responsive styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                transform: scale(0.9) translateY(20px);
+                opacity: 0;
+            }
+            to { 
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes scrollUp {
+            0% { transform: translateY(100%); }
+            100% { transform: translateY(-100%); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .speaking-animation {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @media (max-width: 768px) and (orientation: landscape) {
+            .modal-container {
+                height: 95vh;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Speech synthesis setup
+    let utterance = null;
+    let isPlaying = false;
+
+    // Store original body styles
+    const originalBodyStyle = {
+        overflow: document.body.style.overflow,
+        position: document.body.style.position,
+        top: document.body.style.top,
+        width: document.body.style.width
+    };
+
+    // Add hover effects for buttons
+    [voiceBtn, stopBtn].forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+            btn.style.transform = 'translateY(-2px)';
+            btn.style.boxShadow = btn.style.boxShadow.replace('15px', '20px');
+        });
+        
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = 'translateY(0)';
+            btn.style.boxShadow = btn.style.boxShadow.replace('20px', '15px');
+        });
+    });
+
+    function playVoice() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            
+            const initSpeech = () => {
+                utterance = new SpeechSynthesisUtterance(tourDetails);
+                
+                const voices = window.speechSynthesis.getVoices();
+                let malayalamVoice = voices.find(voice => 
+                    voice.lang === 'ml-IN' || 
+                    voice.lang === 'ml' ||
+                    voice.lang.startsWith('ml-') ||
+                    voice.name.toLowerCase().includes('malayalam')
+                );
+                
+                if (!malayalamVoice) {
+                    malayalamVoice = voices.find(voice => 
+                        voice.lang === 'hi-IN' || 
+                        voice.lang === 'en-IN' ||
+                        voice.name.toLowerCase().includes('india')
+                    );
+                }
+                
+                if (malayalamVoice) {
+                    utterance.voice = malayalamVoice;
+                }
+                
+                utterance.lang = malayalamVoice ? malayalamVoice.lang : 'ml-IN';
+                utterance.rate = 0.7;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                
+                utterance.onstart = () => {
+                    isPlaying = true;
+                    voiceBtn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;" class="speaking-animation">
+                            <path d="M3 9V15H7L12 20V4L7 9H3ZM16.5 12C16.5 10.23 15.48 8.71 14 7.97V16.02C15.48 15.29 16.5 13.77 16.5 12ZM14 3.23V5.29C16.89 6.15 19 8.83 19 12C19 15.17 16.89 17.85 14 18.71V20.77C18.01 19.86 21 16.28 21 Анастасия 12C21 7.72 18.01 4.14 14 3.23Z"/>
+                        </svg>
+                        Speaking...
+                    `;
+                    voiceBtn.style.background = 'linear-gradient(135deg, #718096 0%, #4a5568 100%)';
+                    voiceBtn.classList.add('speaking-animation');
+                };
+                
+                utterance.onend = () => {
+                    isPlaying = false;
+                    voiceBtn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path d="M12 2C13.1 2 14 2.9 14 4V12C14 13.1 13.1 14 12 14C10.9 14 10 13.1 10 12V4C10 2.9 10.9 2 12 2ZM19 10V12C19 15.3 16.3 18 13 18V20H11V18C7.7 18 5 15.3 5 12V10H7V12C7 14.2 8.8 16 11 16H13C15.2  bono 16 17 14.2 17 12V10H19Z"/>
+                        </svg>
+                        Play Voice
+                    `;
+                    voiceBtn.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+                    voiceBtn.classList.remove('speaking-animation');
+                    // Auto-close modal when speech ends
+                    closeModal();
+                };
+                
+                utterance.onerror = (event) => {
+                    isPlaying = false;
+                    voiceBtn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                            <path d="M12 2C13.1 2 14 2.9 14 4V12C14 13.1 13.1 14 12 14C10.9 14 10 13.1 10 12V4C10 2.9 10.9 2 12 2ZM19 10V12C19 15.3 16.3 18 13 18V20H11V18C7.7 18 5 15.3 5 12V10H7V12C7 14.2 8.8 16 11 16H13C15.2 16 17 14.2 17 12V10H19Z"/>
+                        </svg>
+                        Play Voice
+                    `;
+                    voiceBtn.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+                    voiceBtn.classList.remove('speaking-animation');
+                    showNotification('Speech not completed', 'error');
+                };
+                
+                window.speechSynthesis.speak(utterance);
+            };
+            
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                initSpeech();
+            } else {
+                window.speechSynthesis.onvoiceschanged = () => {
+                    initSpeech();
+                    window.speechSynthesis.onvoiceschanged = null;
+                };
+                
+                setTimeout(() => {
+                    if (!isPlaying) {
+                        initSpeech();
+                    }
+                }, 2000);
+            }
+        } else {
+            showNotification('Text-to-speech not supported in this browser', 'error');
+        }
+    }
+
+    function stopVoice() {
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+            isPlaying = false;
+            voiceBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                    <path d="M12 2C13.1 2 14 2.9 14 4V12C14 13.1 13.1 14 12 14C10.9 14 10 13.1 10 12V4C10 2.9 10.9 2 12 2ZM19 10V12C19 15.3 16.3 18 13 18V20H11V18C7.7 18 5 15.3 5 12V10H7V12C7 14.2 8.8 16 11 16H13C15.2 16 17 14.2 17 12V10H19Z"/>
+                </svg>
+                Play Voice
+            `;
+            voiceBtn.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+            voiceBtn.classList.remove('speaking-animation');
+        }
+    }
+
+    function closeModal() {
+        stopVoice();
+        overlay.style.animation = 'fadeIn 0.3s ease-out reverse';
+        container.style.animation = 'slideUp 0.3s ease-out reverse';
+        
+        // Restore original body styles
+        document.body.style.overflow = originalBodyStyle.overflow;
+        document.body.style.position = originalBodyStyle.position;
+        document.body.style.top = originalBodyStyle.top;
+        document.body.style.width = originalBodyStyle.width;
+        
+        // Remove event listeners
+        document.removeEventListener('keydown', escapeHandler);
+        overlay.removeEventListener('click', overlayClickHandler);
+        overlay.removeEventListener('touchstart', touchStartHandler);
+        overlay.removeEventListener('touchmove', touchMoveHandler);
+        
+        setTimeout(() => {
+            if (document.body.contains(overlay)) {
+                document.body.removeChild(overlay);
+            }
+            if (document.head.contains(style)) {
+                document.head.removeChild(style);
+            }
+        }, 300);
+    }
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'error' ? '#e53e3e' : '#48bb78'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 10001;
+            font-size: 14px;
+            animation: slideInRight 0.3s ease-out;
+        `;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideInRight 0.3s ease-out reverse';
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Event listeners
+    const overlayClickHandler = (e) => {
+        if (e.target === overlay) closeModal();
+    };
+    overlay.addEventListener('click', overlayClickHandler);
+
+    closeBtn.addEventListener('click', closeModal);
+    voiceBtn.addEventListener('click', playVoice);
+    stopBtn.addEventListener('click', stopVoice);
+
+    // Touch event handling for mobile
+    let touchStartY = 0;
+    const touchStartHandler = (e) => {
+        touchStartY = e.touches[0].clientY;
+    };
+    const touchMoveHandler = (e) => {
+        const touchY = e.touches[0].clientY;
+        const diff = touchStartY - touchY;
+        
+        if (diff > 50 && e.target === overlay) {
+            closeModal();
+        }
+    };
+    overlay.addEventListener('touchstart', touchStartHandler);
+    overlay.addEventListener('touchmove', touchMoveHandler);
+
+    // Keyboard navigation
+    const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+        } else if (e.key === ' ' || e.key === 'Enter') {
+            if (e.target === voiceBtn || e.target === stopBtn) {
+                return;
+            }
+            e.preventDefault();
+            if (isPlaying) {
+                stopVoice();
+            } else {
+                playVoice();
+            }
+        }
+    };
+    document.addEventListener('keydown', escapeHandler);
+
+    // Assemble the modal
+    header.appendChild(headerTitle);
+    header.appendChild(closeBtn);
+    textArea.appendChild(scrollingContent);
+    controlPanel.appendChild(voiceBtn);
+    controlPanel.appendChild(stopBtn);
+    container.appendChild(header);
+    container.appendChild(textArea);
+    container.appendChild(controlPanel);
+    overlay.appendChild(container);
+    
+    // Add to page
+    document.body.appendChild(overlay);
+    
+    // Prevent body scroll when modal is open
+    const scrollY = window.scrollY;
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    
+    // Auto-start voice after a short delay
+    setTimeout(() => {
+        playVoice();
+    }, 1000);
+} 
+// test end
+</script>
+</body>
+</html>
