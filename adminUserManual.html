@@ -89,13 +89,115 @@
             0% { opacity: 0.7; }
             100% { opacity: 0; }
         }
+
+ #popupContainer {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+
+  .message-list ul {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    gap: 20px;
+  }
+
+  .message-list li {
+    background-color: #ffcc70;
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .message-list li:hover {
+    background-color: #ffaa33;
+  }
+
+  /* Popup style */
+  .popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fffbe6;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    z-index: 1000;
+    display: none;
+    max-width: 80%;
+    text-align: center;
+  }
+
+  .popup h3 {
+    margin-top: 0;
+    color: #333;
+
+  }
+
+  .popup p {
+  color: #555;
+  text-align: justify;
+   font-size: 0.8rem;
+   font-weight:bold;
+}
+
+  .popup .close-btn {
+    margin-top: 20px;
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .popup .close-btn:hover {
+    background-color: #c9302c;
+  }
+
+  /* Background overlay */
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    z-index: 999;
+    display: none;
+  }
+
     </style>
 </head>
 <body>
     <div class="container">
         <div class="celebration-icon">🎉</div>
-        <h1>Admin User Manual <span onclick="alert('ഒടുക്കിയ തുക രേഖപ്പെടുത്തുന്ന വിധം. \nAdmin ആയി ലോഗിൻ ചെയ്ത ശേഷം side bar ൽ നിന്ന് view Tour Booking വഴി ടൂറിന്റെ view Booking വഴി Bus Seat Layout എടുക്കുക. Red ആയി കാണുന്ന Booked സീറ്റിൽ ക്ലിക്ക് ചെയ്യുമ്പോൾ കാണുന്ന Enter Remittance ബട്ടൺ വഴി തുക ചേർക്കുക. അപ്പോൾ ആ സീറ്റ് നീല നിറത്തിൽ കാണാം. ആയതിലുള്ള  print Receipt ക്ലിക്ക് ചെയ്‌താൽ Tour Ticket cum Entry Pass ലഭിക്കും. അതിലെ QR code scan ചെയ്താൽ seat  book ചെയ്ത ആളിന്റെ വിവരങ്ങൾ ലഭിക്കും.')">📘</span></h1>
+        <h1>Admin User Manual <span onclick="alert('ഒടുക്കിയ തുക രേഖപ്പെടുത്തുന്ന വിധം. \nAdmin ആയി ലോഗിൻ ചെയ്ത ശേഷം side bar ൽ നിന്ന് Payment/Receipt menu വഴി ടൂറിന്റെ view Booking വഴി വേണ്ട Bus Seat Layout എടുക്കുക. Red/Green ആയി കാണുന്ന Booked സീറ്റിൽ ക്ലിക്ക് ചെയ്യുമ്പോൾ കാണുന്ന Enter Remittance ബട്ടൺ വഴി തുക ചേർക്കുക. അപ്പോൾ ആ സീറ്റ് നീല നിറത്തിൽ കാണാം. ആയതിലുള്ള  print Receipt ക്ലിക്ക് ചെയ്‌താൽ Tour Ticket cum Entry Pass ലഭിക്കും. അതിലെ QR code scan ചെയ്താൽ seat  book ചെയ്ത ആളിന്റെ വിവരങ്ങൾ ലഭിക്കും.')">📘</span></h1>
         <p class="message">A comprehensive documentation will be available soon for you!</p>
+
+<div id="popupContainer">
+  <div class="message-list">
+    <ul>
+      <li onclick="showPopup(0)">Payment/ Receipt</li>
+      <li onclick="showPopup(1)">Admin Tour Booking</li>
+      <li onclick="showPopup(2)">Admin Utilities</li>
+      <li onclick="showPopup(3)">Delete Old Tours</li>
+    </ul>
+  </div>
+
+  <div class="popup-overlay" id="popupOverlay" onclick="closePopup()"></div>
+
+  <div class="popup" id="popupBox">
+    <h3 id="popupTitle">Title</h3>
+    <p id="popupMessage">Message</p>
+    <button class="close-btn" onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+
         <a href="dashboard.html" class="back-button">Back to Dashboard</a>
     </div>
 
@@ -205,6 +307,35 @@ src: ['https://www.orangefreesounds.com/wp-content/uploads/2021/06/Slow-calm-rel
             soundHint.textContent = 'Click anywhere to play/stop celebration sound. Click Book to get help';
             container.appendChild(soundHint);
         });
+
+
+ const titles = [
+    "ഒടുക്കിയ തുക രേഖപ്പെടുത്തുന്ന വിധം.",
+    "Staff Tour Seats Booking",
+    "Admin Utilities",
+    "Delete Old Tours"
+  ];
+
+  const messages = [
+    "Admin ആയി ലോഗിൻ ചെയ്ത ശേഷം side bar ൽ നിന്ന് Payment/Receipt menu വഴി ടൂറിന്റെ view Booking വഴി വേണ്ട Bus Seat Layout എടുക്കുക. Red/Green ആയി കാണുന്ന Booked സീറ്റിൽ ക്ലിക്ക് ചെയ്യുമ്പോൾ കാണുന്ന Enter Remittance ബട്ടൺ വഴി തുക ചേർക്കുക. അപ്പോൾ ആ സീറ്റ് നീല നിറത്തിൽ കാണാം. ആയതിലുള്ള  print Receipt ക്ലിക്ക് ചെയ്‌താൽ Tour Ticket cum Entry Pass ലഭിക്കും. അതിലെ QR code scan ചെയ്താൽ seat  book ചെയ്ത ആളിന്റെ വിവരങ്ങൾ ലഭിക്കും.",
+    "Admin ആയി ലോഗിൻ ചെയ്ത ശേഷം side bar ൽ നിന്ന് Admin Tour Booking menu വഴി Staff Tour Booking page വഴി മറ്റുള്ളവര്‍ക്കായി ബുക്ക്‌ ചെയ്യേണ്ട ടൂറിലുള്ള Book Now menu ക്ലിക്ക് ചെയ്ത് ലഭിക്കുന്ന SeatLayout വഴി വേണ്ട സീറ്റ്‌ സെലക്ട്‌ ചെയ്ത് പേരും മറ്റ് വിവരങ്ങളും നല്‍കി Submit Bookings ക്ലിക്ക് ചെയ്യുക.",
+    "1.Image Url Test വഴി ഇതില്‍ നല്‍കുന്ന ചിത്രങ്ങളുടെ link ശരിയാണോ എന്ന് പരിശോധിക്കാം. \n2.Delete Old Booking വഴി കാലഹരണപ്പെട്ട ബൂക്കിങ്ങുകള്‍ delete ചെയ്യാം. Password നല്‍കി Booking Management System പേജില്‍ കയറി എത്ര ദിവസം മുമ്പുള്ള booking data ആണെന്ന് നല്‍കി, തെളിഞ്ഞ് വരുന്ന booking records delete ചെയ്യാം.\n🚫 മറ്റ് മെനുകള്‍ ഉപയോഗിച്ച് ഇപ്പോള്‍ ഒന്നും ചെയ്യേണ്ടതില്ല",
+    "Delete Old Tours വഴി കാലഹരണപ്പെട്ട ടൂര്‍ വിവരങ്ങള്‍ delete ചെയ്യാം. Password നല്‍കി Tour Management System പേജില്‍ കയറി എത്ര ദിവസം മുമ്പുള്ള tour data ആണെന്ന് നല്‍കി, തെളിഞ്ഞ് വരുന്ന tour records delete ചെയ്യാം."
+  ];
+
+  function showPopup(index) {
+    document.getElementById('popupTitle').innerText = titles[index];
+    document.getElementById('popupMessage').innerText = messages[index];
+    document.getElementById('popupBox').style.display = 'block';
+    document.getElementById('popupOverlay').style.display = 'block';
+  }
+
+  function closePopup() {
+    document.getElementById('popupBox').style.display = 'none';
+    document.getElementById('popupOverlay').style.display = 'none';
+  }
+
+
     </script>
 </body>
 </html>
