@@ -44,7 +44,7 @@
 
 .header-title {
   margin: 0;
-
+  font-size: 20px;
   font-weight: bold;
   text-align: center;
 }
@@ -68,7 +68,7 @@
 
     .header h1 {
       color: #2c3e50;
-      font-size: 0.8rem;
+      font-size: 1.1rem;
       font-weight: 700;
       margin-bottom: 10px;
     }
@@ -422,7 +422,7 @@
   <h1 class="header-title">യാത്രക്കാരുടെ കുറിപ്പുകള്‍</h1>
 </div>
 
-    <div class="post-form-container">
+    <div class="post-form-container" id="postForm" style="display:none;">
       <form id="postForm">
         <div class="form-group">
           <label for="text" class="form-label"> Welcome, <span class="username" id="username">Loading...</span>. Share your thoughts</label>
@@ -466,8 +466,9 @@
     const db = firebase.firestore();
     let currentUser;
 
-       // Get user from sessionStorage
+    // Get user from sessionStorage
     function initializeUser() {
+ 
 
 if (sessionStorage.getItem('isLogin') === 'true') {
 {     const showForm = document.getElementById('postForm');
@@ -498,6 +499,10 @@ if (sessionStorage.getItem('isLogin') === 'true') {
 } else {
     
 }
+
+
+
+
 
     }
 
