@@ -1279,8 +1279,8 @@ function helpMenu() {
 }
 
 function showImage() {
-  // Remove existing image if already added
-  const existing = document.getElementById('dynamicImage');
+  // Remove existing image or link if already added
+  const existing = document.getElementById('dynamicImageLink');
   if (existing) existing.remove();
 
   // Create style element if not already added
@@ -1288,27 +1288,39 @@ function showImage() {
     const style = document.createElement('style');
     style.id = 'dynamicImageStyle';
     style.textContent = `
-      #dynamicImage {
+      #dynamicImageLink {
         position: fixed;
-        top: 70%; /* just below vertical center */
+        top: 70%;
         left: 50%;
         transform: translate(-50%, -50%);
+        z-index: 9999;
+      }
+      #dynamicImage {
         max-width: 80vw;
         max-height: 40vh;
         border-radius: 8px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        z-index: 9999;
+        cursor: pointer;
       }
     `;
     document.head.appendChild(style);
   }
 
-  // Create and insert the image
+  // Create the link element
+  const link = document.createElement('a');
+  link.href = 'responsesPage.html';
+  link.id = 'dynamicImageLink';
+
+  // Create the image
   const img = document.createElement('img');
   img.src = 'https://live.staticflickr.com/65535/54594991089_2bc7fcbfe4_z.jpg';
   img.id = 'dynamicImage';
-  document.body.appendChild(img);
+
+  // Nest image inside link, and add to body
+  link.appendChild(img);
+  document.body.appendChild(link);
 }
+
 
 
 function showShareButton() {
