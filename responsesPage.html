@@ -466,8 +466,11 @@
     const db = firebase.firestore();
     let currentUser;
 
-    // Get user from sessionStorage
+       // Get user from sessionStorage
     function initializeUser() {
+
+if (sessionStorage.getItem('isLogin') === 'true') {
+{     const showForm = document.getElementById('postForm');
       const userName = sessionStorage.getItem('userName');
       if (userName) {
         currentUser = { 
@@ -475,6 +478,7 @@
           device: /Mobile|Android|iPhone|iPad/.test(navigator.userAgent) ? 'Mobile' : 'Desktop'
         };
         document.getElementById('username').textContent = currentUser.displayName;
+	showForm.style.display = 'block';
       } else {
         // Fallback to anonymous login
         auth.signInAnonymously().then(() => {
@@ -490,6 +494,11 @@
           document.getElementById('username').textContent = 'Guest User';
         });
       }
+}   
+} else {
+    
+}
+
     }
 
     // Enhanced link preview fetching function with multiple fallbacks
