@@ -633,67 +633,129 @@
       return url;
     }
 
+
     function playVideo(url) {
-      const videoOverlay = document.getElementById('videoOverlay');
-      const videoPlayer = document.getElementById('videoPlayer');
-      
-      // Check if it's a platform video (YouTube, Vimeo) or direct video
-      if (url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com')) {
-        // For platform videos, create an iframe
-        const iframe = document.createElement('iframe');
-        iframe.src = getVideoUrl(url);
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.allow = 'autoplay; fullscreen';
-        iframe.allowFullscreen = true;
-        
-        // Replace video element with iframe
-        videoPlayer.style.display = 'none';
-        videoPlayer.parentNode.insertBefore(iframe, videoPlayer);
-        iframe.id = 'videoIframe';
-      } else {
-        // For direct video files, use video element
-        videoPlayer.src = url;
-        videoPlayer.style.display = 'block';
-        videoPlayer.play();
-      }
-      
-      videoOverlay.style.display = 'block';
-    }
-
-    function closeVideo() {
-      const videoOverlay = document.getElementById('videoOverlay');
-      const videoPlayer = document.getElementById('videoPlayer');
-      const iframe = document.getElementById('videoIframe');
-      
-      // Hide overlay
-      videoOverlay.style.display = 'none';
-      
-      // Stop video
-      videoPlayer.pause();
-      videoPlayer.src = '';
-      videoPlayer.style.display = 'block';
-      
-      // Remove iframe if exists
-      if (iframe) {
-        iframe.remove();
-      }
-    }
-
-    // Close video when clicking outside or pressing ESC
-    document.getElementById('videoOverlay').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeVideo();
-      }
+  const videoOverlay = document.getElementById('videoOverlay');
+  const videoPlayer = document.getElementById('videoPlayer');
+  
+  // Check if it's a platform video (YouTube, Vimeo) or direct video
+  if (url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com')) {
+    // For platform videos, create an iframe
+    const iframe = document.createElement('iframe');
+    iframe.src = getVideoUrl(url);
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.allow = 'autoplay; fullscreen';
+    iframe.allowFullscreen = true;
+    
+    // Replace video element with iframe
+    videoPlayer.style.display = 'none';
+    videoPlayer.parentNode.insertBefore(iframe, videoPlayer);
+    iframe.id = 'videoIframe';
+    
+    // Request fullscreen for iframe
+    requestFullscreen(iframe);
+  } else {
+    // For direct video files, use video element
+    videoPlayer.src = url;
+    videoPlayer.style.display = 'block';
+    
+    // Add event listener for video end
+    videoPlayer.addEventListener('ended', function() {
+      closeVideo();
     });
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        closeVideo();
-      }
+    
+    // Play video and request fullscreen
+    videoPlayer.play().then(() => {
+      requestFullscreen(videoPlayer);
     });
+  }
+  
+  videoOverlay.style.display = 'block';
+}
 
+function closeVideo() {
+  const videoOverlay = document.getElementById('videoOverlay');
+  const videoPlayer = document.getElementById('videoPlayer');
+  const iframe = document.getElementById('videoIframe');
+  
+  // Exit fullscreen if active
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  }
+  
+  // Hide overlay
+  videoOverlay.style.display = 'none';
+  
+  // Stop video and remove event listeners
+  videoPlayer.pause();
+  videoPlayer.src = '';
+  videoPlayer.style.display = 'block';
+  
+  // Remove any existing event listeners
+  videoPlayer.removeEventListener('ended', closeVideo);
+  
+  // Remove iframe if exists
+  if (iframe) {
+    iframe.remove();
+  }
+}
+
+// Helper function to request fullscreen with cross-browser support
+function requestFullscreen(element) {
+  if (element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if (element.webkitRequestFullscreen) {
+    element.webkitRequestFullscreen();
+  } else if (element.msRequestFullscreen) {
+    element.msRequestFullscreen();
+  } else if (element.mozRequestFullScreen) {
+    element.mozRequestFullScreen();
+  }
+}
+
+// Close video when clicking outside, pressing ESC, or exiting fullscreen
+document.getElementById('videoOverlay').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeVideo();
+  }
+});
+
+// Handle ESC key and fullscreen changes
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('videoOverlay').style.display === 'block') {
+    closeVideo();
+  }
+});
+
+// Handle fullscreen change events
+document.addEventListener('fullscreenchange', function() {
+  if (!document.fullscreenElement && document.getElementById('videoOverlay').style.display === 'block') {
+    closeVideo();
+  }
+});
+
+// Handle webkit fullscreen change
+document.addEventListener('webkitfullscreenchange', function() {
+  if (!document.webkitFullscreenElement && document.getElementById('videoOverlay').style.display === 'block') {
+    closeVideo();
+  }
+});
+
+// Handle moz fullscreen change
+document.addEventListener('mozfullscreenchange', function() {
+  if (!document.mozFullScreenElement && document.getElementById('videoOverlay').style.display === 'block') {
+    closeVideo();
+  }
+});
+
+
+
+
+
+
+  
     // Get user from sessionStorage
     function initializeUser() {
       if (sessionStorage.getItem('isLogin') === 'true') {
