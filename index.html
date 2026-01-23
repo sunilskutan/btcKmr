@@ -557,22 +557,30 @@ h2::before {
 
   window.addEventListener("load", function () {
 
-    if (!isMobilePortrait()) return;   // ❌ Do nothing on desktop / landscape
+    if (!isMobilePortrait()) return;   // Only mobile portrait
 
     const overlay = document.getElementById("mobileIntroOverlay");
     const video = document.getElementById("mobileIntroVideo");
+    const tapMsg = document.getElementById("tapMessage");
 
-    // Show overlay and request fullscreen
     overlay.style.display = "flex";
 
-    // Try fullscreen (works on most mobile browsers)
-    if (video.requestFullscreen) {
-      video.requestFullscreen().catch(() => {});
-    } else if (video.webkitEnterFullscreen) {
-      video.webkitEnterFullscreen();
-    }
+    // Wait for user tap to start video with sound
+    overlay.addEventListener("click", function startVideo() {
+        tapMsg.style.display = "none";
+        video.play();
 
-    // When video ends, close and clean up
+        // Try fullscreen
+        if (video.requestFullscreen) {
+          video.requestFullscreen().catch(() => {});
+        } else if (video.webkitEnterFullscreen) {
+          video.webkitEnterFullscreen();
+        }
+
+        overlay.removeEventListener("click", startVideo);
+    });
+
+    // When video ends, close overlay
     video.onended = function () {
       overlay.style.display = "none";
       video.pause();
@@ -590,7 +598,7 @@ h2::before {
 <body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
 
 
-<!-- Mobile Portrait Video Overlay (Isolated) -->
+<!-- Mobile Portrait Video Overlay -->
 <div id="mobileIntroOverlay" style="
   position: fixed;
   inset: 0;
@@ -602,8 +610,6 @@ h2::before {
 ">
 
   <video id="mobileIntroVideo"
-         autoplay
-         muted
          playsinline
          style="
            width: 100%;
@@ -611,11 +617,21 @@ h2::before {
            object-fit: cover;
          ">
     <source src="munnar.mp4" type="video/mp4">
-    Your browser does not support the video tag.
   </video>
 
-</div>
+  <!-- Tap to start message -->
+  <div id="tapMessage" style="
+    position:absolute;
+    color:white;
+    font-size:22px;
+    background:rgba(0,0,0,0.6);
+    padding:15px 25px;
+    border-radius:10px;
+  ">
+    Tap to Play
+  </div>
 
+</div>
 
 
 	
@@ -797,4 +813,5 @@ function showMsg(id) {
 
 </body>
 </html>
+
 
