@@ -1109,7 +1109,7 @@ const dateStr = dateObj
     // Enhanced cleanup function for old posts
     async function deleteOldPosts() {
       try {
-        const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         const oldPosts = await db.collection('responses')
           .where('timestamp', '<', cutoff)
           .limit(10)
@@ -1165,3 +1165,4 @@ const dateStr = dateObj
   </script>
 </body>
 </html>
+
