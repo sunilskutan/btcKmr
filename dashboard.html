@@ -1277,7 +1277,7 @@ function helpMenu() {
 `);
 	     }
 }
-
+/*
 function showImage() {
   // Remove existing image or link if already added
   const existing = document.getElementById('dynamicImageLink');
@@ -1320,7 +1320,68 @@ function showImage() {
   link.appendChild(img);
   document.body.appendChild(link);
 }
+*/
 
+		function showImage() {
+  // Remove existing image or link if already added
+  const existing = document.getElementById('dynamicImageLink');
+  if (existing) existing.remove();
+
+  // Create style element if not already added
+  if (!document.getElementById('dynamicImageStyle')) {
+    const style = document.createElement('style');
+    style.id = 'dynamicImageStyle';
+    style.textContent = `
+      #dynamicImageLink {
+        position: fixed;
+        top: 70%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+        text-align: center;
+        text-decoration: none;
+      }
+      #dynamicImage {
+        max-width: 80vw;
+        max-height: 40vh;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+        display: block;
+        margin: 0 auto;
+      }
+      #dynamicImageText {
+        margin-top: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Create the link element
+  const link = document.createElement('a');
+  link.href = 'responsesPage.html';
+  link.id = 'dynamicImageLink';
+
+  // Create the image
+  const img = document.createElement('img');
+  img.src = 'https://live.staticflickr.com/65535/54594991089_2bc7fcbfe4_z.jpg';
+  img.id = 'dynamicImage';
+
+  // Create the text
+  const text = document.createElement('div');
+  text.id = 'dynamicImageText';
+  text.textContent = '☝️ Tap Image to see responses';
+
+  // Append image and text inside link
+  link.appendChild(img);
+  link.appendChild(text);
+
+  // Add to body
+  document.body.appendChild(link);
+}
 
 
 function showShareButton() {
@@ -1607,3 +1668,4 @@ function showAdminOnlyMessage() {
 </footer>
 </body>
 </html>
+
