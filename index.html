@@ -546,6 +546,13 @@ h2::before {
 
 
 
+  const heading = document.getElementById("mainHeading");
+  const texts = ["BTC Kilimanoor", "celebrating 400 Tours"];
+  let index = 0;
+  setInterval(() => {
+    index = (index + 1) % texts.length;
+    heading.textContent = texts[index];
+  }, 2000);
 
 
 		
@@ -566,7 +573,7 @@ h2::before {
                 <span onclick="window.open('https://www.instagram.com/btcksrtckilimanoor/', '_blank')" style=" cursor: pointer;"><i class="fas fa-bus"></i></span>
             </div>
            
-            <h2 onclick="window.open('https://www.facebook.com/photo.php?fbid=882675203893183&id=100064521349277&set=a.488016386692402', '_blank')" style=" cursor: pointer;">BTC Kilimanoor</h2>
+            <h2 id="mainHeading" onclick="window.open('https://www.facebook.com/photo.php?fbid=882675203893183&id=100064521349277&set=a.488016386692402', '_blank')" style=" cursor: pointer;">BTC Kilimanoor</h2>
             <p class="subtitle">Budget Tourism Cell of <span onclick="window.open('https://www.facebook.com/KeralaStateRoadTransportCorporation', '_blank')" style=" cursor: pointer;">KSRTC </span>
 	<span onclick="window.open('https://g.co/kgs/NrWA4c9', '_blank')" >Kilimanoor</span></p>
             
@@ -733,6 +740,7 @@ function showMsg(id) {
 
 </body>
 </html>
+
 
 
 
