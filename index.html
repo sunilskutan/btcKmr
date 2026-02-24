@@ -547,91 +547,11 @@ h2::before {
 
 
 
-		(function () {
-
-  function isMobilePortrait() {
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const isPortrait = window.matchMedia("(orientation: portrait)").matches;
-    return isMobile && isPortrait;
-  }
-
-  window.addEventListener("load", function () {
-
-    if (!isMobilePortrait()) return;   // Only mobile portrait
-
-    const overlay = document.getElementById("mobileIntroOverlay");
-    const video = document.getElementById("mobileIntroVideo");
-    const tapMsg = document.getElementById("tapMessage");
-
-    overlay.style.display = "flex";
-
-    // Wait for user tap to start video with sound
-    overlay.addEventListener("click", function startVideo() {
-        tapMsg.style.display = "none";
-        video.play();
-
-        // Try fullscreen
-        if (video.requestFullscreen) {
-          video.requestFullscreen().catch(() => {});
-        } else if (video.webkitEnterFullscreen) {
-          video.webkitEnterFullscreen();
-        }
-
-        overlay.removeEventListener("click", startVideo);
-    });
-
-    // When video ends, close overlay
-    video.onended = function () {
-      overlay.style.display = "none";
-      video.pause();
-      video.currentTime = 0;
-    };
-
-  });
-
-})();
-
 
 		
     </script>
 </head>
 <body oncontextmenu="return false;" onkeydown="if(event.keyCode==123) return false;">
-
-
-<!-- Mobile Portrait Video Overlay -->
-<div id="mobileIntroOverlay" style="
-  position: fixed;
-  inset: 0;
-  background: black;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 100000;
-">
-
-  <video id="mobileIntroVideo"
-         playsinline
-         style="
-           width: 100%;
-           height: 100%;
-           object-fit: cover;
-         ">
-    <source src="munnar.mp4" type="video/mp4">
-  </video>
-
-  <!-- Tap to start message -->
-  <div id="tapMessage" style="
-    position:absolute;
-    color:white;
-    font-size:22px;
-    background:rgba(0,0,0,0.6);
-    padding:15px 25px;
-    border-radius:10px;
-  ">
-    Tap to Play
-  </div>
-
-</div>
 
 
 	
@@ -813,5 +733,6 @@ function showMsg(id) {
 
 </body>
 </html>
+
 
 
