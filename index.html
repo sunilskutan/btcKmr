@@ -549,9 +549,26 @@ h2::before {
   const heading = document.getElementById("mainHeading");
   const texts = ["BTC Kilimanoor", "celebrating 400 Tours"];
   let index = 0;
+
+  heading.style.transition = "opacity 0.5s, font-size 0.3s";
+
   setInterval(() => {
-    index = (index + 1) % texts.length;
-    heading.textContent = texts[index];
+    heading.style.opacity = 0;
+
+    setTimeout(() => {
+      index = (index + 1) % texts.length;
+      heading.textContent = texts[index];
+
+      // Change font size based on text
+      if (texts[index] === "celebrating 400 Tours") {
+        heading.style.fontSize = "20px";   // smaller size
+      } else {
+        heading.style.fontSize = "32px";   // original size
+      }
+
+      heading.style.opacity = 1;
+    }, 500);
+
   }, 2000);
 
 
@@ -740,6 +757,7 @@ function showMsg(id) {
 
 </body>
 </html>
+
 
 
 
