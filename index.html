@@ -65,19 +65,19 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button class="ghost" id="reset">Start over</button>
     </div>
     <div class="note" id="status"></div>
-    <div class="linkbox hide" id="linkbox">
-      <b>Your shareable link</b>
-      <code id="link"></code>
-      <div class="row"><button id="copy">Copy link</button></div>
-      <div class="note">Anyone who opens this link sees the slider. Drag, or use the arrow keys.</div>
-    </div>
   </section>
 
   <section id="view" class="hide">
     <h1 id="vt">Before &amp; After</h1>
     <div class="stage" id="vstage"></div>
     <div class="note" id="vstatus"></div>
-    <div class="row"><a class="btn ghost" id="mine" href="#">Create your own</a></div>
+    <div class="linkbox hide" id="linkbox">
+      <b>Your shareable link</b>
+      <code id="link"></code>
+      <div class="row"><button id="copy">Copy link</button></div>
+      <div class="note">Anyone who opens this link sees this slider. Drag, or use the arrow keys.</div>
+    </div>
+    <div class="row"><a class="btn ghost" id="mine" href="#">Create new slider</a></div>
   </section>
 </main>
 
@@ -171,7 +171,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
         before:ub.id,after:ua.id,hl:$('hl').value.trim(),bl:$('lb').value||'Before',al:$('la').value||'After',created:Date.now()
       });
       var url=location.href.split('#')[0]+'#s-'+id;
-      $('link').textContent=url;$('linkbox').classList.remove('hide');
+      $('link').textContent=url;try{history.replaceState(null,'','#s-'+id)}catch(e){}
+      var hv2=$('hl').value.trim();$('create').classList.add('hide');$('view').classList.remove('hide');
+      $('vt').textContent=hv2||'Before & After';$('vstatus').textContent='';
+      makeSlider($('vstage'),imgs.b,imgs.a,$('lb').value||'Before',$('la').value||'After');
+      $('linkbox').classList.remove('hide');window.scrollTo(0,0);
       $('status').textContent='';
     }catch(err){
       $('status').textContent='Couldn\u2019t create the link: '+(err&&err.message?err.message:'please try again')+'.';
@@ -191,7 +195,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
     var m=/^s-([a-z0-9]+)$/.exec(h);
     $('create').classList.toggle('hide',!!m);
     $('view').classList.toggle('hide',!m);
-    if(!m)return;
+    if(!m)return;$('linkbox').classList.add('hide');
     $('vstage').innerHTML='';$('vstatus').textContent='Loading\u2026';
     var tries=0;
     while(!caps.db&&tries<40){await new Promise(function(r){setTimeout(r,250)});tries++}
@@ -205,7 +209,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
       makeSlider($('vstage'),'/_blob/'+d.before,'/_blob/'+d.after,d.bl||'Before',d.al||'After');
     }catch(e){$('vstatus').textContent='Slider not found.'}
   }
-  $('mine').addEventListener('click',function(e){e.preventDefault();history.replaceState(null,'',location.href.split('#')[0]);route()});
+  $('mine').addEventListener('click',function(e){e.preventDefault();history.replaceState(null,'',location.href.split('#')[0]);$('reset').click();route()});
   window.addEventListener('hashchange',route);
 
   (async function(){
