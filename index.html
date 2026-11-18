@@ -1,65 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page Expired</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-12px); }
-    }
-    .float { animation: float 3s ease-in-out infinite; }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-up { animation: fadeUp 0.6s ease forwards; }
-    .delay-1 { animation-delay: 0.1s; opacity: 0; }
-    .delay-2 { animation-delay: 0.25s; opacity: 0; }
-    .delay-3 { animation-delay: 0.4s; opacity: 0; }
-    .delay-4 { animation-delay: 0.55s; opacity: 0; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Before & After Slider</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--ink:#1d1d1b;--mute:#6b6a66;--line:#e2e0da;--accent:#e4572e;--accent-ink:#fff;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151514;--card:#1f1f1d;--ink:#f1efea;--mute:#9a988f;--line:#33322f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151514;--card:#1f1f1d;--ink:#f1efea;--mute:#9a988f;--line:#33322f;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+main{max-width:920px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:clamp(1.5rem,5vw,2.2rem);margin:8px 0 4px;letter-spacing:-.02em}
+.sub{color:var(--mute);margin:0 0 20px}
+.drops{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.drop{background:var(--card);border:2px dashed var(--line);border-radius:14px;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;text-align:center;padding:12px;position:relative;overflow:hidden;transition:border-color .15s}
+.drop:hover,.drop.over{border-color:var(--accent)}
+.drop b{font-size:1rem}.drop span{color:var(--mute);font-size:.85rem}
+.drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.drop .tag{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.65);color:#fff;font-size:.75rem;padding:2px 8px;border-radius:99px;z-index:1}
+.drop input{display:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+input[type=text]{flex:1;min-width:120px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+button,.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:11px 18px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
+button.ghost,.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.hl{font-size:clamp(1.25rem,4.5vw,1.8rem);letter-spacing:-.02em;margin:20px 0 -8px;text-align:center}
+.stage{margin:20px 0}
+.ba{position:relative;width:100%;overflow:hidden;border-radius:14px;background:var(--card);user-select:none;-webkit-user-select:none;touch-action:pan-y;cursor:ew-resize;outline:none}
+.ba img{display:block;width:100%;height:auto;pointer-events:none;-webkit-user-drag:none}
+.ba .top{position:absolute;inset:0;clip-path:inset(0 50% 0 0)}
+.ba .top img{height:100%;object-fit:cover}
+.ba .bar{position:absolute;top:0;bottom:0;left:50%;width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 6px rgba(0,0,0,.5)}
+.ba .knob{position:absolute;top:50%;left:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#222;font-size:16px;font-weight:700}
+.ba .lab{position:absolute;bottom:10px;background:rgba(0,0,0,.6);color:#fff;font-size:.8rem;padding:3px 10px;border-radius:99px}
+.ba .lab.l{left:10px}.ba .lab.r{right:10px}
+.linkbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:16px}
+.linkbox code{display:block;word-break:break-all;margin:8px 0;font-size:.85rem;background:var(--bg);padding:8px 10px;border-radius:8px}
+.note{color:var(--mute);font-size:.85rem}
+.hide{display:none}
+@media (max-width:520px){.drops{gap:8px}.drop{min-height:120px}}
+</style>
 </head>
-<body class="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-
-  <div class="text-center max-w-md w-full">
-
-    <!-- Icon -->
-    <div class="float mb-8 fade-up delay-1">
-      <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-amber-100 border-4 border-amber-200">
-        <svg class="w-12 h-12 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
-        </svg>
-      </div>
+<body>
+<main>
+  <section id="create">
+    <h1>Before &amp; After Slider</h1>
+    <p class="sub">Add two photos, drag the handle to compare, then get a shareable link.</p>
+    <div class="row"><input type="text" id="hl" placeholder="Add a headline for your slider" maxlength="80" aria-label="Headline"></div>
+    <div class="drops">
+      <label class="drop" id="dB"><span class="tag">Before</span><b>Add before photo</b><span>Tap or drop an image</span><input type="file" accept="image/*"></label>
+      <label class="drop" id="dA"><span class="tag">After</span><b>Add after photo</b><span>Tap or drop an image</span><input type="file" accept="image/*"></label>
     </div>
-
-    <!-- Heading -->
-    <h1 class="text-4xl font-bold text-slate-800 mb-2 fade-up delay-2">Page Expired</h1>
-
-    <!-- Message -->
-    <p class="text-slate-500 text-base mb-8 leading-relaxed fade-up delay-3">
-      This page is no longer valid. It may have timed out or the session has ended.
-      Please go back and try again.
-    </p>
-
-    <!-- Button -->
-    <div class="fade-up delay-4">
-      <button onclick="history.back()"
-        class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-md shadow-amber-200">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Go Back
-      </button>
+    <div class="row">
+      <input type="text" id="lb" value="Before" maxlength="20" aria-label="Before label">
+      <input type="text" id="la" value="After" maxlength="20" aria-label="After label">
     </div>
+    <h2 class="hl hide" id="ph"></h2>
+    <div class="stage hide" id="stage"></div>
+    <div class="row">
+      <button id="share" disabled>Save and share</button>
+      <button class="ghost" id="reset">Start over</button>
+    </div>
+    <div class="note" id="status"></div>
+    <div class="linkbox hide" id="linkbox">
+      <b>Your shareable link</b>
+      <code id="link"></code>
+      <div class="row"><button id="copy">Copy link</button></div>
+      <div class="note">Anyone who opens this link sees the slider. Drag, or use the arrow keys.</div>
+    </div>
+  </section>
 
-    <!-- Footer note -->
-    <p class="mt-10 text-slate-300 text-xs fade-up delay-4">Error 419 · Session Expired</p>
+  <section id="view" class="hide">
+    <h1 id="vt">Before &amp; After</h1>
+    <div class="stage" id="vstage"></div>
+    <div class="note" id="vstatus"></div>
+    <div class="row"><a class="btn ghost" id="mine" href="#">Create your own</a></div>
+  </section>
+</main>
 
-  </div>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var imgs={b:null,a:null}; // data URLs
+  var files={b:null,a:null};
+  var caps={assets:null,db:null};
 
+  function makeSlider(host,bSrc,aSrc,bl,al){
+    host.innerHTML='';
+    var el=document.createElement('div');el.className='ba';el.tabIndex=0;
+    el.setAttribute('role','slider');el.setAttribute('aria-label','Before and after comparison');
+    el.setAttribute('aria-valuemin','0');el.setAttribute('aria-valuemax','100');el.setAttribute('aria-valuenow','50');
+    var base=new Image();base.src=aSrc;base.alt=al;base.draggable=false;
+    var top=document.createElement('div');top.className='top';
+    var t=new Image();t.src=bSrc;t.alt=bl;t.draggable=false;top.appendChild(t);
+    var bar=document.createElement('div');bar.className='bar';
+    var knob=document.createElement('div');knob.className='knob';knob.textContent='\u25C0\u25B6';knob.style.fontSize='11px';
+    var l1=document.createElement('div');l1.className='lab l';l1.textContent=bl;
+    var l2=document.createElement('div');l2.className='lab r';l2.textContent=al;
+    el.append(base,top,bar,knob,l1,l2);host.appendChild(el);
+    var pos=50;
+    function set(p){
+      pos=Math.max(0,Math.min(100,p));
+      top.style.clipPath='inset(0 '+(100-pos)+'% 0 0)';
+      bar.style.left=pos+'%';knob.style.left=pos+'%';
+      el.setAttribute('aria-valuenow',Math.round(pos));
+    }
+    function fromEvent(e){var r=el.getBoundingClientRect();set((e.clientX-r.left)/r.width*100)}
+    var drag=false;
+    el.addEventListener('pointerdown',function(e){drag=true;el.setPointerCapture(e.pointerId);fromEvent(e)});
+    el.addEventListener('pointermove',function(e){if(drag)fromEvent(e)});
+    el.addEventListener('pointerup',function(){drag=false});
+    el.addEventListener('pointercancel',function(){drag=false});
+    el.addEventListener('keydown',function(e){
+      if(e.key==='ArrowLeft'){set(pos-3);e.preventDefault()}
+      if(e.key==='ArrowRight'){set(pos+3);e.preventDefault()}
+    });
+    set(50);
+  }
+
+  function readFile(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result)};r.onerror=rej;r.readAsDataURL(f)})}
+
+  function refresh(){
+    var ready=imgs.b&&imgs.a;
+    $('stage').classList.toggle('hide',!ready);
+    var hv=$('hl').value.trim();$('ph').textContent=hv;$('ph').classList.toggle('hide',!(ready&&hv));
+    $('share').disabled=!(ready&&caps.assets&&caps.db);
+    if(ready){makeSlider($('stage'),imgs.b,imgs.a,$('lb').value||'Before',$('la').value||'After')}
+    $('status').textContent=ready&&!(caps.assets&&caps.db)?'Sharing links aren\u2019t available in this view, but the slider still works here.':'';
+  }
+
+  function wire(id,key){
+    var box=$(id),inp=box.querySelector('input');
+    function take(f){
+      if(!f||!/^image\//.test(f.type))return;
+      files[key]=f;
+      readFile(f).then(function(d){
+        imgs[key]=d;
+        var old=box.querySelector('img');if(old)old.remove();
+        var im=new Image();im.src=d;im.alt='';box.appendChild(im);
+        refresh();
+      });
+    }
+    inp.addEventListener('change',function(){take(inp.files[0])});
+    box.addEventListener('dragover',function(e){e.preventDefault();box.classList.add('over')});
+    box.addEventListener('dragleave',function(){box.classList.remove('over')});
+    box.addEventListener('drop',function(e){e.preventDefault();box.classList.remove('over');take(e.dataTransfer.files[0])});
+  }
+  wire('dB','b');wire('dA','a');
+  $('hl').addEventListener('input',refresh);$('lb').addEventListener('input',refresh);$('la').addEventListener('input',refresh);
+
+  $('reset').addEventListener('click',function(){
+    imgs={b:null,a:null};files={b:null,a:null};
+    document.querySelectorAll('.drop img').forEach(function(i){i.remove()});
+    document.querySelectorAll('.drop input').forEach(function(i){i.value=''});
+    $('hl').value='';$('linkbox').classList.add('hide');refresh();
+  });
+
+  function rid(){var s='',c='abcdefghijkmnpqrstuvwxyz23456789';for(var i=0;i<8;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
+
+  $('share').addEventListener('click',async function(){
+    var btn=$('share');btn.disabled=true;$('status').textContent='Uploading images\u2026';
+    try{
+      var ub=await caps.assets.upload(files.b);
+      var ua=await caps.assets.upload(files.a);
+      var id=rid();
+      await caps.db.collection('sliders').doc(id).set({
+        before:ub.id,after:ua.id,hl:$('hl').value.trim(),bl:$('lb').value||'Before',al:$('la').value||'After',created:Date.now()
+      });
+      var url=location.href.split('#')[0]+'#s-'+id;
+      $('link').textContent=url;$('linkbox').classList.remove('hide');
+      $('status').textContent='';
+    }catch(err){
+      $('status').textContent='Couldn\u2019t create the link: '+(err&&err.message?err.message:'please try again')+'.';
+    }
+    btn.disabled=false;
+  });
+
+  $('copy').addEventListener('click',function(){
+    var t=$('link').textContent;
+    var done=function(){$('copy').textContent='Copied!';setTimeout(function(){$('copy').textContent='Copy link'},1500)};
+    try{navigator.clipboard.writeText(t).then(done,function(){sel()})}catch(e){sel()}
+    function sel(){var r=document.createRange();r.selectNode($('link'));var s=getSelection();s.removeAllRanges();s.addAllRanges(r)}
+  });
+
+  async function route(){
+    var h=location.hash.replace('#','');
+    var m=/^s-([a-z0-9]+)$/.exec(h);
+    $('create').classList.toggle('hide',!!m);
+    $('view').classList.toggle('hide',!m);
+    if(!m)return;
+    $('vstage').innerHTML='';$('vstatus').textContent='Loading\u2026';
+    var tries=0;
+    while(!caps.db&&tries<40){await new Promise(function(r){setTimeout(r,250)});tries++}
+    if(!caps.db){$('vstatus').textContent='This slider couldn\u2019t be loaded. You may need to sign in.';return}
+    try{
+      var snap=await caps.db.collection('sliders').doc(m[1]).get();
+      var d=snap&&(typeof snap.data==='function'?snap.data():snap);
+      if(!d||!d.before){$('vstatus').textContent='Slider not found.';return}
+      $('vstatus').textContent='';
+      $('vt').textContent=d.hl||'Before & After';if(d.hl)document.title=d.hl;
+      makeSlider($('vstage'),'/_blob/'+d.before,'/_blob/'+d.after,d.bl||'Before',d.al||'After');
+    }catch(e){$('vstatus').textContent='Slider not found.'}
+  }
+  $('mine').addEventListener('click',function(e){e.preventDefault();history.replaceState(null,'',location.href.split('#')[0]);route()});
+  window.addEventListener('hashchange',route);
+
+  (async function(){
+    try{
+      if(window.claude&&claude.use){
+        caps.assets=await claude.use('assets');
+        caps.db=await claude.use('db');
+      }
+    }catch(e){}
+    refresh();
+  })();
+  route();
+})();
+</script>
 </body>
 </html>
